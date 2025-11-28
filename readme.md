@@ -1,2 +1,5 @@
-#h2 installation
-'docker compose up --build'
+## Installation
+
+```bash
+docker compose up --build
+```
