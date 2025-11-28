@@ -5,9 +5,14 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: example
+    volumes:
+      - db_data:/var/lib/mysql
   app:
     build: .
     ports:
       - 80:8000
     volumes:
       - ./:/app
+
+volumes:
+  db_data:
