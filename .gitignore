@@ -81,6 +81,7 @@ yarn.lock
 *.db
 *.db-shm
 *.db-wal
+data/schema_db.sql
 
 # Logs
 *.log

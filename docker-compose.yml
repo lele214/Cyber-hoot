@@ -1,18 +1,37 @@
 services:
 
   db:
-    image: mysql
+    image: mysql:8.0
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: example
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: cyberhoot
+      MYSQL_USER: flaskuser
+      MYSQL_PASSWORD: flaskpassword
     volumes:
       - db_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      timeout: 20s
+      retries: 10
+
   app:
     build: .
     ports:
       - 80:8000
     volumes:
       - ./:/app
+    environment:
+      MYSQL_HOST: db
+      MYSQL_PORT: 3306
+      MYSQL_DATABASE: cyberhoot
+      MYSQL_USER: flaskuser
+      MYSQL_PASSWORD: flaskpassword
+    depends_on:
+      db:
+        condition: service_healthy
 
 volumes:
   db_data:
