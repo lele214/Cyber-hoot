@@ -16,7 +16,7 @@ def init_db(app):
     )
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.config["SQLALCHEMY_ECHO"] = (
-        False  # True si on veut afficher les requêtes SQL en erreur
+        True  # True pour afficher les requêtes SQL et les erreurs
     )
 
     db.init_app(app)
