@@ -4,7 +4,7 @@
 
 ```bash
 # Cloner le repository
-git clone <repo-url>
+git clone https://github.com/lele214/Cyber-hoot
 cd Cyber-hoot
 
 # Lancer l'application avec Docker
