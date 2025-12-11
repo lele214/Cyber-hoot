@@ -1,0 +1,25 @@
+{
+  "name": "cyber-hoot",
+  "version": "1.0.0",
+  "description": "```bash\r # Cloner le repository\r git clone https://github.com/lele214/Cyber-hoot\r cd Cyber-hoot",
+  "main": "index.js",
+  "scripts": {
+    "build:css": "npx tailwindcss -i ./static/src/input.css -o ./static/output.css --minify",
+    "watch:css": "npx tailwindcss -i ./static/src/input.css -o ./static/output.css --watch",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lele214/Cyber-hoot.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lele214/Cyber-hoot/issues"
+  },
+  "homepage": "https://github.com/lele214/Cyber-hoot#readme",
+  "devDependencies": {
+    "tailwindcss": "^3.4.19"
+  }
+}
