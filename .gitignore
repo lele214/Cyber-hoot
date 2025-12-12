@@ -76,6 +76,10 @@ yarn-error.log*
 package-lock.json
 yarn.lock
 
+# Tailwind CSS généré
+app/static/output.css
+static/output.css
+
 # Bases de données
 *.sqlite
 *.sqlite3

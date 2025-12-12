@@ -20,17 +20,21 @@ services:
       retries: 10
 
   app:
-    build: .
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
     ports:
       - 5000:8000
     volumes:
-      - ./:/app
+      - ./app:/app/app
     environment:
+      FLASK_ENV: development
       MYSQL_HOST: db
       MYSQL_PORT: 3306
       MYSQL_DATABASE: cyberhoot
       MYSQL_USER: flaskuser
       MYSQL_PASSWORD: flaskpassword
+    command: sh -c "/wait-for-it.sh db && python3 -m app.main"
     depends_on:
       db:
         condition: service_healthy
