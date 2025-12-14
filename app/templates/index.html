@@ -16,11 +16,11 @@
 
             <div class="flex gap-5 justify-center flex-wrap">
                 <a href="{{ url_for('auth.login_get') }}"
-                   class="px-8 py-3.5 rounded-lg no-underline font-semibold text-base transition-all duration-300 inline-block bg-white text-primary hover:-translate-y-0.5 hover:shadow-xl">
+                    class="px-8 py-3.5 rounded-lg no-underline font-semibold text-base transition-all duration-300 inline-block bg-white text-primary hover:-translate-y-0.5 hover:shadow-xl">
                     Se connecter
                 </a>
                 <a href="{{ url_for('auth.register_get') }}"
-                   class="px-8 py-3.5 rounded-lg no-underline font-semibold text-base transition-all duration-300 inline-block bg-transparent text-white border-2 border-white hover:bg-white hover:text-primary">
+                    class="px-8 py-3.5 rounded-lg no-underline font-semibold text-base transition-all duration-300 inline-block bg-transparent text-white border-2 border-white hover:bg-white hover:text-primary">
                     S'inscrire
                 </a>
             </div>
@@ -29,24 +29,36 @@
         <div class="py-20 px-5 bg-white">
             <h2 class="text-center text-4xl mb-14 text-gray-800">Fonctionnalités</h2>
             <div class="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-8 max-w-6xl mx-auto">
-                <div class="bg-gray-50 p-8 rounded-xl text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+                <div
+                    class="bg-gray-50 p-8 rounded-xl text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
                     <h3 class="text-gray-800 text-2xl mb-4">Quiz interactifs</h3>
-                    <p class="text-gray-600 leading-relaxed">Testez vos connaissances en cybersécurité avec des quiz adaptés à votre niveau</p>
+                    <p class="text-gray-600 leading-relaxed">Testez vos connaissances en cybersécurité avec des quiz
+                        adaptés à votre niveau</p>
+                    <a href="{{ url_for('main.quiz1') }}"
+                        class="inline-block mt-4 px-6 py-2 bg-black text-dark rounded-lg hover:bg-gray-800 transition-colors">
+                        Commencer un quiz
+                    </a>
                 </div>
 
-                <div class="bg-gray-50 p-8 rounded-xl text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+                <div
+                    class="bg-gray-50 p-8 rounded-xl text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
                     <h3 class="text-gray-800 text-2xl mb-4">Badges et trophées</h3>
-                    <p class="text-gray-600 leading-relaxed">Débloquez des badges en réussissant les quiz et suivez votre progression</p>
+                    <p class="text-gray-600 leading-relaxed">Débloquez des badges en réussissant les quiz et suivez
+                        votre progression</p>
                 </div>
 
-                <div class="bg-gray-50 p-8 rounded-xl text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+                <div
+                    class="bg-gray-50 p-8 rounded-xl text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
                     <h3 class="text-gray-800 text-2xl mb-4">Suivi de progression</h3>
-                    <p class="text-gray-600 leading-relaxed">Visualisez vos résultats et votre évolution dans le temps</p>
+                    <p class="text-gray-600 leading-relaxed">Visualisez vos résultats et votre évolution dans le temps
+                    </p>
                 </div>
 
-                <div class="bg-gray-50 p-8 rounded-xl text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+                <div
+                    class="bg-gray-50 p-8 rounded-xl text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
                     <h3 class="text-gray-800 text-2xl mb-4">Notifications</h3>
-                    <p class="text-gray-600 leading-relaxed">Restez informé des nouveaux quiz et de vos accomplissements</p>
+                    <p class="text-gray-600 leading-relaxed">Restez informé des nouveaux quiz et de vos accomplissements
+                    </p>
                 </div>
             </div>
         </div>
