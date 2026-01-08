@@ -13,8 +13,6 @@ RUN npm install
 COPY app/ ./app/
 COPY tailwind.config.js ./
 
-RUN mkdir -p app/static && npm run build:css
-
 RUN apk del gcc musl-dev linux-headers
 
 EXPOSE 8000

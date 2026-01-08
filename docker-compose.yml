@@ -34,7 +34,7 @@ services:
       MYSQL_DATABASE: cyberhoot
       MYSQL_USER: flaskuser
       MYSQL_PASSWORD: flaskpassword
-    command: python3 -m app.main
+    command: sh -c "npm run build:css && python3 -m app.main"
     depends_on:
       db:
         condition: service_healthy
