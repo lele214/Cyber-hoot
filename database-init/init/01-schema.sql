@@ -17,8 +17,8 @@ CREATE TABLE IF NOT EXISTS `cyberhoot`.`USER` (
   `idUSER` INT NOT NULL AUTO_INCREMENT,
   `typeUser` ENUM('Admin', 'Redactor', 'Player') NULL,
   `username` VARCHAR(45) NULL,
-  `hashpassword` VARCHAR(60) NULL,
-  `emailUser` VARCHAR(45) NULL,
+  `hashpassword` VARCHAR(255) NULL,
+  `emailUser` VARCHAR(100) NULL,
   PRIMARY KEY (`idUSER`))
 ENGINE = InnoDB;
 

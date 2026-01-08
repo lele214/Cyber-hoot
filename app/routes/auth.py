@@ -32,7 +32,7 @@ def login_post():
         db.session.commit()
 
         flash(f"Bienvenue {user.username} !", "success")
-        return redirect(url_for("main.dashboard"))
+        return redirect(url_for("main.home"))
     else:
         flash("Nom d'utilisateur ou mot de passe incorrect", "error")
         return render_template("auth/login.html")
