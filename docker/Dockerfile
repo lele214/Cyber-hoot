@@ -7,13 +7,11 @@ RUN apk add --no-cache gcc musl-dev linux-headers nodejs npm netcat-openbsd
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY package.json package-lock.json ./
+COPY package.json ./
 RUN npm install
 
 COPY app/ ./app/
 COPY tailwind.config.js ./
-COPY docker/wait-for-it.sh /wait-for-it.sh
-RUN chmod +x /wait-for-it.sh
 
 RUN mkdir -p app/static && npm run build:css
 
