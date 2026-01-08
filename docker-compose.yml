@@ -11,7 +11,7 @@ services:
       MYSQL_PASSWORD: flaskpassword
     volumes:
       - db_data:/var/lib/mysql
-      - ./data/init:/docker-entrypoint-initdb.d
+      - ./database-init/init:/docker-entrypoint-initdb.d
     ports:
       - "3306:3306"
     healthcheck:
