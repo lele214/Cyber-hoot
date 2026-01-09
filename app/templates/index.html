@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accueil - Cyber-hoot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='output.css') }}">
+</head>
+
+<body class="min-h-screen py-10 px-5 scanline relative">
+    <div class="max-w-7xl mx-auto">
+        <!-- Hero Section -->
+        <div class="mb-20">
+            <h1 class="text-cyber-text-lighter text-4xl md:text-5xl font-bold mb-5 tracking-wide text-glow">
+                Bienvenue sur Cyber-hoot
+            </h1>
+            <p class="text-cyber-text-muted text-base md:text-lg mb-8">
+                Plateforme d'apprentissage en cybersécurité
+            </p>
+
+            {% if session.username %}
+            <!-- si l'utilisateur est connecté -->
+            <p class="text-cyber-text-light text-lg mb-8">
+                Bienvenue, {{ session.username }}
+            </p>
+            <div class="flex gap-5 flex-wrap justify-center">
+                <a href="{{ url_for('profile.profile') }}" class="btn-cyber-primary">
+                    Accéder à mon profil
+                </a>
+                <a href="{{ url_for('auth.logout') }}" class="btn-cyber">
+                    Se déconnecter
+                </a>
+            </div>
+            {% else %}
+            <!-- si l'utilisateur n'est pas connecté -->
+            <div class="flex gap-5 flex-wrap justify-center">
+                <a href="{{ url_for('auth.login_get') }}" class="btn-cyber-primary">
+                    Se connecter
+                </a>
+                <a href="{{ url_for('auth.register_get') }}" class="btn-cyber">
+                    S'inscrire
+                </a>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Features Section -->
+        <div>
+            <h2 class="text-cyber-text-lighter text-3xl md:text-4xl font-bold mb-12 tracking-wide text-center text-glow">
+                Fonctionnalités
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+                <div class="feature-box">
+                    <h3 class="text-cyber-text-lighter text-2xl font-bold mb-5 tracking-wide">
+                        Quiz interactifs
+                    </h3>
+                    <p class="text-cyber-text-muted text-base leading-relaxed mb-4">
+                        Testez vos connaissances en cybersécurité avec des quiz adaptés à votre niveau
+                    </p>
+                    <a href="{{ url_for('main.quiz') }}"
+                       class="inline-block mt-2 px-5 py-2.5 bg-transparent border border-cyber-border-light rounded-lg text-cyber-text-light text-sm transition-all duration-300 hover:bg-cyber-bg-lighter hover:border-cyber-border-lighter hover:text-cyber-text-bright">
+                        Commencer un quiz
+                    </a>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="text-cyber-text-lighter text-2xl font-bold mb-5 tracking-wide">
+                        Badges et trophées
+                    </h3>
+                    <p class="text-cyber-text-muted text-base leading-relaxed">
+                        Débloquez des badges en réussissant les quiz et suivez votre progression
+                    </p>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="text-cyber-text-lighter text-2xl font-bold mb-5 tracking-wide">
+                        Suivi de progression
+                    </h3>
+                    <p class="text-cyber-text-muted text-base leading-relaxed">
+                        Visualisez vos résultats et votre évolution dans le temps
+                    </p>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="text-cyber-text-lighter text-2xl font-bold mb-5 tracking-wide">
+                        Notifications
+                    </h3>
+                    <p class="text-cyber-text-muted text-base leading-relaxed">
+                        Restez informé des nouveaux quiz et de vos accomplissements
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if request.args.get('logout') == 'success' %}
+    <script>
+        alert("Vous avez été déconnecté avec succès");
+    </script>
+    {% endif %}
+</body>
+
+</html>
