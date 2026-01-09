@@ -1,42 +1,202 @@
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Custom styles personnalisés si besoin */
-@layer components {
-  .gradient-primary {
-    @apply bg-gradient-to-br from-primary to-primary-dark;
+/* Style de base pour body avec thème cyberpunk */
+body {
+  font-family: 'Share Tech Mono', monospace;
+  background: #0f1f0f;
+  color: #a8c4a0;
+}
+
+/* Classes de couleur de texte cyberpunk */
+.text-cyber-text { color: #a8c4a0; }
+.text-cyber-text-light { color: #b8d8b0; }
+.text-cyber-text-lighter { color: #c8e8c0; }
+.text-cyber-text-bright { color: #d8f8d0; }
+.text-cyber-text-muted { color: #8a9a8a; }
+.text-cyber-text-dark { color: #6a8a6a; }
+
+/* Classes de bordure cyberpunk */
+.border-cyber-border { border-color: #2a4a2a; }
+.border-cyber-border-light { border-color: #3a5a3a; }
+.border-cyber-border-lighter { border-color: #4a6a4a; }
+.border-cyber-accent { border-color: #5a7a5a; }
+.border-cyber-accent-light { border-color: #6a8a6a; }
+
+/* Classes de background cyberpunk */
+.bg-cyber-border { background-color: #2a4a2a; }
+.bg-cyber-bg-light { background-color: #1a2a1a; }
+.bg-cyber-bg-lighter { background-color: #1a3a1a; }
+
+/* Classes de shadow glow */
+.shadow-glow-sm { box-shadow: 0 0 15px rgba(100, 180, 100, 0.3); }
+.shadow-glow-md { box-shadow: 0 0 20px rgba(100, 180, 100, 0.3); }
+.shadow-glow { box-shadow: 0 0 10px rgba(100, 180, 100, 0.5), 0 0 20px rgba(100, 180, 100, 0.3); }
+
+/* Effet scanline cyberpunk */
+.scanline::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom, transparent 50%, rgba(0, 0, 0, 0.05) 50%);
+  background-size: 100% 4px;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* Effet glow text */
+.text-glow {
+  text-shadow: 0 0 10px rgba(100, 180, 100, 0.5), 0 0 20px rgba(100, 180, 100, 0.3);
+}
+
+/* Bouton cyberpunk */
+.btn-cyber {
+  padding: 0.875rem 2rem;
+  background: transparent;
+  border: 2px solid #3a5a3a;
+  border-radius: 0.5rem;
+  color: #c8e8c0;
+  font-weight: 600;
+  transition: all 0.3s;
+}
+
+.btn-cyber:hover {
+  background: #1a3a1a;
+  border-color: #4a6a4a;
+  box-shadow: 0 0 20px rgba(100, 180, 100, 0.3);
+  transform: translateY(-2px);
+}
+
+.btn-cyber-primary {
+  padding: 0.875rem 2rem;
+  background: linear-gradient(135deg, #3a5a3a, #2a4a2a);
+  border: 2px solid #5a7a5a;
+  border-radius: 0.5rem;
+  color: #d8f8d0;
+  font-weight: 600;
+  transition: all 0.3s;
+  box-shadow: 0 0 20px rgba(100, 180, 100, 0.2);
+}
+
+.btn-cyber-primary:hover {
+  background: linear-gradient(135deg, #4a6a4a, #3a5a3a);
+  border-color: #6a8a6a;
+  box-shadow: 0 0 30px rgba(100, 180, 100, 0.4);
+  transform: translateY(-2px);
+}
+
+.btn-cyber-primary:active {
+  transform: translateY(0);
+}
+
+/* Input field cyberpunk */
+.input-cyber {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  background: #1a2a1a;
+  border: 2px solid #3a5a3a;
+  border-radius: 0.5rem;
+  color: #c8e8c0;
+  font-size: 0.875rem;
+  font-family: 'Share Tech Mono', monospace;
+  transition: all 0.3s;
+}
+
+.input-cyber::placeholder {
+  color: #6a8a6a;
+}
+
+.input-cyber:focus {
+  outline: none;
+  border-color: #5a7a5a;
+  box-shadow: 0 0 20px rgba(100, 180, 100, 0.3);
+  background: #1a3a1a;
+}
+
+/* Container cyberpunk */
+.container-cyber {
+  background: rgba(36, 52, 36, 0.95);
+  border: 2px solid #3a5a3a;
+  border-radius: 1.5rem;
+  padding: 3rem;
+  box-shadow: 0 0 40px rgba(100, 180, 100, 0.2), inset 0 0 30px rgba(100, 180, 100, 0.05);
+}
+
+/* Feature box */
+.feature-box {
+  background: transparent;
+  border: 2px solid #2a4a2a;
+  border-radius: 1.5rem;
+  padding: 3rem 2.5rem;
+  transition: all 0.3s;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  min-height: 280px;
+}
+
+.feature-box:hover {
+  border-color: #3a5a3a;
+  box-shadow: 0 0 25px rgba(100, 180, 100, 0.15);
+  transform: translateY(-3px);
+}
+
+/* Flash message */
+.flash-message {
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1.25rem;
+  font-size: 0.8125rem;
+  animation: slideDown 0.3s ease-out;
+}
+
+.flash-error {
+  background: rgba(180, 50, 50, 0.2);
+  color: #ff9999;
+  border: 2px solid rgba(180, 50, 50, 0.5);
+}
+
+.flash-success {
+  background: rgba(100, 180, 100, 0.2);
+  color: #c8f8c0;
+  border: 2px solid rgba(100, 180, 100, 0.5);
+}
+
+/* Animations */
+.animate-fadeIn {
+  animation: fadeIn 0.5s ease-in;
+}
+
+.animate-slideDown {
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-@layer utilities {
-  .animate-fadeIn {
-    animation: fadeIn 0.5s ease-in;
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
   }
-
-  .animate-slideDown {
-    animation: slideDown 0.3s ease-out;
-  }
-
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(-20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  @keyframes slideDown {
-    from {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

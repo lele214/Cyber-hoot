@@ -6,237 +6,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inscription - Cyber-hoot</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='output.css') }}">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Share Tech Mono', monospace;
-            background: linear-gradient(135deg, #1a2a1a 0%, #0a1a0a 100%);
-            color: #a8c4a0;
-            min-height: 100vh;
-        }
-
-        .scanline {
-            position: relative;
-        }
-
-        .scanline::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(
-                to bottom,
-                transparent 50%,
-                rgba(0, 0, 0, 0.05) 50%
-            );
-            background-size: 100% 4px;
-            pointer-events: none;
-            z-index: 10;
-        }
-
-        .glow {
-            text-shadow: 0 0 10px rgba(100, 180, 100, 0.5),
-                         0 0 20px rgba(100, 180, 100, 0.3);
-        }
-
-        .back-button {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            padding: 12px 24px;
-            background: transparent;
-            border: 2px solid #5a7a5a;
-            color: #c8e8c0;
-            text-decoration: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.3s;
-            z-index: 100;
-        }
-
-        .back-button:hover {
-            background: #2a4a2a;
-            border-color: #6a8a6a;
-            box-shadow: 0 0 15px rgba(100, 180, 100, 0.3);
-            transform: translateX(-4px);
-        }
-
-        .register-wrapper {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 40px 20px;
-        }
-
-        .register-container {
-            background: rgba(36, 52, 36, 0.95);
-            border: 2px solid #3a5a3a;
-            border-radius: 20px;
-            padding: 50px 40px;
-            width: 100%;
-            max-width: 450px;
-            box-shadow: 0 0 40px rgba(100, 180, 100, 0.2),
-                        inset 0 0 30px rgba(100, 180, 100, 0.05);
-        }
-
-        .register-header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        .register-header h1 {
-            color: #d8f8d0;
-            font-size: 42px;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-
-        .register-header p {
-            color: #a8c8a0;
-            font-size: 14px;
-        }
-
-        .flash-message {
-            padding: 12px 16px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            font-size: 13px;
-            animation: slideDown 0.3s ease-out;
-        }
-
-        .flash-error {
-            background: rgba(180, 50, 50, 0.2);
-            color: #ff9999;
-            border: 2px solid rgba(180, 50, 50, 0.5);
-        }
-
-        .flash-success {
-            background: rgba(100, 180, 100, 0.2);
-            color: #c8f8c0;
-            border: 2px solid rgba(100, 180, 100, 0.5);
-        }
-
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .form-group {
-            margin-bottom: 24px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #c8e8c0;
-            font-weight: 500;
-            font-size: 14px;
-        }
-
-        .input-field {
-            width: 100%;
-            padding: 14px 16px;
-            background: #1a2a1a;
-            border: 2px solid #3a5a3a;
-            border-radius: 10px;
-            color: #c8e8c0;
-            font-size: 14px;
-            font-family: 'Share Tech Mono', monospace;
-            transition: all 0.3s;
-        }
-
-        .input-field:focus {
-            outline: none;
-            border-color: #5a7a5a;
-            box-shadow: 0 0 20px rgba(100, 180, 100, 0.3);
-            background: #1a3a1a;
-        }
-
-        .input-field::placeholder {
-            color: #6a8a6a;
-        }
-
-        .btn-submit {
-            width: 100%;
-            padding: 16px;
-            background: linear-gradient(135deg, #3a5a3a, #2a4a2a);
-            border: 2px solid #5a7a5a;
-            border-radius: 10px;
-            color: #d8f8d0;
-            font-size: 16px;
-            font-weight: 600;
-            font-family: 'Share Tech Mono', monospace;
-            cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 0 20px rgba(100, 180, 100, 0.2);
-            margin-top: 10px;
-        }
-
-        .btn-submit:hover {
-            background: linear-gradient(135deg, #4a6a4a, #3a5a3a);
-            border-color: #6a8a6a;
-            box-shadow: 0 0 30px rgba(100, 180, 100, 0.4);
-            transform: translateY(-2px);
-        }
-
-        .btn-submit:active {
-            transform: translateY(0);
-        }
-
-        .login-section {
-            text-align: center;
-            padding-top: 28px;
-            margin-top: 28px;
-            border-top: 1px solid #3a5a3a;
-        }
-
-        .login-section p {
-            color: #a8c8a0;
-            font-size: 14px;
-        }
-
-        .login-link {
-            color: #b8d8b0;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-
-        .login-link:hover {
-            color: #d8f8d0;
-            text-shadow: 0 0 10px rgba(100, 180, 100, 0.5);
-            text-decoration: underline;
-        }
-    </style>
 </head>
 
-<body class="scanline">
-    <a href="{{ url_for('main.home') }}" class="back-button">
+<body class="min-h-screen scanline relative">
+    <a href="{{ url_for('main.home') }}"
+       class="fixed top-5 left-5 px-6 py-3 bg-transparent border-2 border-cyber-accent text-cyber-text-lighter rounded-lg font-semibold text-sm transition-all duration-300 hover:bg-cyber-border hover:border-cyber-accent-light hover:shadow-glow-sm hover:-translate-x-1 z-50">
         ← Retour à l'accueil
     </a>
 
-    <div class="register-wrapper">
-        <div class="register-container">
-            <div class="register-header">
-                <h1 class="glow">Cyber-hoot</h1>
-                <p>Créez votre compte</p>
+    <div class="flex justify-center items-center min-h-screen py-10 px-5">
+        <div class="container-cyber w-full max-w-md">
+            <div class="text-center mb-10">
+                <h1 class="text-cyber-text-bright text-4xl mb-2 font-bold text-glow">Cyber-hoot</h1>
+                <p class="text-cyber-text text-sm">Créez votre compte</p>
             </div>
 
             {% with messages = get_flashed_messages(with_categories=true) %}
@@ -250,59 +32,69 @@
             {% endwith %}
 
             <form method="POST" action="{{ url_for('auth.register_post') }}">
-                <div class="form-group">
-                    <label for="email">Adresse email</label>
+                <div class="mb-6">
+                    <label for="email" class="block mb-2 text-cyber-text-lighter font-medium text-sm">
+                        Adresse email
+                    </label>
                     <input type="email"
                            id="email"
                            name="email"
-                           class="input-field"
+                           class="input-cyber"
                            placeholder="exemple@mail.fr"
                            autocomplete="email"
                            required>
                 </div>
 
-                <div class="form-group">
-                    <label for="username">Nom d'utilisateur</label>
+                <div class="mb-6">
+                    <label for="username" class="block mb-2 text-cyber-text-lighter font-medium text-sm">
+                        Nom d'utilisateur
+                    </label>
                     <input type="text"
                            id="username"
                            name="username"
-                           class="input-field"
+                           class="input-cyber"
                            placeholder="Entrez votre nom d'utilisateur"
                            autocomplete="username"
                            required>
                 </div>
 
-                <div class="form-group">
-                    <label for="password">Mot de passe</label>
+                <div class="mb-6">
+                    <label for="password" class="block mb-2 text-cyber-text-lighter font-medium text-sm">
+                        Mot de passe
+                    </label>
                     <input type="password"
                            id="password"
                            name="password"
-                           class="input-field"
+                           class="input-cyber"
                            placeholder="Entrez votre mot de passe"
                            autocomplete="new-password"
                            required>
                 </div>
 
-                <div class="form-group">
-                    <label for="password_confirm">Confirmer le mot de passe</label>
+                <div class="mb-6">
+                    <label for="password_confirm" class="block mb-2 text-cyber-text-lighter font-medium text-sm">
+                        Confirmer le mot de passe
+                    </label>
                     <input type="password"
                            id="password_confirm"
                            name="password_confirm"
-                           class="input-field"
+                           class="input-cyber"
                            placeholder="Confirmez votre mot de passe"
                            autocomplete="new-password"
                            required>
                 </div>
 
-                <button type="submit" class="btn-submit">
+                <button type="submit" class="btn-cyber-primary w-full mt-2">
                     S'inscrire
                 </button>
             </form>
 
-            <div class="login-section">
-                <p>
+            <div class="text-center pt-7 mt-7 border-t border-cyber-border-light">
+                <p class="text-cyber-text text-sm">
                     Déjà un compte ?
-                    <a href="{{ url_for('auth.login_get') }}" class="login-link">Se connecter</a>
+                    <a href="{{ url_for('auth.login_get') }}" class="text-cyber-text-light font-semibold transition-all duration-300 hover:text-cyber-text-bright hover:underline hover:shadow-glow">
+                        Se connecter
+                    </a>
                 </p>
             </div>
         </div>
