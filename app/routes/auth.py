@@ -31,7 +31,7 @@ def login_post():
         db.session.add(connexion_log)
         db.session.commit()
 
-        flash(f"Bienvenue {user.username} !", "success")
+        # flash(f"Bienvenue {user.username} !", "success")
         return redirect(url_for("main.home"))
     else:
         flash("Nom d'utilisateur ou mot de passe incorrect", "error")
