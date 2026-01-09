@@ -1,4 +1,13 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session
+import re
+from flask import (
+    Blueprint,
+    render_template,
+    request,
+    redirect,
+    url_for,
+    flash,
+    session,
+)
 from werkzeug.security import check_password_hash, generate_password_hash
 from app.database import db
 from app.models.models import User, ConnexionLog
@@ -58,6 +67,26 @@ def register_post():
         flash("Les mots de passe ne correspondent pas", "error")
         return render_template("auth/register.html")
 
+    if len(password) < 8:
+        flash("Le mot de passe doit contenir au moins 8 caractères", "error")
+        return render_template("auth/register.html")
+
+    if not re.search(r"[A-Z]", password):
+        flash("Le mot de passe doit contenir au moins une majuscule", "error")
+        return render_template("auth/register.html")
+
+    if not re.search(r"[a-z]", password):
+        flash("Le mot de passe doit contenir au moins une minuscule", "error")
+        return render_template("auth/register.html")
+
+    if not re.search(r"[0-9]", password):
+        flash("Le mot de passe doit contenir au moins un chiffre", "error")
+        return render_template("auth/register.html")
+
+    if not re.search(r"[!@#$%^&*(),.?\":{}|<>]", password):
+        flash("Le mot de passe doit contenir au moins un caractère spécial", "error")
+        return render_template("auth/register.html")
+
     existing_user_by_username = User.query.filter_by(username=username).first()
     if existing_user_by_username:
         flash("Ce nom d'utilisateur est déjà utilisé", "error")
@@ -86,5 +115,5 @@ def register_post():
 @auth_bp.get("/logout")
 def logout():
     session.clear()
-    flash("Vous avez été déconnecté avec succès", "success")
-    return redirect(url_for("auth.login_get"))
+    # flash("Vous avez été déconnecté avec succès", "success")
+    return redirect(url_for("main.home", logout="success"))
