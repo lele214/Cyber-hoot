@@ -4,46 +4,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Liste des quiz</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='output.css') }}">
+    <title>Liste des quiz - Cyber-hoot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
-<body class="bg-gray-100 min-h-screen">
-    <div class="container mx-auto px-4 py-8">
-        <div class="max-w-3xl mx-auto">
-            <div class="bg-white p-8 mb-6">
-                <div class="flex items-center justify-between mb-6">
-                    <a href="{{ url_for('main.home') }}" class="text-gray-600 hover:text-gray-800 transition-colors">
-                        ← Retour
-                    </a>
+<body>
+    <div class="dashboard-container">
+        <div class="dashboard-header">
+            <h1 class="glow">Liste des Quiz</h1>
+            <p>Sélectionnez un quiz pour tester vos connaissances</p>
+        </div>
+
+        <div class="dashboard-content">
+            <a href="{{ url_for('main.home') }}" class="btn-back" style="position: relative; display: inline-block; margin-bottom: 30px;">
+                ← Retour à l'accueil
+            </a>
+
+            <div class="container" style="max-width: 900px; margin: 0 auto;">
+                <!-- Part I Section -->
+                <div class="section">
+                    <h2 style="color: #d8f8d0; font-size: 28px; margin-bottom: 20px; text-shadow: 0 0 10px rgba(100, 180, 100, 0.5);">
+                        Part I - Fondamentaux
+                    </h2>
+                    <div class="features-grid" style="grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px;">
+                        <a href="{{ url_for('main.quiz_detail', quiz_id=1) }}" class="feature-card" style="min-height: 120px; text-decoration: none; cursor: pointer;">
+                            <h3 style="margin-bottom: 10px;">Quiz 1</h3>
+                            <p style="font-size: 13px;">Introduction à la cybersécurité</p>
+                        </a>
+                        <div class="feature-card" style="min-height: 120px; opacity: 0.5; cursor: not-allowed;">
+                            <h3 style="margin-bottom: 10px;">Quiz 2</h3>
+                            <p style="font-size: 13px;">À venir...</p>
+                        </div>
+                        <div class="feature-card" style="min-height: 120px; opacity: 0.5; cursor: not-allowed;">
+                            <h3 style="margin-bottom: 10px;">Quiz 3</h3>
+                            <p style="font-size: 13px;">À venir...</p>
+                        </div>
+                        <div class="feature-card" style="min-height: 120px; opacity: 0.5; cursor: not-allowed;">
+                            <h3 style="margin-bottom: 10px;">Quiz 4</h3>
+                            <p style="font-size: 13px;">À venir...</p>
+                        </div>
+                    </div>
                 </div>
 
-                <h1 class="text-3xl font-bold text-gray-800 mb-2">Listes des quiz</h1>
-
-                <div>
-                    <h2>Part I</h2>
-                    <ul>
-                        <li>
-                            <a href="{{ url_for('main.quiz_detail', quiz_id=1) }}">Quiz 1</a>
-                        </li>
-                        <li>2</li>
-                        <li>3</li>
-                        <li>4</li>
-                    </ul>
-                    <h2>Part II</h2>
-                    <ul>
-                        <li>1</li>
-                        <li>2</li>
-                        <li>3</li>
-                        <li>4</li>
-                    </ul>
+                <!-- Part II Section -->
+                <div class="section" style="margin-top: 50px;">
+                    <h2 style="color: #d8f8d0; font-size: 28px; margin-bottom: 20px; text-shadow: 0 0 10px rgba(100, 180, 100, 0.5);">
+                        Part II - Avancé
+                    </h2>
+                    <div class="features-grid" style="grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px;">
+                        <div class="feature-card" style="min-height: 120px; opacity: 0.5; cursor: not-allowed;">
+                            <h3 style="margin-bottom: 10px;">Quiz 1</h3>
+                            <p style="font-size: 13px;">À venir...</p>
+                        </div>
+                        <div class="feature-card" style="min-height: 120px; opacity: 0.5; cursor: not-allowed;">
+                            <h3 style="margin-bottom: 10px;">Quiz 2</h3>
+                            <p style="font-size: 13px;">À venir...</p>
+                        </div>
+                        <div class="feature-card" style="min-height: 120px; opacity: 0.5; cursor: not-allowed;">
+                            <h3 style="margin-bottom: 10px;">Quiz 3</h3>
+                            <p style="font-size: 13px;">À venir...</p>
+                        </div>
+                        <div class="feature-card" style="min-height: 120px; opacity: 0.5; cursor: not-allowed;">
+                            <h3 style="margin-bottom: 10px;">Quiz 4</h3>
+                            <p style="font-size: 13px;">À venir...</p>
+                        </div>
+                    </div>
                 </div>
-                <!-- barre de progression -->
-                <!-- <div class="w-full bg-gray-200 rounded-full h-2 mb-8">
-                    <div class="bg-primary h-2 rounded-full" style="width: 10%">Titre de la barre de progression</div>
+
+                <!-- Optional Progress Bar (commented out in original) -->
+                <!-- <div style="margin-top: 50px;">
+                    <h3 style="color: #c8e8c0; margin-bottom: 15px;">Votre progression</h3>
+                    <div style="width: 100%; background: #1a2a1a; border: 2px solid #3a5a3a; border-radius: 10px; height: 30px; overflow: hidden;">
+                        <div style="background: linear-gradient(135deg, #3a5a3a, #2a4a2a); height: 100%; width: 25%; display: flex; align-items: center; justify-content: center; color: #d8f8d0; font-size: 12px; font-weight: 600;">
+                            25%
+                        </div>
+                    </div>
                 </div> -->
             </div>
-
         </div>
     </div>
 </body>
