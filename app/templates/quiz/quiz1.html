@@ -4,27 +4,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiz 1 - Cybersécurité</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='output.css') }}">
+    <title>Quiz 1 - Cyber-hoot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
-<body class="bg-gray-100 min-h-screen">
-    <div class="container mx-auto px-4 py-8">
-        <div class="max-w-3xl mx-auto">
-            <div class="bg-white p-8 mb-6">
-                <div class="flex items-center justify-between mb-6">
-                    <a href="{{ url_for('main.quiz') }}" class="text-gray-600 hover:text-gray-800 transition-colors">
-                        ← Retour
-                    </a>
+<body>
+    <div class="dashboard-container">
+        <div class="dashboard-header">
+            <h1 class="glow">Quiz 1</h1>
+            <p>Introduction à la cybersécurité</p>
+        </div>
+
+        <div class="dashboard-content">
+            <a href="{{ url_for('main.quiz') }}" class="btn-back" style="position: relative; display: inline-block; margin-bottom: 30px;">
+                ← Retour à la liste
+            </a>
+
+            <div class="container" style="max-width: 900px; margin: 0 auto;">
+                <!-- Quiz Description -->
+                <div class="section">
+                    <h2 style="color: #d8f8d0; font-size: 24px; margin-bottom: 20px;">
+                        À propos de ce quiz
+                    </h2>
+                    <p style="color: #a8c8a0; line-height: 1.8; margin-bottom: 30px; font-size: 15px;">
+                        Ce quiz vous permettra de tester vos connaissances de base en cybersécurité. 
+                        Vous découvrirez les concepts fondamentaux de la sécurité informatique, 
+                        les menaces courantes et les bonnes pratiques à adopter.
+                    </p>
+
+                    <!-- Quiz Stats -->
+                    <div class="stats-grid" style="margin-bottom: 40px;">
+                        <div class="stat-card">
+                            <div class="stat-icon">❓</div>
+                            <h3>Questions</h3>
+                            <div class="stat-value">10</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">⏱️</div>
+                            <h3>Durée estimée</h3>
+                            <div class="stat-value">15 min</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">🎯</div>
+                            <h3>Difficulté</h3>
+                            <div class="stat-value">Débutant</div>
+                        </div>
+                    </div>
+
+                    <!-- Topics Covered -->
+                    <div style="margin-bottom: 40px;">
+                        <h3 style="color: #c8e8c0; font-size: 20px; margin-bottom: 20px;">
+                            Sujets abordés
+                        </h3>
+                        <ul style="list-style: none; padding: 0;">
+                            <li style="color: #a8c8a0; padding: 10px 0; border-bottom: 1px solid #3a5a3a; font-size: 14px;">
+                                ✓ Les bases de la sécurité informatique
+                            </li>
+                            <li style="color: #a8c8a0; padding: 10px 0; border-bottom: 1px solid #3a5a3a; font-size: 14px;">
+                                ✓ Les types de menaces courantes
+                            </li>
+                            <li style="color: #a8c8a0; padding: 10px 0; border-bottom: 1px solid #3a5a3a; font-size: 14px;">
+                                ✓ La protection des données personnelles
+                            </li>
+                            <li style="color: #a8c8a0; padding: 10px 0; border-bottom: 1px solid #3a5a3a; font-size: 14px;">
+                                ✓ Les bonnes pratiques de sécurité
+                            </li>
+                            <li style="color: #a8c8a0; padding: 10px 0; font-size: 14px;">
+                                ✓ L'authentification et les mots de passe
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Start Button -->
+                    <div style="text-align: center;">
+                        <a href="#" class="action-btn" style="font-size: 18px; padding: 16px 48px; display: inline-block;">
+                            Commencer le quiz →
+                        </a>
+                    </div>
                 </div>
 
-                <h1 class="text-3xl font-bold text-gray-800 mb-2">Quiz 1</h1>
-
-                <div>
-                    <p>description</p>
+                <!-- Best Score (if exists) -->
+                <div class="section" style="margin-top: 40px; border-top: 2px solid #3a5a3a; padding-top: 30px;">
+                    <h3 style="color: #c8e8c0; font-size: 18px; margin-bottom: 15px;">
+                        Votre meilleur score
+                    </h3>
+                    <div class="stat-card" style="display: inline-block; padding: 20px 40px;">
+                        <div class="stat-icon">🏆</div>
+                        <div class="stat-value" style="font-size: 28px;">--</div>
+                        <p style="color: #8a9a8a; font-size: 13px; margin-top: 5px;">Pas encore tenté</p>
+                    </div>
                 </div>
             </div>
-
         </div>
     </div>
 </body>
