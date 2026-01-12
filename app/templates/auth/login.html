@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion - Cyber-hoot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='output.css') }}">
+</head>
+
+<body class="min-h-screen scanline relative">
+    <a href="{{ url_for('main.home') }}"
+       class="fixed top-5 left-5 px-6 py-3 bg-transparent border-2 border-cyber-accent text-cyber-text-lighter rounded-lg font-semibold text-sm transition-all duration-300 hover:bg-cyber-border hover:border-cyber-accent-light hover:shadow-glow-sm hover:-translate-x-1 z-50">
+        ← Retour à l'accueil
+    </a>
+
+    <div class="flex justify-center items-center min-h-screen py-10 px-5">
+        <div class="container-cyber w-full max-w-md">
+            <div class="text-center mb-10">
+                <h1 class="text-cyber-text-bright text-4xl mb-2 font-bold text-glow">Cyber-hoot</h1>
+                <p class="text-cyber-text text-sm">Connectez-vous à votre compte</p>
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            {% for category, message in messages %}
+            <div class="flash-message {% if category == 'error' %}flash-error{% else %}flash-success{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+
+            <form method="POST" action="{{ url_for('auth.login_post') }}">
+                <div class="mb-6">
+                    <label for="username" class="block mb-2 text-cyber-text-lighter font-medium text-sm">
+                        Nom d'utilisateur
+                    </label>
+                    <input type="text"
+                           id="username"
+                           name="username"
+                           class="input-cyber"
+                           placeholder="Entrez votre nom d'utilisateur"
+                           autocomplete="username"
+                           required>
+                </div>
+
+                <div class="mb-6">
+                    <label for="password" class="block mb-2 text-cyber-text-lighter font-medium text-sm">
+                        Mot de passe
+                    </label>
+                    <input type="password"
+                           id="password"
+                           name="password"
+                           class="input-cyber"
+                           placeholder="Entrez votre mot de passe"
+                           autocomplete="current-password"
+                           required>
+                </div>
+
+                <div class="flex justify-between items-center mb-7 text-sm">
+                    <label class="flex items-center cursor-pointer select-none">
+                        <input type="checkbox" name="remember" class="mr-2 cursor-pointer w-4 h-4 accent-cyber-accent">
+                        <span class="text-cyber-text">Se souvenir de moi</span>
+                    </label>
+                    <a href="#" class="text-cyber-text-light font-medium transition-all duration-300 hover:text-cyber-text-bright hover:shadow-glow">
+                        Mot de passe oublié ?
+                    </a>
+                </div>
+
+                <button type="submit" class="btn-cyber-primary w-full">
+                    Se connecter
+                </button>
+            </form>
+
+            <div class="text-center pt-7 mt-7 border-t border-cyber-border-light">
+                <p class="text-cyber-text text-sm">
+                    Pas encore de compte ?
+                    <a href="{{ url_for('auth.register_get') }}" class="text-cyber-text-light font-semibold transition-all duration-300 hover:text-cyber-text-bright hover:underline hover:shadow-glow">
+                        Créer un compte
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

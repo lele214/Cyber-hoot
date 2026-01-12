@@ -60,6 +60,7 @@ coverage.xml
 # IDEs et éditeurs
 .vscode/
 .idea/
+.claude/
 *.swp
 *.swo
 *~
@@ -74,6 +75,10 @@ yarn-debug.log*
 yarn-error.log*
 package-lock.json
 yarn.lock
+
+# Tailwind CSS généré
+app/static/output.css
+static/output.css
 
 # Bases de données
 *.sqlite
