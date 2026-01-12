@@ -1,18 +1,88 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Joueur</title>
+    <title>Dashboard Joueur - Cyber-hoot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='output.css') }}">
 </head>
 
-<body>
-    <h1>Profil du Joueur {{ username }}</h1>
+<body class="min-h-screen py-10 px-5 scanline relative">
+    <a href="{{ url_for('main.home') }}"
+        class="fixed top-5 left-5 px-6 py-3 bg-transparent border-2 border-cyber-accent text-cyber-text-lighter rounded-lg font-semibold text-sm transition-all duration-300 hover:bg-cyber-border hover:border-cyber-accent-light hover:shadow-glow-sm hover:-translate-x-1 z-50">
+        ← Retour à l'accueil
+    </a>
 
+    <div class="max-w-7xl mx-auto">
+        <div class="text-center mb-12">
+            <h1 class="text-cyber-text-lighter text-4xl md:text-5xl font-bold mb-5 tracking-wide text-glow">
+                Profil du Joueur {{ username }}
+            </h1>
+            <p class="text-cyber-text-muted text-base md:text-lg">
+                Bienvenue sur votre tableau de bord
+            </p>
+        </div>
 
+        <!-- Boutons de navigation vers les autres profils si l'utilisateur possède le rôle -->
+        {% if 'Admin' in user_roles or 'Redactor' in user_roles %}
+        <div class="flex gap-5 flex-wrap justify-center mb-12">
+            {% if 'Admin' in user_roles %}
+            <a href="{{ url_for('profile.admin_dashboard') }}" class="btn-cyber-primary">
+                Afficher le profil Admin
+            </a>
+            {% endif %}
 
+            {% if 'Redactor' in user_roles %}
+            <a href="{{ url_for('profile.redactor_dashboard') }}" class="btn-cyber">
+                Afficher le profil Rédacteur
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
 
+        <!-- Contenu du dashboard -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+            <div class="feature-box">
+                <h3 class="text-cyber-text-lighter text-2xl font-bold mb-5 tracking-wide">
+                    Mes Quiz
+                </h3>
+                <p class="text-cyber-text-muted text-base leading-relaxed mb-4">
+                    Consultez vos quiz complétés et vos résultats
+                </p>
+            </div>
+
+            <div class="feature-box">
+                <h3 class="text-cyber-text-lighter text-2xl font-bold mb-5 tracking-wide">
+                    Mes Badges
+                </h3>
+                <p class="text-cyber-text-muted text-base leading-relaxed">
+                    Découvrez tous les badges que vous avez obtenus
+                </p>
+            </div>
+
+            <div class="feature-box">
+                <h3 class="text-cyber-text-lighter text-2xl font-bold mb-5 tracking-wide">
+                    Ma Progression
+                </h3>
+                <p class="text-cyber-text-muted text-base leading-relaxed">
+                    Suivez votre évolution et vos statistiques
+                </p>
+            </div>
+
+            <div class="feature-box">
+                <h3 class="text-cyber-text-lighter text-2xl font-bold mb-5 tracking-wide">
+                    Notifications
+                </h3>
+                <p class="text-cyber-text-muted text-base leading-relaxed">
+                    Consultez vos notifications et alertes
+                </p>
+            </div>
+        </div>
+    </div>
+    <footer>
+        <p class="flex justify-center pt-7">Copyright BTS SIO</p>
+    </footer>
 </body>
 
 </html>
