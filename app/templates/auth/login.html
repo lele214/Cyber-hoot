@@ -63,7 +63,7 @@
                         <input type="checkbox" name="remember" class="mr-2 cursor-pointer w-4 h-4 accent-cyber-accent">
                         <span class="text-cyber-text">Se souvenir de moi</span>
                     </label>
-                    <a href="#" class="text-cyber-text-light font-medium transition-all duration-300 hover:text-cyber-text-bright hover:shadow-glow">
+                    <a href="{{ url_for('auth.forgot_password_get') }}" class="text-cyber-text-light font-medium transition-all duration-300 hover:text-cyber-text-bright hover:shadow-glow">
                         Mot de passe oublié ?
                     </a>
                 </div>
