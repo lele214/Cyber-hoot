@@ -177,6 +177,8 @@ CREATE TABLE IF NOT EXISTS `cyberhoot`.`RESULT` (
   `idQUIZinResult` INT NOT NULL,
   `idUSERinResult` INT NOT NULL,
   `date` DATE NULL,
+  `score` INT NULL COMMENT 'Score obtenu par l\'utilisateur pour ce quiz',
+  `totalQuestions` INT NULL COMMENT 'Nombre total de questions dans le quiz',
   `resultHistory` VARCHAR(45) NULL COMMENT 'commentaire',
   PRIMARY KEY (`idRESULT`),
   INDEX `idQUIZ_idx` (`idQUIZinResult` ASC) VISIBLE,
