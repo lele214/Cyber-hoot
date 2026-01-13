@@ -1,5 +1,8 @@
 # import de Flask et des éléments qu'on utilise (les routes, les affichages html)
 from flask import Blueprint, render_template, request, session, jsonify
+from app.database import db
+from app.models.models import Result, Quiz
+from datetime import date
 
 # Création de la route principale de l'application
 main_bp = Blueprint("main", __name__)
@@ -48,13 +51,47 @@ def quiz_submit(quiz_id):
     # Récupérer les réponses soumises
     data = request.get_json()
     answers = data.get("answers", {})
+    score = data.get("score", 0)
+    total_questions = data.get("totalQuestions", 0)
 
-    # Ici ajouter la logique pour :
-    # - Vérifier les réponses
-    # - Calculer le score
-    # - Enregistrer le résultat en base de données
+    try:
+        # Vérifier si le quiz existe dans la base de données
+        quiz = Quiz.query.filter_by(idQUIZ=quiz_id).first()
+        if not quiz:
+            return jsonify({"success": False, "error": "Quiz non trouvé dans la base de données"}), 404
 
-    # Pour l'instant, on retourne juste un succès
-    return jsonify(
-        {"success": True, "message": "Quiz validé avec succès", "answers": answers}
-    ), 200
+        # Récupérer l'ID de l'utilisateur depuis la session
+        user_id = session.get("user_id")
+
+        # Créer un nouveau résultat dans la base de données
+        new_result = Result(
+            idQUIZinResult=quiz_id,
+            idUSERinResult=user_id,
+            date=date.today(),
+            score=score,
+            totalQuestions=total_questions,
+            resultHistory=str(answers)  # Stocker les réponses en format texte
+        )
+
+        # Ajouter et enregistrer le résultat
+        db.session.add(new_result)
+        db.session.commit()
+
+        return jsonify(
+            {
+                "success": True,
+                "message": "Quiz validé avec succès",
+                "score": score,
+                "totalQuestions": total_questions
+            }
+        ), 200
+
+    except Exception as e:
+        # En cas d'erreur, annuler les changements
+        db.session.rollback()
+        return jsonify(
+            {
+                "success": False,
+                "error": f"Erreur lors de l'enregistrement du résultat: {str(e)}"
+            }
+        ), 500

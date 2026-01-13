@@ -41,32 +41,100 @@
         </div>
         {% endif %}
 
-        <!-- Contenu du dashboard -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-            <div class="feature-box">
-                <h3 class="text-cyber-text-lighter text-2xl font-bold mb-5 tracking-wide">
-                    Mes quiz
+        <!-- Statistiques générales -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto mb-12">
+            <div class="feature-box text-center">
+                <h3 class="text-cyber-accent text-5xl font-bold mb-3">
+                    {{ completed_quizzes }}
                 </h3>
-                <p class="text-cyber-text-muted text-base leading-relaxed mb-4">
-                    Consultez vos quiz complétés et vos résultats
-                </p>
+                <p class="text-cyber-text-lighter text-lg font-semibold mb-2">Quiz complétés</p>
+                <p class="text-cyber-text-muted text-sm">sur {{ total_quizzes }} disponibles</p>
             </div>
 
+            <div class="feature-box text-center">
+                <h3 class="text-cyber-accent text-5xl font-bold mb-3">
+                    {{ remaining_quizzes }}
+                </h3>
+                <p class="text-cyber-text-lighter text-lg font-semibold mb-2">Quiz restants</p>
+                <p class="text-cyber-text-muted text-sm">à découvrir</p>
+            </div>
+
+            <div class="feature-box text-center">
+                <h3 class="text-cyber-accent text-5xl font-bold mb-3">
+                    {{ average_score }}%
+                </h3>
+                <p class="text-cyber-text-lighter text-lg font-semibold mb-2">Score moyen</p>
+                <p class="text-cyber-text-muted text-sm">sur tous les quiz</p>
+            </div>
+        </div>
+
+        <!-- Historique des quiz -->
+        <div class="max-w-6xl mx-auto mb-12">
+            <div class="feature-box">
+                <h3 class="text-cyber-text-lighter text-2xl font-bold mb-5 tracking-wide">
+                    Historique de mes quiz
+                </h3>
+
+                {% if quiz_history %}
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="border-b border-cyber-border">
+                                <th class="text-cyber-text-lighter font-semibold py-3 px-4">Quiz</th>
+                                <th class="text-cyber-text-lighter font-semibold py-3 px-4">Difficulté</th>
+                                <th class="text-cyber-text-lighter font-semibold py-3 px-4 text-center">Score</th>
+                                <th class="text-cyber-text-lighter font-semibold py-3 px-4 text-center">Résultat</th>
+                                <th class="text-cyber-text-lighter font-semibold py-3 px-4">Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for quiz in quiz_history %}
+                            <tr class="border-b border-cyber-border/30 hover:bg-cyber-border/20 transition-colors">
+                                <td class="text-cyber-text-muted py-3 px-4">{{ quiz.quiz_title }}</td>
+                                <td class="py-3 px-4">
+                                    <span class="px-3 py-1 rounded-full text-xs font-semibold
+                                        {% if quiz.quiz_difficulty == 'EASY' %}bg-green-500/20 text-green-400
+                                        {% elif quiz.quiz_difficulty == 'MEDIUM' %}bg-yellow-500/20 text-yellow-400
+                                        {% else %}bg-red-500/20 text-red-400{% endif %}">
+                                        {{ quiz.quiz_difficulty }}
+                                    </span>
+                                </td>
+                                <td class="text-cyber-text-muted py-3 px-4 text-center">
+                                    {{ quiz.score }}/{{ quiz.total_questions }}
+                                </td>
+                                <td class="py-3 px-4 text-center">
+                                    <span class="text-2xl font-bold
+                                        {% if quiz.percentage >= 80 %}text-green-400
+                                        {% elif quiz.percentage >= 60 %}text-yellow-400
+                                        {% else %}text-red-400{% endif %}">
+                                        {{ quiz.percentage }}%
+                                    </span>
+                                </td>
+                                <td class="text-cyber-text-muted py-3 px-4">{{ quiz.date }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-cyber-text-muted text-center py-8">
+                    Vous n'avez pas encore complété de quiz.
+                    <a href="{{ url_for('main.quiz') }}" class="text-cyber-accent hover:text-cyber-accent-light underline">
+                        Commencez maintenant !
+                    </a>
+                </p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Autres sections -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
             <div class="feature-box">
                 <h3 class="text-cyber-text-lighter text-2xl font-bold mb-5 tracking-wide">
                     Mes badges
                 </h3>
                 <p class="text-cyber-text-muted text-base leading-relaxed">
                     Découvrez tous les badges que vous avez obtenus
-                </p>
-            </div>
-
-            <div class="feature-box">
-                <h3 class="text-cyber-text-lighter text-2xl font-bold mb-5 tracking-wide">
-                    Ma progression
-                </h3>
-                <p class="text-cyber-text-muted text-base leading-relaxed">
-                    Suivez votre évolution et vos statistiques
                 </p>
             </div>
 

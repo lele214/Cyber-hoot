@@ -1,3 +1,5 @@
+/* JS POUR LES QUIZ */
+
 // Réponses correctes
 const correctAnswers = {
     q1: 'b',  // Méthode qui manipule les personnes

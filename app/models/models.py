@@ -173,6 +173,8 @@ class Result(db.Model):
     idQUIZinResult = db.Column(db.Integer, db.ForeignKey('QUIZ.idQUIZ'), nullable=False)
     idUSERinResult = db.Column(db.Integer, db.ForeignKey('USER.idUSER'), nullable=False)
     date = db.Column(db.Date, nullable=True)
+    score = db.Column(db.Integer, nullable=True, comment='Score obtenu par l\'utilisateur pour ce quiz')
+    totalQuestions = db.Column(db.Integer, nullable=True, comment='Nombre total de questions dans le quiz')
     resultHistory = db.Column(db.String(45), nullable=True, comment='commentaire')
 
     # Relations
