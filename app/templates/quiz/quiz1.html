@@ -4,34 +4,503 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiz 1 - Cybersécurité</title>
+    <title>Quiz 1 - Ingénierie sociale</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='output.css') }}">
 </head>
 
-<body class="bg-gray-100 min-h-screen">
-    <div class="container mx-auto px-4 py-8">
-        <div class="max-w-3xl mx-auto">
-            <div class="bg-white p-8 mb-6">
-                <div class="flex items-center justify-between mb-6">
-                    <a href="{{ url_for('main.quiz') }}" class="text-gray-600 hover:text-gray-800 transition-colors">
-                        ← Retour
-                    </a>
-                </div>
+<body class="min-h-screen scanline relative py-10 px-5">
+    <a href="{{ url_for('main.quiz') }}"
+        class="fixed top-5 left-5 px-6 py-3 bg-transparent border-2 border-cyber-accent text-cyber-text-lighter rounded-lg font-semibold text-sm transition-all duration-300 hover:bg-cyber-border hover:border-cyber-accent-light hover:shadow-glow-sm hover:-translate-x-1 z-50">
+        ← Retour aux quiz
+    </a>
 
-                <h1 class="text-3xl font-bold text-gray-800 mb-2">Ingénierie sociale : comment s'en protéger ?</h1>
+    <div class="max-w-4xl mx-auto">
+        <!-- En-tête du quiz -->
+        <div class="text-center mb-12 mt-16">
+            <div class="inline-block px-4 py-2 bg-cyber-bg-lighter border border-cyber-border-light rounded mb-4">
+                <span class="text-cyber-text-light text-sm font-semibold">DIFFICULTÉ : EASY</span>
+            </div>
+            <h1 class="text-cyber-text-lighter text-4xl md:text-5xl font-bold mb-6 tracking-wide text-glow">
+                Ingénierie sociale : comment s'en protéger ?
+            </h1>
+            <p class="text-cyber-text-muted text-lg max-w-2xl mx-auto leading-relaxed">
+                Testez vos connaissances sur les techniques de manipulation utilisées par les cybercriminels et
+                apprenez à vous protéger efficacement.
+            </p>
+        </div>
 
-                <div>
-                    <p>description</p>
+        <!-- Formulaire du quiz -->
+        <form id="quizForm" class="space-y-8">
+            <!-- Question 1 -->
+            <div class="container-cyber p-8" style="margin-bottom: 1.5rem;">
+                <h3 class="text-cyber-text-lighter text-xl font-bold mb-4">
+                    Question 1 : Qu'est-ce que l'ingénierie sociale ?
+                </h3>
+                <div class="space-y-3">
+                    <label
+                        class="flex items-start p-4 bg-cyber-bg-lighter border border-cyber-border rounded cursor-pointer transition-all hover:border-cyber-accent group">
+                        <input type="radio" name="q1" value="a" class="mt-1 mr-3 accent-cyber-accent">
+                        <span class="text-cyber-text group-hover:text-cyber-text-light">
+                            Une technique qui exploite les failles techniques des ordinateurs
+                        </span>
+                    </label>
+                    <label
+                        class="flex items-start p-4 bg-cyber-bg-lighter border border-cyber-border rounded cursor-pointer transition-all hover:border-cyber-accent group">
+                        <input type="radio" name="q1" value="b" class="mt-1 mr-3 accent-cyber-accent">
+                        <span class="text-cyber-text group-hover:text-cyber-text-light">
+                            Une méthode qui manipule les personnes pour obtenir des informations confidentielles
+                        </span>
+                    </label>
+                    <label
+                        class="flex items-start p-4 bg-cyber-bg-lighter border border-cyber-border rounded cursor-pointer transition-all hover:border-cyber-accent group">
+                        <input type="radio" name="q1" value="c" class="mt-1 mr-3 accent-cyber-accent">
+                        <span class="text-cyber-text group-hover:text-cyber-text-light">
+                            Un logiciel antivirus pour protéger les réseaux sociaux
+                        </span>
+                    </label>
+                    <label
+                        class="flex items-start p-4 bg-cyber-bg-lighter border border-cyber-border rounded cursor-pointer transition-all hover:border-cyber-accent group">
+                        <input type="radio" name="q1" value="d" class="mt-1 mr-3 accent-cyber-accent">
+                        <span class="text-cyber-text group-hover:text-cyber-text-light">
+                            Une formation pour améliorer les compétences sociales
+                        </span>
+                    </label>
                 </div>
             </div>
 
-            <div>
-                <h4>Sources :</h4>
-                <p>https://www.ibm.com/fr-fr/think/topics/social-engineering</p>
+            <!-- Question 2 -->
+            <div class="container-cyber p-8" style="margin-bottom: 1.5rem;">
+                <h3 class="text-cyber-text-lighter text-xl font-bold mb-4">
+                    Question 2 : Qu'est-ce que le phishing ?
+                </h3>
+                <div class="space-y-3">
+                    <label
+                        class="flex items-start p-4 bg-cyber-bg-lighter border border-cyber-border rounded cursor-pointer transition-all hover:border-cyber-accent group">
+                        <input type="radio" name="q2" value="a" class="mt-1 mr-3 accent-cyber-accent">
+                        <span class="text-cyber-text group-hover:text-cyber-text-light">
+                            Un sport nautique très populaire
+                        </span>
+                    </label>
+                    <label
+                        class="flex items-start p-4 bg-cyber-bg-lighter border border-cyber-border rounded cursor-pointer transition-all hover:border-cyber-accent group">
+                        <input type="radio" name="q2" value="b" class="mt-1 mr-3 accent-cyber-accent">
+                        <span class="text-cyber-text group-hover:text-cyber-text-light">
+                            Une technique pour tromper les gens via de faux e-mails ou sites web
+                        </span>
+                    </label>
+                    <label
+                        class="flex items-start p-4 bg-cyber-bg-lighter border border-cyber-border rounded cursor-pointer transition-all hover:border-cyber-accent group">
+                        <input type="radio" name="q2" value="c" class="mt-1 mr-3 accent-cyber-accent">
+                        <span class="text-cyber-text group-hover:text-cyber-text-light">
+                            Un outil de recherche sur internet
+                        </span>
+                    </label>
+                    <label
+                        class="flex items-start p-4 bg-cyber-bg-lighter border border-cyber-border rounded cursor-pointer transition-all hover:border-cyber-accent group">
+                        <input type="radio" name="q2" value="d" class="mt-1 mr-3 accent-cyber-accent">
+                        <span class="text-cyber-text group-hover:text-cyber-text-light">
+                            Un nouveau type de réseau social
+                        </span>
+                    </label>
+                </div>
             </div>
 
+            <!-- Question 3 -->
+            <div class="container-cyber p-8" style="margin-bottom: 1.5rem;">
+                <h3 class="text-cyber-text-lighter text-xl font-bold mb-4">
+                    Question 3 : Vous recevez un e-mail urgent de votre "banque" vous demandant de confirmer votre mot
+                    de passe. Que devez-vous faire ?
+                </h3>
+                <div class="space-y-3">
+                    <label
+                        class="flex items-start p-4 bg-cyber-bg-lighter border border-cyber-border rounded cursor-pointer transition-all hover:border-cyber-accent group">
+                        <input type="radio" name="q3" value="a" class="mt-1 mr-3 accent-cyber-accent">
+                        <span class="text-cyber-text group-hover:text-cyber-text-light">
+                            Répondre immédiatement avec votre mot de passe
+                        </span>
+                    </label>
+                    <label
+                        class="flex items-start p-4 bg-cyber-bg-lighter border border-cyber-border rounded cursor-pointer transition-all hover:border-cyber-accent group">
+                        <input type="radio" name="q3" value="b" class="mt-1 mr-3 accent-cyber-accent">
+                        <span class="text-cyber-text group-hover:text-cyber-text-light">
+                            Cliquer sur le lien dans l'e-mail
+                        </span>
+                    </label>
+                    <label
+                        class="flex items-start p-4 bg-cyber-bg-lighter border border-cyber-border rounded cursor-pointer transition-all hover:border-cyber-accent group">
+                        <input type="radio" name="q3" value="c" class="mt-1 mr-3 accent-cyber-accent">
+                        <span class="text-cyber-text group-hover:text-cyber-text-light">
+                            Supprimer l'e-mail et contacter votre banque par un canal officiel
+                        </span>
+                    </label>
+                    <label
+                        class="flex items-start p-4 bg-cyber-bg-lighter border border-cyber-border rounded cursor-pointer transition-all hover:border-cyber-accent group">
+                        <input type="radio" name="q3" value="d" class="mt-1 mr-3 accent-cyber-accent">
+                        <span class="text-cyber-text group-hover:text-cyber-text-light">
+                            Transférer l'e-mail à tous vos collègues
+                        </span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Question 4 -->
+            <div class="container-cyber p-8" style="margin-bottom: 1.5rem;">
+                <h3 class="text-cyber-text-lighter text-xl font-bold mb-4">
+                    Question 4 : Qu'est-ce que le "vishing" ?
+                </h3>
+                <div class="space-y-3">
+                    <label
+                        class="flex items-start p-4 bg-cyber-bg-lighter border border-cyber-border rounded cursor-pointer transition-all hover:border-cyber-accent group">
+                        <input type="radio" name="q4" value="a" class="mt-1 mr-3 accent-cyber-accent">
+                        <span class="text-cyber-text group-hover:text-cyber-text-light">
+                            Du phishing par téléphone (appels vocaux)
+                        </span>
+                    </label>
+                    <label
+                        class="flex items-start p-4 bg-cyber-bg-lighter border border-cyber-border rounded cursor-pointer transition-all hover:border-cyber-accent group">
+                        <input type="radio" name="q4" value="b" class="mt-1 mr-3 accent-cyber-accent">
+                        <span class="text-cyber-text group-hover:text-cyber-text-light">
+                            Un nouveau type de virus informatique
+                        </span>
+                    </label>
+                    <label
+                        class="flex items-start p-4 bg-cyber-bg-lighter border border-cyber-border rounded cursor-pointer transition-all hover:border-cyber-accent group">
+                        <input type="radio" name="q4" value="c" class="mt-1 mr-3 accent-cyber-accent">
+                        <span class="text-cyber-text group-hover:text-cyber-text-light">
+                            Une application de messagerie sécurisée
+                        </span>
+                    </label>
+                    <label
+                        class="flex items-start p-4 bg-cyber-bg-lighter border border-cyber-border rounded cursor-pointer transition-all hover:border-cyber-accent group">
+                        <input type="radio" name="q4" value="d" class="mt-1 mr-3 accent-cyber-accent">
+                        <span class="text-cyber-text group-hover:text-cyber-text-light">
+                            Un jeu vidéo en ligne
+                        </span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Question 5 -->
+            <div class="container-cyber p-8" style="margin-bottom: 1.5rem;">
+                <h3 class="text-cyber-text-lighter text-xl font-bold mb-4">
+                    Question 5 : Quelle technique les pirates utilisent-ils pour créer un sentiment d'urgence ?
+                </h3>
+                <div class="space-y-3">
+                    <label
+                        class="flex items-start p-4 bg-cyber-bg-lighter border border-cyber-border rounded cursor-pointer transition-all hover:border-cyber-accent group">
+                        <input type="radio" name="q5" value="a" class="mt-1 mr-3 accent-cyber-accent">
+                        <span class="text-cyber-text group-hover:text-cyber-text-light">
+                            Envoyer des messages amicaux et polis
+                        </span>
+                    </label>
+                    <label
+                        class="flex items-start p-4 bg-cyber-bg-lighter border border-cyber-border rounded cursor-pointer transition-all hover:border-cyber-accent group">
+                        <input type="radio" name="q5" value="b" class="mt-1 mr-3 accent-cyber-accent">
+                        <span class="text-cyber-text group-hover:text-cyber-text-light">
+                            Menacer de bloquer un compte ou signaler une violation imminente
+                        </span>
+                    </label>
+                    <label
+                        class="flex items-start p-4 bg-cyber-bg-lighter border border-cyber-border rounded cursor-pointer transition-all hover:border-cyber-accent group">
+                        <input type="radio" name="q5" value="c" class="mt-1 mr-3 accent-cyber-accent">
+                        <span class="text-cyber-text group-hover:text-cyber-text-light">
+                            Proposer des formations gratuites
+                        </span>
+                    </label>
+                    <label
+                        class="flex items-start p-4 bg-cyber-bg-lighter border border-cyber-border rounded cursor-pointer transition-all hover:border-cyber-accent group">
+                        <input type="radio" name="q5" value="d" class="mt-1 mr-3 accent-cyber-accent">
+                        <span class="text-cyber-text group-hover:text-cyber-text-light">
+                            Offrir des conseils en sécurité
+                        </span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Question 6 -->
+            <div class="container-cyber p-8" style="margin-bottom: 1.5rem;">
+                <h3 class="text-cyber-text-lighter text-xl font-bold mb-4">
+                    Question 6 : Qu'est-ce que le "smishing" ?
+                </h3>
+                <div class="space-y-3">
+                    <label
+                        class="flex items-start p-4 bg-cyber-bg-lighter border border-cyber-border rounded cursor-pointer transition-all hover:border-cyber-accent group">
+                        <input type="radio" name="q6" value="a" class="mt-1 mr-3 accent-cyber-accent">
+                        <span class="text-cyber-text group-hover:text-cyber-text-light">
+                            Du phishing par SMS
+                        </span>
+                    </label>
+                    <label
+                        class="flex items-start p-4 bg-cyber-bg-lighter border border-cyber-border rounded cursor-pointer transition-all hover:border-cyber-accent group">
+                        <input type="radio" name="q6" value="b" class="mt-1 mr-3 accent-cyber-accent">
+                        <span class="text-cyber-text group-hover:text-cyber-text-light">
+                            Un réseau social pour professionnels
+                        </span>
+                    </label>
+                    <label
+                        class="flex items-start p-4 bg-cyber-bg-lighter border border-cyber-border rounded cursor-pointer transition-all hover:border-cyber-accent group">
+                        <input type="radio" name="q6" value="c" class="mt-1 mr-3 accent-cyber-accent">
+                        <span class="text-cyber-text group-hover:text-cyber-text-light">
+                            Un logiciel de protection contre les virus
+                        </span>
+                    </label>
+                    <label
+                        class="flex items-start p-4 bg-cyber-bg-lighter border border-cyber-border rounded cursor-pointer transition-all hover:border-cyber-accent group">
+                        <input type="radio" name="q6" value="d" class="mt-1 mr-3 accent-cyber-accent">
+                        <span class="text-cyber-text group-hover:text-cyber-text-light">
+                            Une technique de piratage de carte SIM
+                        </span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Question 7 -->
+            <div class="container-cyber p-8" style="margin-bottom: 1.5rem;">
+                <h3 class="text-cyber-text-lighter text-xl font-bold mb-4">
+                    Question 7 : Comment reconnaître un e-mail de phishing ?
+                </h3>
+                <div class="space-y-3">
+                    <label
+                        class="flex items-start p-4 bg-cyber-bg-lighter border border-cyber-border rounded cursor-pointer transition-all hover:border-cyber-accent group">
+                        <input type="radio" name="q7" value="a" class="mt-1 mr-3 accent-cyber-accent">
+                        <span class="text-cyber-text group-hover:text-cyber-text-light">
+                            Il contient toujours des images de haute qualité
+                        </span>
+                    </label>
+                    <label
+                        class="flex items-start p-4 bg-cyber-bg-lighter border border-cyber-border rounded cursor-pointer transition-all hover:border-cyber-accent group">
+                        <input type="radio" name="q7" value="b" class="mt-1 mr-3 accent-cyber-accent">
+                        <span class="text-cyber-text group-hover:text-cyber-text-light">
+                            Il peut contenir des fautes d'orthographe, une adresse d'expéditeur suspecte, ou créer un
+                            sentiment d'urgence
+                        </span>
+                    </label>
+                    <label
+                        class="flex items-start p-4 bg-cyber-bg-lighter border border-cyber-border rounded cursor-pointer transition-all hover:border-cyber-accent group">
+                        <input type="radio" name="q7" value="c" class="mt-1 mr-3 accent-cyber-accent">
+                        <span class="text-cyber-text group-hover:text-cyber-text-light">
+                            Il provient toujours d'une adresse gmail.com
+                        </span>
+                    </label>
+                    <label
+                        class="flex items-start p-4 bg-cyber-bg-lighter border border-cyber-border rounded cursor-pointer transition-all hover:border-cyber-accent group">
+                        <input type="radio" name="q7" value="d" class="mt-1 mr-3 accent-cyber-accent">
+                        <span class="text-cyber-text group-hover:text-cyber-text-light">
+                            Il est impossible de reconnaître un e-mail de phishing
+                        </span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Question 8 -->
+            <div class="container-cyber p-8" style="margin-bottom: 1.5rem;">
+                <h3 class="text-cyber-text-lighter text-xl font-bold mb-4">
+                    Question 8 : Quelle est la meilleure protection contre l'ingénierie sociale ?
+                </h3>
+                <div class="space-y-3">
+                    <label
+                        class="flex items-start p-4 bg-cyber-bg-lighter border border-cyber-border rounded cursor-pointer transition-all hover:border-cyber-accent group">
+                        <input type="radio" name="q8" value="a" class="mt-1 mr-3 accent-cyber-accent">
+                        <span class="text-cyber-text group-hover:text-cyber-text-light">
+                            Installer un antivirus coûteux
+                        </span>
+                    </label>
+                    <label
+                        class="flex items-start p-4 bg-cyber-bg-lighter border border-cyber-border rounded cursor-pointer transition-all hover:border-cyber-accent group">
+                        <input type="radio" name="q8" value="b" class="mt-1 mr-3 accent-cyber-accent">
+                        <span class="text-cyber-text group-hover:text-cyber-text-light">
+                            Ne jamais utiliser internet
+                        </span>
+                    </label>
+                    <label
+                        class="flex items-start p-4 bg-cyber-bg-lighter border border-cyber-border rounded cursor-pointer transition-all hover:border-cyber-accent group">
+                        <input type="radio" name="q8" value="c" class="mt-1 mr-3 accent-cyber-accent">
+                        <span class="text-cyber-text group-hover:text-cyber-text-light">
+                            La formation et la sensibilisation des employés
+                        </span>
+                    </label>
+                    <label
+                        class="flex items-start p-4 bg-cyber-bg-lighter border border-cyber-border rounded cursor-pointer transition-all hover:border-cyber-accent group">
+                        <input type="radio" name="q8" value="d" class="mt-1 mr-3 accent-cyber-accent">
+                        <span class="text-cyber-text group-hover:text-cyber-text-light">
+                            Changer son ordinateur tous les mois
+                        </span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Question 9 -->
+            <div class="container-cyber p-8" style="margin-bottom: 1.5rem;">
+                <h3 class="text-cyber-text-lighter text-xl font-bold mb-4">
+                    Question 9 : Un inconnu vous appelle en se présentant comme un technicien de votre service
+                    informatique et vous demande votre mot de passe. Que faites-vous ?
+                </h3>
+                <div class="space-y-3">
+                    <label
+                        class="flex items-start p-4 bg-cyber-bg-lighter border border-cyber-border rounded cursor-pointer transition-all hover:border-cyber-accent group">
+                        <input type="radio" name="q9" value="a" class="mt-1 mr-3 accent-cyber-accent">
+                        <span class="text-cyber-text group-hover:text-cyber-text-light">
+                            Lui donner immédiatement votre mot de passe
+                        </span>
+                    </label>
+                    <label
+                        class="flex items-start p-4 bg-cyber-bg-lighter border border-cyber-border rounded cursor-pointer transition-all hover:border-cyber-accent group">
+                        <input type="radio" name="q9" value="b" class="mt-1 mr-3 accent-cyber-accent">
+                        <span class="text-cyber-text group-hover:text-cyber-text-light">
+                            Refuser et vérifier auprès de votre service informatique
+                        </span>
+                    </label>
+                    <label
+                        class="flex items-start p-4 bg-cyber-bg-lighter border border-cyber-border rounded cursor-pointer transition-all hover:border-cyber-accent group">
+                        <input type="radio" name="q9" value="c" class="mt-1 mr-3 accent-cyber-accent">
+                        <span class="text-cyber-text group-hover:text-cyber-text-light">
+                            Raccrocher et ne rien faire
+                        </span>
+                    </label>
+                    <label
+                        class="flex items-start p-4 bg-cyber-bg-lighter border border-cyber-border rounded cursor-pointer transition-all hover:border-cyber-accent group">
+                        <input type="radio" name="q9" value="d" class="mt-1 mr-3 accent-cyber-accent">
+                        <span class="text-cyber-text group-hover:text-cyber-text-light">
+                            Lui donner un faux mot de passe
+                        </span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Question 10 -->
+            <div class="container-cyber p-8" style="margin-bottom: 1.5rem;">
+                <h3 class="text-cyber-text-lighter text-xl font-bold mb-4">
+                    Question 10 : Qu'est-ce que l'authentification multifacteur (MFA) ?
+                </h3>
+                <div class="space-y-3">
+                    <label
+                        class="flex items-start p-4 bg-cyber-bg-lighter border border-cyber-border rounded cursor-pointer transition-all hover:border-cyber-accent group">
+                        <input type="radio" name="q10" value="a" class="mt-1 mr-3 accent-cyber-accent">
+                        <span class="text-cyber-text group-hover:text-cyber-text-light">
+                            Un système qui demande plusieurs mots de passe différents
+                        </span>
+                    </label>
+                    <label
+                        class="flex items-start p-4 bg-cyber-bg-lighter border border-cyber-border rounded cursor-pointer transition-all hover:border-cyber-accent group">
+                        <input type="radio" name="q10" value="b" class="mt-1 mr-3 accent-cyber-accent">
+                        <span class="text-cyber-text group-hover:text-cyber-text-light">
+                            Une protection qui nécessite plusieurs preuves d'identité (mot de passe + code SMS par
+                            exemple)
+                        </span>
+                    </label>
+                    <label
+                        class="flex items-start p-4 bg-cyber-bg-lighter border border-cyber-border rounded cursor-pointer transition-all hover:border-cyber-accent group">
+                        <input type="radio" name="q10" value="c" class="mt-1 mr-3 accent-cyber-accent">
+                        <span class="text-cyber-text group-hover:text-cyber-text-light">
+                            Un type de virus informatique
+                        </span>
+                    </label>
+                    <label
+                        class="flex items-start p-4 bg-cyber-bg-lighter border border-cyber-border rounded cursor-pointer transition-all hover:border-cyber-accent group">
+                        <input type="radio" name="q10" value="d" class="mt-1 mr-3 accent-cyber-accent">
+                        <span class="text-cyber-text group-hover:text-cyber-text-light">
+                            Un logiciel pour faire plusieurs tâches en même temps
+                        </span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Bouton de soumission -->
+            <div class="flex justify-center py-8" style="margin-bottom: 1.5rem;">
+                <button type="submit" class="btn-cyber-primary px-12 py-4 text-lg">
+                    Valider le quiz
+                </button>
+            </div>
+        </form>
+
+        <!-- Section résultats (cachée par défaut) -->
+        <div id="results" class="hidden container-cyber p-8 mt-8">
+            <h2 class="text-cyber-text-lighter text-3xl font-bold mb-6 text-center text-glow">
+                Résultats
+            </h2>
+            <div class="text-center mb-6">
+                <p class="text-cyber-text-light text-2xl mb-2">
+                    Score : <span id="score" class="text-cyber-accent font-bold"></span>
+                </p>
+                <p id="message" class="text-cyber-text-muted text-lg"></p>
+            </div>
+            <div class="flex justify-center gap-4">
+                <button onclick="window.location.reload()" class="btn-cyber">
+                    Recommencer
+                </button>
+                <a href="{{ url_for('main.quiz') }}" class="btn-cyber-primary">
+                    Retour aux quiz
+                </a>
+            </div>
+        </div>
+
+        <!-- Sources -->
+        <div class="flex justify-center items-center p-8">
+            <h4 class="text-cyber-text-lighter text-lg font-bold mb-3">Sources :</h4>
+            <a href="https://www.ibm.com/fr-fr/think/topics/social-engineering" target="_blank"
+                class="text-cyber-text-light hover:text-cyber-text-bright transition-colors underline"
+                style="margin-top: 0.3rem;">
+                IBM - Ingénierie sociale
+            </a>
         </div>
     </div>
+
+    <footer class="py-10 text-center mt-12">
+        <p class="text-cyber-text-muted">Copyright BTS SIO</p>
+    </footer>
+
+    <script>
+        // Réponses correctes
+        const correctAnswers = {
+            q1: 'b',  // Méthode qui manipule les personnes
+            q2: 'b',  // Technique pour tromper via faux e-mails
+            q3: 'c',  // Supprimer et contacter banque
+            q4: 'a',  // Phishing par téléphone
+            q5: 'b',  // Menacer de bloquer un compte
+            q6: 'a',  // Phishing par SMS
+            q7: 'b',  // Fautes, adresse suspecte, urgence
+            q8: 'c',  // Formation et sensibilisation
+            q9: 'b',  // Refuser et vérifier
+            q10: 'b'  // Plusieurs preuves d'identité
+        };
+
+        document.getElementById('quizForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            let score = 0;
+            const totalQuestions = Object.keys(correctAnswers).length;
+
+            // Vérifier chaque réponse
+            for (let question in correctAnswers) {
+                const selectedAnswer = document.querySelector(`input[name="${question}"]:checked`);
+                if (selectedAnswer && selectedAnswer.value === correctAnswers[question]) {
+                    score++;
+                }
+            }
+
+            // Afficher les résultats
+            const percentage = (score / totalQuestions) * 100;
+            document.getElementById('score').textContent = `${score}/${totalQuestions} (${percentage.toFixed(0)}%)`;
+
+            let message = '';
+            if (percentage === 100) {
+                message = '🎉 Parfait ! Vous maîtrisez parfaitement les bases de la protection contre l\'ingénierie sociale.';
+            } else if (percentage >= 70) {
+                message = '✅ Très bien ! Vous avez de bonnes connaissances sur le sujet.';
+            } else if (percentage >= 50) {
+                message = '📚 Pas mal ! Continuez à vous former pour améliorer vos compétences.';
+            } else {
+                message = '⚠️ Il est recommandé de revoir les concepts de base de l\'ingénierie sociale.';
+            }
+
+            document.getElementById('message').textContent = message;
+            document.getElementById('results').classList.remove('hidden');
+            document.getElementById('quizForm').style.display = 'none';
+
+            // Scroll vers les résultats
+            document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+        });
+    </script>
 </body>
 
 </html>
