@@ -1,5 +1,5 @@
 # import de Flask et des éléments qu'on utilise (les routes, les affichages html)
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, request, session, jsonify
 
 # Création de la route principale de l'application
 main_bp = Blueprint("main", __name__)
@@ -26,3 +26,35 @@ def quiz_detail(quiz_id):
 
     # Affiche le template du quiz correspondant à l'ID
     return render_template(f"quiz/quiz{quiz_id}.html")
+
+
+# Route pour soumettre un quiz (nécessite d'être connecté)
+@main_bp.post("/quiz/<int:quiz_id>/submit")
+def quiz_submit(quiz_id):
+    # Vérifier que l'utilisateur est connecté
+    if "user_id" not in session:
+        return jsonify(
+            {
+                "success": False,
+                "error": "Vous devez être connecté pour valider le quiz",
+                "redirect": "/auth/login",
+            }
+        ), 401
+
+    # Vérifier que l'ID du quiz existe (entre 1 et 8)
+    if quiz_id < 1 or quiz_id > 8:
+        return jsonify({"success": False, "error": "Quiz non trouvé"}), 404
+
+    # Récupérer les réponses soumises
+    data = request.get_json()
+    answers = data.get("answers", {})
+
+    # Ici ajouter la logique pour :
+    # - Vérifier les réponses
+    # - Calculer le score
+    # - Enregistrer le résultat en base de données
+
+    # Pour l'instant, on retourne juste un succès
+    return jsonify(
+        {"success": True, "message": "Quiz validé avec succès", "answers": answers}
+    ), 200
