@@ -3,7 +3,6 @@
 ### Première installation
 
 ```bash
-# Cloner le repository
 git clone https://github.com/lele214/Cyber-hoot
 cd Cyber-hoot
 docker compose down -v
