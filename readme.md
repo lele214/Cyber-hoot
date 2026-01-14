@@ -1,3 +1,8 @@
+
+Notre plateforme Cyber-hoot (pour “cyber” et “kahoot”) propose des quiz sur le thème de la Cybersécurité. Aujourd’hui, à l’ère d’un monde hyper-connecté, le nombre de cyberattaques n’a jamais été aussi important : il est prévu jusqu’à une cyberattaque toutes les 2 secondes d’ici 2031. Et l’un des facteurs de réussite de ces attaques est toujours relatif à une chose : le facteur humain. En effet, ce sont les erreurs que nous faisons tous les jours qui nous rendent le plus vulnérable. Et la raison est essentiellement à cause d’un manque d’information ou de formation. Notre plateforme va proposer divers quiz de culture générale relatifs aux différentes attaques existantes, essentiellement pour sensibiliser sur les risques liés à la cybersécurité. 
+
+
+
 ## Installation
 
 ### Première installation
