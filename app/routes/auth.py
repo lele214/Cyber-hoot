@@ -128,8 +128,8 @@ def register_post():
         hashpassword=hashed_password,
     )
 
-    # Récupérer le rôle "Player" et l'assigner à l'utilisateur par défaut
-    player_role = Role.query.filter_by(nameRoles="Player").first()
+    # Récupérer le rôle "player" et l'assigner à l'utilisateur par défaut
+    player_role = Role.query.filter_by(nameRoles="player").first()
     if player_role:
         new_user.roles.append(player_role)
 

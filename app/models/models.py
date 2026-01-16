@@ -1,33 +1,34 @@
 from app.database import db
-from datetime import date
+# from datetime import date
+
 
 # Table de liaison many-to-many entre User et Role
 class UserToRole(db.Model):
-    __tablename__ = 'userToRoles'
+    __tablename__ = "userToRoles"
 
     userToRole_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    idUser = db.Column(db.Integer, db.ForeignKey('USER.idUSER'), nullable=False)
-    idROLES = db.Column(db.Integer, db.ForeignKey('ROLES.idROLES'), nullable=False)
+    idUser = db.Column(db.Integer, db.ForeignKey("USER.idUSER"), nullable=False)
+    idROLES = db.Column(db.Integer, db.ForeignKey("ROLES.idROLES"), nullable=False)
 
     def __repr__(self):
-        return f'<UserToRole user_id={self.idUser} role_id={self.idROLES}>'
+        return f"<UserToRole user_id={self.idUser} role_id={self.idROLES}>"
 
 
 class Role(db.Model):
-    __tablename__ = 'ROLES'
+    __tablename__ = "ROLES"
 
     idROLES = db.Column(db.Integer, primary_key=True, autoincrement=True)
     nameRoles = db.Column(db.String(45), unique=True, nullable=False)
 
     # Relation many-to-many avec User via userToRoles
-    users = db.relationship('User', secondary='userToRoles', back_populates='roles')
+    users = db.relationship("User", secondary="userToRoles", back_populates="roles")
 
     def __repr__(self):
-        return f'<Role {self.nameRoles}>'
+        return f"<Role {self.nameRoles}>"
 
 
 class User(db.Model):
-    __tablename__ = 'USER'
+    __tablename__ = "USER"
 
     idUSER = db.Column(db.Integer, primary_key=True, autoincrement=True)
     username = db.Column(db.String(45), nullable=True)
@@ -35,164 +36,192 @@ class User(db.Model):
     emailUser = db.Column(db.String(45), nullable=True)
 
     # Relation many-to-many avec Role via userToRoles
-    roles = db.relationship('Role', secondary='userToRoles', back_populates='users')
+    roles = db.relationship("Role", secondary="userToRoles", back_populates="users")
 
     # Relations existantes
-    quizzes = db.relationship('Quiz', back_populates='creator', foreign_keys='Quiz.idCreatedByUser')
-    notifications = db.relationship('Notification', back_populates='user')
-    trophies = db.relationship('Trophy', back_populates='user')
-    results = db.relationship('Result', back_populates='user')
-    connexion_logs = db.relationship('ConnexionLog', back_populates='user')
+    quizzes = db.relationship(
+        "Quiz", back_populates="creator", foreign_keys="Quiz.idCreatedByUser"
+    )
+    notifications = db.relationship("Notification", back_populates="user")
+    trophies = db.relationship("Trophy", back_populates="user")
+    results = db.relationship("Result", back_populates="user")
+    connexion_logs = db.relationship("ConnexionLog", back_populates="user")
 
     def __repr__(self):
-        return f'<User {self.username}>'
+        return f"<User {self.username}>"
 
 
 class Quiz(db.Model):
-    __tablename__ = 'QUIZ'
+    __tablename__ = "QUIZ"
 
     idQUIZ = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    idCreatedByUser = db.Column(db.Integer, db.ForeignKey('USER.idUSER'), nullable=False)
-    difficulty = db.Column(db.Enum('HARD', 'MEDIUM', 'EASY'), nullable=True)
+    idCreatedByUser = db.Column(
+        db.Integer, db.ForeignKey("USER.idUSER"), nullable=False
+    )
+    difficulty = db.Column(db.Enum("HARD", "MEDIUM", "EASY"), nullable=True)
     title = db.Column(db.String(45), nullable=True)
-    statut = db.Column(db.Enum('MODIFIED', 'PUBLISHED', 'DRAFT'), nullable=True)
+    statut = db.Column(db.Enum("MODIFIED", "PUBLISHED", "DRAFT"), nullable=True)
     createdAt = db.Column(db.Date, nullable=True)
 
     # Relations
-    creator = db.relationship('User', back_populates='quizzes', foreign_keys=[idCreatedByUser])
-    badges = db.relationship('Badge', back_populates='quiz')
-    questions = db.relationship('Question', back_populates='quiz')
-    results = db.relationship('Result', back_populates='quiz')
+    creator = db.relationship(
+        "User", back_populates="quizzes", foreign_keys=[idCreatedByUser]
+    )
+    badges = db.relationship("Badge", back_populates="quiz")
+    questions = db.relationship("Question", back_populates="quiz")
+    results = db.relationship("Result", back_populates="quiz")
 
     def __repr__(self):
-        return f'<Quiz {self.title}>'
+        return f"<Quiz {self.title}>"
 
 
 class Badge(db.Model):
-    __tablename__ = 'BADGES'
+    __tablename__ = "BADGES"
 
     idBADGES = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(45), nullable=True)
     image = db.Column(db.LargeBinary, nullable=True)
-    idQuiz = db.Column(db.Integer, db.ForeignKey('QUIZ.idQUIZ'), nullable=False)
+    idQuiz = db.Column(db.Integer, db.ForeignKey("QUIZ.idQUIZ"), nullable=False)
 
     # Relations
-    quiz = db.relationship('Quiz', back_populates='badges')
-    trophies = db.relationship('Trophy', back_populates='badge')
+    quiz = db.relationship("Quiz", back_populates="badges")
+    trophies = db.relationship("Trophy", back_populates="badge")
 
     def __repr__(self):
-        return f'<Badge {self.name}>'
+        return f"<Badge {self.name}>"
 
 
 class Notification(db.Model):
-    __tablename__ = 'NOTIFICATIONS'
+    __tablename__ = "NOTIFICATIONS"
 
     idNOTIFICATIONS = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    idUser = db.Column(db.Integer, db.ForeignKey('USER.idUSER'), nullable=False)
-    type = db.Column(db.Enum('new_quiz', 'badge_earned', 'reminder'), nullable=True)
+    idUser = db.Column(db.Integer, db.ForeignKey("USER.idUSER"), nullable=False)
+    type = db.Column(db.Enum("new_quiz", "badge_earned", "reminder"), nullable=True)
     message = db.Column(db.String(45), nullable=True)
     sentAt = db.Column(db.Date, nullable=True)
     emailNotif = db.Column(db.String(45), nullable=True)
 
     # Relations
-    user = db.relationship('User', back_populates='notifications')
+    user = db.relationship("User", back_populates="notifications")
 
     def __repr__(self):
-        return f'<Notification {self.type} for User {self.idUser}>'
+        return f"<Notification {self.type} for User {self.idUser}>"
 
 
 class Trophy(db.Model):
-    __tablename__ = 'TROPHY'
+    __tablename__ = "TROPHY"
 
     idTrophy = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    idBadge = db.Column(db.Integer, db.ForeignKey('BADGES.idBADGES'), nullable=False)
-    idUser = db.Column(db.Integer, db.ForeignKey('USER.idUSER'), nullable=False)
+    idBadge = db.Column(db.Integer, db.ForeignKey("BADGES.idBADGES"), nullable=False)
+    idUser = db.Column(db.Integer, db.ForeignKey("USER.idUSER"), nullable=False)
     obtainedAt = db.Column(db.Date, nullable=True)
 
     # Relations
-    badge = db.relationship('Badge', back_populates='trophies')
-    user = db.relationship('User', back_populates='trophies')
+    badge = db.relationship("Badge", back_populates="trophies")
+    user = db.relationship("User", back_populates="trophies")
 
     def __repr__(self):
-        return f'<Trophy {self.idTrophy}>'
+        return f"<Trophy {self.idTrophy}>"
 
 
 class Question(db.Model):
-    __tablename__ = 'QUESTION'
+    __tablename__ = "QUESTION"
 
     idQUESTION = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    idQuestionFromQuiz = db.Column(db.Integer, db.ForeignKey('QUIZ.idQUIZ'), nullable=False)
+    idQuestionFromQuiz = db.Column(
+        db.Integer, db.ForeignKey("QUIZ.idQUIZ"), nullable=False
+    )
     QuestionText = db.Column(db.String(45), nullable=True)
 
     # Relations
-    quiz = db.relationship('Quiz', back_populates='questions')
-    responses = db.relationship('Response', back_populates='question')
-    medias = db.relationship('Media', back_populates='question', foreign_keys='Media.idMediaFromQuestion')
+    quiz = db.relationship("Quiz", back_populates="questions")
+    responses = db.relationship("Response", back_populates="question")
+    medias = db.relationship(
+        "Media", back_populates="question", foreign_keys="Media.idMediaFromQuestion"
+    )
 
     def __repr__(self):
-        return f'<Question {self.idQUESTION}>'
+        return f"<Question {self.idQUESTION}>"
 
 
 class Response(db.Model):
-    __tablename__ = 'RESPONSE'
+    __tablename__ = "RESPONSE"
 
     idRESPONSE = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    idResponseFromQuestion = db.Column(db.Integer, db.ForeignKey('QUESTION.idQUESTION'), nullable=False)
+    idResponseFromQuestion = db.Column(
+        db.Integer, db.ForeignKey("QUESTION.idQUESTION"), nullable=False
+    )
     responseText = db.Column(db.String(45), nullable=True)
     isCorrect = db.Column(db.Boolean, nullable=True)
 
     # Relations
-    question = db.relationship('Question', back_populates='responses')
-    medias = db.relationship('Media', back_populates='response', foreign_keys='Media.idMediaFromResponse')
+    question = db.relationship("Question", back_populates="responses")
+    medias = db.relationship(
+        "Media", back_populates="response", foreign_keys="Media.idMediaFromResponse"
+    )
 
     def __repr__(self):
-        return f'<Response {self.idRESPONSE}>'
+        return f"<Response {self.idRESPONSE}>"
 
 
 class Media(db.Model):
-    __tablename__ = 'MEDIA'
+    __tablename__ = "MEDIA"
 
     idMEDIA = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    idMediaFromQuestion = db.Column(db.Integer, db.ForeignKey('QUESTION.idQUESTION'), nullable=True)
-    idMediaFromResponse = db.Column(db.Integer, db.ForeignKey('RESPONSE.idRESPONSE'), nullable=True)
+    idMediaFromQuestion = db.Column(
+        db.Integer, db.ForeignKey("QUESTION.idQUESTION"), nullable=True
+    )
+    idMediaFromResponse = db.Column(
+        db.Integer, db.ForeignKey("RESPONSE.idRESPONSE"), nullable=True
+    )
     mediaUrl = db.Column(db.String(255), nullable=True)
     mediaType = db.Column(db.String(50), nullable=True)
 
     # Relations
-    question = db.relationship('Question', back_populates='medias', foreign_keys=[idMediaFromQuestion])
-    response = db.relationship('Response', back_populates='medias', foreign_keys=[idMediaFromResponse])
+    question = db.relationship(
+        "Question", back_populates="medias", foreign_keys=[idMediaFromQuestion]
+    )
+    response = db.relationship(
+        "Response", back_populates="medias", foreign_keys=[idMediaFromResponse]
+    )
 
     def __repr__(self):
-        return f'<Media {self.idMEDIA}>'
+        return f"<Media {self.idMEDIA}>"
 
 
 class Result(db.Model):
-    __tablename__ = 'RESULT'
+    __tablename__ = "RESULT"
 
     idRESULT = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    idQUIZinResult = db.Column(db.Integer, db.ForeignKey('QUIZ.idQUIZ'), nullable=False)
-    idUSERinResult = db.Column(db.Integer, db.ForeignKey('USER.idUSER'), nullable=False)
+    idQUIZinResult = db.Column(db.Integer, db.ForeignKey("QUIZ.idQUIZ"), nullable=False)
+    idUSERinResult = db.Column(db.Integer, db.ForeignKey("USER.idUSER"), nullable=False)
     date = db.Column(db.Date, nullable=True)
-    score = db.Column(db.Integer, nullable=True, comment='Score obtenu par l\'utilisateur pour ce quiz')
-    totalQuestions = db.Column(db.Integer, nullable=True, comment='Nombre total de questions dans le quiz')
-    resultHistory = db.Column(db.String(45), nullable=True, comment='commentaire')
+    score = db.Column(
+        db.Integer, nullable=True, comment="Score obtenu par l'utilisateur pour ce quiz"
+    )
+    totalQuestions = db.Column(
+        db.Integer, nullable=True, comment="Nombre total de questions dans le quiz"
+    )
+    resultHistory = db.Column(db.String(45), nullable=True, comment="commentaire")
 
     # Relations
-    quiz = db.relationship('Quiz', back_populates='results')
-    user = db.relationship('User', back_populates='results')
+    quiz = db.relationship("Quiz", back_populates="results")
+    user = db.relationship("User", back_populates="results")
 
     def __repr__(self):
-        return f'<Result {self.idRESULT}>'
+        return f"<Result {self.idRESULT}>"
 
 
 class ConnexionLog(db.Model):
-    __tablename__ = 'CONNEXION_LOG'
+    __tablename__ = "CONNEXION_LOG"
 
     idCONNEXION_LOG = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    idUSERforConnexion = db.Column(db.Integer, db.ForeignKey('USER.idUSER'), nullable=False)
+    idUSERforConnexion = db.Column(
+        db.Integer, db.ForeignKey("USER.idUSER"), nullable=False
+    )
 
     # Relations
-    user = db.relationship('User', back_populates='connexion_logs')
+    user = db.relationship("User", back_populates="connexion_logs")
 
     def __repr__(self):
-        return f'<ConnexionLog {self.idCONNEXION_LOG}>'
+        return f"<ConnexionLog {self.idCONNEXION_LOG}>"

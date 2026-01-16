@@ -32,8 +32,8 @@ def admin_dashboard():
 
     # Récupère les rôles de l'utilisateur depuis la session
     user_roles = session.get("user_roles", [])
-    # Vérifie si l'utilisateur possède le rôle "Admin"
-    if "Admin" not in user_roles:
+    # Vérifie si l'utilisateur possède le rôle "admin"
+    if "admin" not in user_roles:
         flash("Accès refusé : réservé aux administrateurs", "error")
         return redirect(url_for("main.home"))
 
@@ -43,25 +43,25 @@ def admin_dashboard():
     return render_template("profile/admin/admin_dashboard.html", username=username, user_roles=user_roles)
 
 
-# Envoie vers la page du tableau de bord rédacteur
-@profile_bp.get("/redactor")
-def redactor_dashboard():
+# Envoie vers la page du tableau de bord créateur
+@profile_bp.get("/creator")
+def creator_dashboard():
     # Vérifie si l'utilisateur est connecté
     if "user_id" not in session:
         return redirect(url_for("auth.login_get"))
 
     # Récupère les rôles de l'utilisateur depuis la session
     user_roles = session.get("user_roles", [])
-    # Vérifie si l'utilisateur possède le rôle "Redactor"
-    if "Redactor" not in user_roles:
-        flash("Accès refusé : réservé aux rédacteurs", "error")
+    # Vérifie si l'utilisateur possède le rôle "creator"
+    if "creator" not in user_roles:
+        flash("Accès refusé : réservé aux créateurs", "error")
         return redirect(url_for("main.home"))
 
     # Récupère le nom d'utilisateur depuis la session
     username = session.get("username")
-    # Affiche le template du dashboard rédacteur avec les données de l'utilisateur
+    # Affiche le template du dashboard créateur avec les données de l'utilisateur
     return render_template(
-        "profile/redactor/redactor_dashboard.html", username=username, user_roles=user_roles
+        "profile/creator/creator_dashboard.html", username=username, user_roles=user_roles
     )
 
 
