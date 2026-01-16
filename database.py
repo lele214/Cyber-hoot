@@ -5,11 +5,11 @@ db = SQLAlchemy()
 
 
 def init_db(app):
-    mysql_user = os.getenv("MYSQL_USER", "flaskuser")
-    mysql_password = os.getenv("MYSQL_PASSWORD", "flaskpassword")
-    mysql_host = os.getenv("MYSQL_HOST", "localhost")
-    mysql_port = os.getenv("MYSQL_PORT", "16969")
-    mysql_database = os.getenv("MYSQL_DATABASE", "cyberhoot")
+    mysql_user = os.getenv("MYSQL_USER", "")
+    mysql_password = os.getenv("MYSQL_PASSWORD", "")
+    mysql_host = os.getenv("MYSQL_HOST", "")
+    mysql_port = os.getenv("MYSQL_PORT", "")
+    mysql_database = os.getenv("MYSQL_DATABASE", "")
 
     app.config["SQLALCHEMY_DATABASE_URI"] = (
         f"mysql+pymysql://{mysql_user}:{mysql_password}@{mysql_host}:{mysql_port}/{mysql_database}"
