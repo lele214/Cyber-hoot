@@ -1,28 +1,4 @@
 services:
-<<<<<<< HEAD
-
-  db:
-    image: mysql:8.0
-    restart: always
-    command: --default-authentication-plugin=mysql_native_password
-    env_file:
-      - .env
-    volumes:
-      - db_data:/var/lib/mysql
-      # ici est l'initialisation de la base de donnée au démarrage du docker
-      # permet de récupérer également les infos "données de test" dans le dossier test
-      - ./database/db_schemaV3-3.sql:/docker-entrypoint-initdb.d/01-schema.sql
-      - ./test/seed_data.sql:/docker-entrypoint-initdb.d/02-seed-data.sql
-    ports:
-      - "3306:3306"
-    healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-=======
->>>>>>> c0b63a72169d28401f6939bb7aea785fabbf1def
   app:
     build:
       context: .
@@ -36,16 +12,6 @@ services:
     env_file:
       - .env
     environment:
-<<<<<<< HEAD
-      MYSQL_HOST: db
-    depends_on:
-      db:
-        condition: service_healthy
-    command: [ "python3", "run.py" ]
-
-volumes:
-  db_data:
-=======
       FLASK_ENV: ${FLASK_ENV}
       SECRET_KEY: ${SECRET_KEY}
       MYSQL_HOST: ${MYSQL_HOST}
@@ -54,4 +20,3 @@ volumes:
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     command: sh -c "npm run build:css && python3 -m app.main"
->>>>>>> c0b63a72169d28401f6939bb7aea785fabbf1def
