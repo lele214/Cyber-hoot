@@ -1,4 +1,5 @@
 services:
+<<<<<<< HEAD
 
   db:
     image: mysql:8.0
@@ -20,6 +21,8 @@ services:
       timeout: 5s
       retries: 5
 
+=======
+>>>>>>> c0b63a72169d28401f6939bb7aea785fabbf1def
   app:
     build:
       context: .
@@ -33,6 +36,7 @@ services:
     env_file:
       - .env
     environment:
+<<<<<<< HEAD
       MYSQL_HOST: db
     depends_on:
       db:
@@ -41,3 +45,13 @@ services:
 
 volumes:
   db_data:
+=======
+      FLASK_ENV: ${FLASK_ENV}
+      SECRET_KEY: ${SECRET_KEY}
+      MYSQL_HOST: ${MYSQL_HOST}
+      MYSQL_PORT: ${MYSQL_PORT}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    command: sh -c "npm run build:css && python3 -m app.main"
+>>>>>>> c0b63a72169d28401f6939bb7aea785fabbf1def

@@ -23,7 +23,7 @@ USE `cyberhoot` ;
 CREATE TABLE IF NOT EXISTS `cyberhoot`.`USER` (
   `idUSER` INT NOT NULL AUTO_INCREMENT,
   `username` VARCHAR(45) NULL,
-  `hashpassword` VARCHAR(255) NULL,
+  `hashpassword` VARCHAR(60) NULL,
   `emailUser` VARCHAR(45) NULL,
   PRIMARY KEY (`idUSER`))
 ENGINE = InnoDB;
@@ -177,7 +177,11 @@ CREATE TABLE IF NOT EXISTS `cyberhoot`.`RESULT` (
   `idQUIZinResult` INT NOT NULL,
   `idUSERinResult` INT NOT NULL,
   `date` DATE NULL,
+<<<<<<< HEAD:database/db_schemaV3-3.sql
   `resultHistory` VARCHAR(255) NULL COMMENT "ici prévoir un champ pour garder en mémoire les réponses à chaque question qu\'un utilisateur a donné pour un quiz",
+=======
+  `resultHistory` VARCHAR(45) NULL COMMENT "ici prévoir un champ pour garder en mémoire les réponses à chaque question qu\'un utilisateur a donné pour un quiz",
+>>>>>>> c0b63a72169d28401f6939bb7aea785fabbf1def:app/models/db_schemaV3-3.sql
   `score` INT NULL,
   `totalQuestions` INT NULL,
   PRIMARY KEY (`idRESULT`),

@@ -63,9 +63,13 @@ def creator_dashboard():
     username = session.get("username")
     # Affiche le template du dashboard créateur avec les données de l'utilisateur
     return render_template(
+<<<<<<< HEAD
         "profile/creator/creator_dashboard.html",
         username=username,
         user_roles=user_roles,
+=======
+        "profile/creator/creator_dashboard.html", username=username, user_roles=user_roles
+>>>>>>> c0b63a72169d28401f6939bb7aea785fabbf1def
     )
 
 

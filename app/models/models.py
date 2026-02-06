@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 from app.extensions import db
+=======
+from app.database import db
+>>>>>>> c0b63a72169d28401f6939bb7aea785fabbf1def
 # from datetime import date
 
 
