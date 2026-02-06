@@ -19,4 +19,4 @@ services:
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-    command: sh -c "npm run build:css && python3 -m app.main"
+    command: sh -c "npm run build:css && python3 run.py"
