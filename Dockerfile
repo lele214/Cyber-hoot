@@ -1,15 +1,23 @@
 FROM python:3.11-alpine
-RUN mkdir /app
+
 WORKDIR /app
 
-# Install system dependencies required for Python packages
-RUN apk add --no-cache gcc musl-dev linux-headers
+RUN apk add --no-cache gcc musl-dev linux-headers nodejs npm netcat-openbsd
 
-COPY requirements.txt requirements.txt
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Clean up build dependencies to keep image small
+COPY package.json package-lock.json ./
+RUN npm install
+
+COPY app/ ./app/
+COPY run.py ./
+COPY tailwind.config.js ./
+
+RUN npm run build:css
+
 RUN apk del gcc musl-dev linux-headers
 
-COPY . .
-CMD [ "python3", "main.py" ]
+EXPOSE 5000
+
+CMD ["python3", "run.py"]

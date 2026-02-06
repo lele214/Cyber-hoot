@@ -1,7 +1,7 @@
 # import de Flask et des éléments qu'on utilise (les routes, les affichages html, la session, les redirections, les messages flash)
 from flask import Blueprint, render_template, session, redirect, url_for, flash
 from app.models.models import Result, Quiz, User
-from app.database import db
+from app.extensions import db
 from sqlalchemy import func
 
 # Création de la route liée aux profils utilisateurs
@@ -32,36 +32,40 @@ def admin_dashboard():
 
     # Récupère les rôles de l'utilisateur depuis la session
     user_roles = session.get("user_roles", [])
-    # Vérifie si l'utilisateur possède le rôle "Admin"
-    if "Admin" not in user_roles:
+    # Vérifie si l'utilisateur possède le rôle "admin"
+    if "admin" not in user_roles:
         flash("Accès refusé : réservé aux administrateurs", "error")
         return redirect(url_for("main.home"))
 
     # Récupère le nom d'utilisateur depuis la session
     username = session.get("username")
     # Affiche le template du dashboard admin avec les données de l'utilisateur
-    return render_template("profile/admin/admin_dashboard.html", username=username, user_roles=user_roles)
+    return render_template(
+        "profile/admin/admin_dashboard.html", username=username, user_roles=user_roles
+    )
 
 
-# Envoie vers la page du tableau de bord rédacteur
-@profile_bp.get("/redactor")
-def redactor_dashboard():
+# Envoie vers la page du tableau de bord créateur
+@profile_bp.get("/creator")
+def creator_dashboard():
     # Vérifie si l'utilisateur est connecté
     if "user_id" not in session:
         return redirect(url_for("auth.login_get"))
 
     # Récupère les rôles de l'utilisateur depuis la session
     user_roles = session.get("user_roles", [])
-    # Vérifie si l'utilisateur possède le rôle "Redactor"
-    if "Redactor" not in user_roles:
-        flash("Accès refusé : réservé aux rédacteurs", "error")
+    # Vérifie si l'utilisateur possède le rôle "creator"
+    if "creator" not in user_roles:
+        flash("Accès refusé : réservé aux créateurs", "error")
         return redirect(url_for("main.home"))
 
     # Récupère le nom d'utilisateur depuis la session
     username = session.get("username")
-    # Affiche le template du dashboard rédacteur avec les données de l'utilisateur
+    # Affiche le template du dashboard créateur avec les données de l'utilisateur
     return render_template(
-        "profile/redactor/redactor_dashboard.html", username=username, user_roles=user_roles
+        "profile/creator/creator_dashboard.html",
+        username=username,
+        user_roles=user_roles,
     )
 
 
@@ -79,18 +83,16 @@ def player_dashboard():
 
     # Récupérer les statistiques de l'utilisateur
     # 1. Nombre total de quiz disponibles (publiés)
-    total_quizzes = Quiz.query.filter_by(statut='PUBLISHED').count()
+    total_quizzes = Quiz.query.filter_by(statut="PUBLISHED").count()
 
     # 2. Récupérer tous les résultats de l'utilisateur avec les informations du quiz
-    user_results = db.session.query(
-        Result, Quiz
-    ).join(
-        Quiz, Result.idQUIZinResult == Quiz.idQUIZ
-    ).filter(
-        Result.idUSERinResult == user_id
-    ).order_by(
-        Result.date.desc()
-    ).all()
+    user_results = (
+        db.session.query(Result, Quiz)
+        .join(Quiz, Result.idQUIZinResult == Quiz.idQUIZ)
+        .filter(Result.idUSERinResult == user_id)
+        .order_by(Result.date.desc())
+        .all()
+    )
 
     # 3. Calculer les statistiques
     completed_quizzes = len(user_results)
@@ -98,7 +100,11 @@ def player_dashboard():
 
     # 4. Calculer le score moyen
     if completed_quizzes > 0:
-        total_score = sum((result.score / result.totalQuestions * 100) for result, quiz in user_results if result.totalQuestions > 0)
+        total_score = sum(
+            (result.score / result.totalQuestions * 100)
+            for result, quiz in user_results
+            if result.totalQuestions > 0
+        )
         average_score = round(total_score / completed_quizzes, 1)
     else:
         average_score = 0
@@ -111,14 +117,16 @@ def player_dashboard():
         else:
             percentage = 0
 
-        quiz_history.append({
-            'quiz_title': quiz.title,
-            'quiz_difficulty': quiz.difficulty,
-            'score': result.score,
-            'total_questions': result.totalQuestions,
-            'percentage': percentage,
-            'date': result.date.strftime('%d/%m/%Y') if result.date else 'N/A'
-        })
+        quiz_history.append(
+            {
+                "quiz_title": quiz.title,
+                "quiz_difficulty": quiz.difficulty,
+                "score": result.score,
+                "total_questions": result.totalQuestions,
+                "percentage": percentage,
+                "date": result.date.strftime("%d/%m/%Y") if result.date else "N/A",
+            }
+        )
 
     # Affiche le template du dashboard joueur avec les données de l'utilisateur
     return render_template(
@@ -129,5 +137,5 @@ def player_dashboard():
         completed_quizzes=completed_quizzes,
         remaining_quizzes=remaining_quizzes,
         average_score=average_score,
-        quiz_history=quiz_history
+        quiz_history=quiz_history,
     )

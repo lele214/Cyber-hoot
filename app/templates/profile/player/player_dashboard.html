@@ -25,17 +25,17 @@
         </div>
 
         <!-- Boutons de navigation vers les autres profils si l'utilisateur possède le rôle -->
-        {% if 'Admin' in user_roles or 'Redactor' in user_roles %}
+        {% if 'admin' in user_roles or 'creator' in user_roles %}
         <div class="flex gap-5 flex-wrap justify-center mb-12">
-            {% if 'Admin' in user_roles %}
+            {% if 'admin' in user_roles %}
             <a href="{{ url_for('profile.admin_dashboard') }}" class="btn-cyber-primary">
                 Afficher le profil Admin
             </a>
             {% endif %}
 
-            {% if 'Redactor' in user_roles %}
-            <a href="{{ url_for('profile.redactor_dashboard') }}" class="btn-cyber">
-                Afficher le profil Rédacteur
+            {% if 'creator' in user_roles %}
+            <a href="{{ url_for('profile.creator_dashboard') }}" class="btn-cyber">
+                Afficher le profil Créateur
             </a>
             {% endif %}
         </div>
@@ -75,6 +75,7 @@
                     Historique de mes quiz
                 </h3>
 
+                <!-- Vérification si le tableau "quiz_history" est rempli (informations ajoutée dans profile.py) -->
                 {% if quiz_history %}
                 <div class="overflow-x-auto">
                     <table class="w-full text-left">
@@ -119,7 +120,8 @@
                 {% else %}
                 <p class="text-cyber-text-muted text-center py-8">
                     Vous n'avez pas encore complété de quiz.
-                    <a href="{{ url_for('main.quiz') }}" class="text-cyber-accent hover:text-cyber-accent-light underline">
+                    <a href="{{ url_for('main.quiz') }}"
+                        class="text-cyber-accent hover:text-cyber-accent-light underline">
                         Commencez maintenant !
                     </a>
                 </p>

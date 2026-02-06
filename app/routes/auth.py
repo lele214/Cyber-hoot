@@ -19,13 +19,24 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 
 # import de l'application (base de donnée, les models de page, la config de l'appli flask)
-from app.database import db
+# fonction try/except dans extensions.py
+from app.extensions import db_transaction
 from app.models.models import User, ConnexionLog, Role
 from flask import current_app
 
 
 # Création de la route lié à l'authentification
 auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
+
+
+# Utilisateur admin par défaut pour le développement (ne pas utiliser en production)
+DEV_ADMIN_USER = {
+    "id": 0,
+    "username": "AdminHoot",
+    "hashpassword": "scrypt:32768:8:1$PSwKNtuaZCDoODBA$3df18ede31a2f2189d4cbf1e86e9abea8863c19f84a6b10f1e8cef1d30ac22add6187296513070ca58c4fcec37bde4c332f1b1a70cbe18334fccfffc38b1b3b6",
+    "email": "admin@cyberhoot.local",
+    "roles": ["admin", "creator"],
+}
 
 
 # Envoie vers la page de login
@@ -44,6 +55,16 @@ def login_post():
         flash("Veuillez remplir tous les champs", "error")
         return render_template("auth/login.html")
 
+    # Vérifier d'abord l'utilisateur admin de développement
+    if username == DEV_ADMIN_USER["username"] and check_password_hash(
+        DEV_ADMIN_USER["hashpassword"], password
+    ):
+        session["user_id"] = DEV_ADMIN_USER["id"]
+        session["username"] = DEV_ADMIN_USER["username"]
+        session["user_roles"] = DEV_ADMIN_USER["roles"]
+        return redirect(url_for("main.home"))
+
+    # Sinon, vérifier dans la base de données
     user = User.query.filter_by(username=username).first()
 
     if user and check_password_hash(user.hashpassword, password):
@@ -53,9 +74,11 @@ def login_post():
         user_roles = [role.nameRoles for role in user.roles]
         session["user_roles"] = user_roles
 
-        connexion_log = ConnexionLog(idUSERforConnexion=user.idUSER)
-        db.session.add(connexion_log)
-        db.session.commit()
+        with db_transaction() as db_session:
+            connexion_log = ConnexionLog(idUSERforConnexion=user.idUSER)
+            db_session.add(connexion_log)
+        # db.session.add(connexion_log)
+        # db.session.commit()
 
         # flash(f"Bienvenue {user.username} !", "success")
         return redirect(url_for("main.home"))
@@ -128,15 +151,19 @@ def register_post():
         hashpassword=hashed_password,
     )
 
-    # Récupérer le rôle "Player" et l'assigner à l'utilisateur par défaut
-    player_role = Role.query.filter_by(nameRoles="Player").first()
+    # Récupérer le rôle "player" et l'assigner à l'utilisateur par défaut
+    player_role = Role.query.filter_by(nameRoles="player").first()
     if player_role:
         new_user.roles.append(player_role)
 
-    # Ajout du nouvel utilisateur à la session de la base de données (préparation)
-    db.session.add(new_user)
-    # Enregistrement définitif des modifications dans la base de données
-    db.session.commit()
+    # # Ajout du nouvel utilisateur à la session de la base de données (préparation)
+    # db.session.add(new_user)
+    # # Enregistrement définitif des modifications dans la base de données
+    # db.session.commit()
+
+    # Ajout du nouvel utilisateur à la session de la base de données
+    with db_transaction() as db_session:
+        db_session.add(new_user)
 
     flash("Compte créé avec succès ! Vous pouvez maintenant vous connecter.", "success")
     return redirect(url_for("auth.login_get"))
@@ -269,8 +296,9 @@ def reset_password_post(token):
         return redirect(url_for("auth.forgot_password_get"))
 
     # Mettre à jour le mot de passe
-    user.hashpassword = generate_password_hash(password)
-    db.session.commit()
+    with db_transaction():
+        user.hashpassword = generate_password_hash(password)
+    # db.session.commit()
 
     flash(
         "Votre mot de passe a été réinitialisé avec succès. Vous pouvez maintenant vous connecter.",

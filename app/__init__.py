@@ -1,35 +1,32 @@
-# Fichier d'initialisation de l'application Flask
-# Ce fichier configure et assemble tous les composants de l'application
-
-# Import de Flask pour créer l'application web
+import os
 from flask import Flask
-# Import de la fonction pour initialiser la base de données
-from app.database import init_db
+from dotenv import load_dotenv
 
 
-# Fonction principale qui crée et configure l'application Flask
-def create_app():
-    # Création de l'instance Flask
+def create_app(config_name=None):
+    """Application Factory - crée et configure l'application Flask"""
+    load_dotenv()
+
+    if config_name is None:
+        config_name = os.getenv("FLASK_ENV", "development")
+
     app = Flask(__name__)
 
-    # Import de la configuration de l'application (clés secrètes, paramètres DB, etc.)
-    from app.config import Config
+    # Charger la configuration
+    from app.config import config
+    app.config.from_object(config[config_name])
 
-    # Application de la configuration à l'application Flask
-    app.config.from_object(Config)
+    # Initialiser les extensions
+    from app.extensions import db
+    db.init_app(app)
 
-    # Initialisation de la base de données avec l'application
-    init_db(app)
-
-    # Import des différents blueprints (modules de routes)
-    from app.routes.auth import auth_bp
+    # Enregistrer les blueprints
     from app.routes.main_routes import main_bp
+    from app.routes.auth import auth_bp
     from app.routes.profile import profile_bp
 
-    # Enregistrement des blueprints dans l'application
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(profile_bp)
 
-    # Retourne l'application configurée et prête à être lancée
     return app

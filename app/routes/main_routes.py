@@ -1,6 +1,6 @@
 # import de Flask et des éléments qu'on utilise (les routes, les affichages html)
 from flask import Blueprint, render_template, request, session, jsonify
-from app.database import db
+from app.extensions import db_transaction
 from app.models.models import Result, Quiz
 from datetime import date
 
@@ -58,7 +58,9 @@ def quiz_submit(quiz_id):
         # Vérifier si le quiz existe dans la base de données
         quiz = Quiz.query.filter_by(idQUIZ=quiz_id).first()
         if not quiz:
-            return jsonify({"success": False, "error": "Quiz non trouvé dans la base de données"}), 404
+            return jsonify(
+                {"success": False, "error": "Quiz non trouvé dans la base de données"}
+            ), 404
 
         # Récupérer l'ID de l'utilisateur depuis la session
         user_id = session.get("user_id")
@@ -70,28 +72,30 @@ def quiz_submit(quiz_id):
             date=date.today(),
             score=score,
             totalQuestions=total_questions,
-            resultHistory=str(answers)  # Stocker les réponses en format texte
+            resultHistory=str(answers),  # Stocker les réponses en format texte
         )
 
         # Ajouter et enregistrer le résultat
-        db.session.add(new_result)
-        db.session.commit()
+        # db.session.add(new_result)
+        # db.session.commit()
+        with db_transaction() as db_session:
+            db_session.add(new_result)
 
         return jsonify(
             {
                 "success": True,
                 "message": "Quiz validé avec succès",
                 "score": score,
-                "totalQuestions": total_questions
+                "totalQuestions": total_questions,
             }
         ), 200
 
     except Exception as e:
         # En cas d'erreur, annuler les changements
-        db.session.rollback()
+        # db.session.rollback() //déjà fait dans db_transaction
         return jsonify(
             {
                 "success": False,
-                "error": f"Erreur lors de l'enregistrement du résultat: {str(e)}"
+                "error": f"Erreur lors de l'enregistrement du résultat: {str(e)}",
             }
         ), 500
