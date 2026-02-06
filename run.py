@@ -1,3 +1,5 @@
+# Point d'entrée de l'application : via Docker
+
 from app import create_app
 
 app = create_app()
