@@ -14,7 +14,7 @@ services:
     environment:
       FLASK_ENV: ${FLASK_ENV}
       SECRET_KEY: ${SECRET_KEY}
-      MYSQL_HOST: ${MYSQL_HOST}
+      MYSQL_HOST: db
       MYSQL_PORT: ${MYSQL_PORT}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}
