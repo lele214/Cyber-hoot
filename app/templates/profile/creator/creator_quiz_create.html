@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Créer un quiz - Cyber-hoot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='output.css') }}">
+    <script src="{{ url_for('static', filename='js/quiz_create.js') }}" async></script>
+</head>
+
+<body class="min-h-screen scanline relative">
+    <a href="{{ url_for('profile.creator_dashboard') }}"
+        class="fixed top-5 left-5 px-6 py-3 bg-transparent border-2 border-cyber-accent text-cyber-text-lighter rounded-lg font-semibold text-sm transition-all duration-300 hover:bg-cyber-border hover:border-cyber-accent-light hover:shadow-glow-sm hover:-translate-x-1 z-50">
+        ← Retour au dashboard
+    </a>
+
+    <div class="flex justify-center items-center min-h-screen py-10 px-5">
+        <div class="container-cyber w-full max-w-2xl">
+            <div class="text-center mb-10">
+                <h1 class="text-cyber-text-bright text-4xl mb-2 font-bold text-glow">Créer un quiz</h1>
+                <p class="text-cyber-text text-sm">Remplissez les informations et ajoutez vos questions</p>
+            </div>
+
+            <!-- bug : il reste affiché constamment ? -->
+            <!-- {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            {% for category, message in messages %}
+            <div class="flash-message {% if category == 'error' %}flash-error{% else %}flash-success{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %} -->
+
+            <form method="POST" action="{{ url_for('profile.creator_quiz_create_post') }}" id="quizForm">
+                <!-- Informations générales du quiz -->
+                <div class="mb-6">
+                    <label for="title" class="block mb-2 text-cyber-text-lighter font-medium text-sm">
+                        Titre du quiz
+                    </label>
+                    <input type="text" id="title" name="title" class="input-cyber"
+                        placeholder="Ex : Les bases de la cybersécurité" required>
+                </div>
+
+                <div class="mb-8">
+                    <label for="difficulty" class="block mb-2 text-cyber-text-lighter font-medium text-sm">
+                        Difficulté
+                    </label>
+                    <select id="difficulty" name="difficulty" class="input-cyber" required>
+                        <option value="" disabled selected>Choisir une difficulté</option>
+                        <option value="EASY">Facile</option>
+                        <option value="MEDIUM">Moyen</option>
+                        <option value="HARD">Difficile</option>
+                    </select>
+                </div>
+
+                <!-- Section Questions -->
+                <div class="mb-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-cyber-text-bright text-xl font-bold">Questions</h2>
+                        <button type="button" onclick="addQuestion()"
+                            class="px-4 py-2 bg-transparent border-2 border-cyber-accent text-cyber-text-lighter rounded-lg font-semibold text-sm transition-all duration-300 hover:bg-cyber-border hover:border-cyber-accent-light hover:shadow-glow-sm">
+                            + Ajouter une question
+                        </button>
+                    </div>
+
+                    <div id="questionsContainer">
+                        <!-- Les questions seront ajoutées ici dynamiquement -->
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-cyber-primary w-full mt-2">
+                    Créer le quiz
+                </button>
+            </form>
+        </div>
+    </div>
+
+</body>
+
+</html>

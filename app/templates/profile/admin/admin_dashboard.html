@@ -1,20 +1,385 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Admin</title>
+    <title>Dashboard Admin - Cyber-hoot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='output.css') }}">
 </head>
 
-<body>
+<body class="min-h-screen py-10 px-5 scanline relative">
     <a href="{{ url_for('profile.player_dashboard') }}"
         class="fixed top-5 left-5 px-6 py-3 bg-transparent border-2 border-cyber-accent text-cyber-text-lighter rounded-lg font-semibold text-sm transition-all duration-300 hover:bg-cyber-border hover:border-cyber-accent-light hover:shadow-glow-sm hover:-translate-x-1 z-50">
-        ← Retour
+        ← Retour au profil
     </a>
-    <h1>Profil de l'Admin {{ username }}</h1>
 
+    <div class="max-w-7xl mx-auto">
 
+        <!-- En-tête -->
+        <div class="text-center mb-12">
+            <h1 class="text-cyber-text-lighter text-4xl md:text-5xl font-bold mb-5 tracking-wide text-glow">
+                Tableau de bord Admin
+            </h1>
+            <p class="text-cyber-text-muted text-base md:text-lg">
+                Bienvenue {{ username }} — Panneau d'administration
+            </p>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- Statistiques générales (CU-03)                               -->
+        <!-- ============================================================ -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto mb-12">
+            <div class="feature-box text-center">
+                <h3 class="text-cyber-accent text-5xl font-bold mb-3">
+                    {{ total_users }}
+                </h3>
+                <p class="text-cyber-text-lighter text-lg font-semibold mb-2">Utilisateurs</p>
+                <p class="text-cyber-text-muted text-sm">inscrits sur la plateforme</p>
+            </div>
+
+            <div class="feature-box text-center">
+                <h3 class="text-cyber-accent text-5xl font-bold mb-3">
+                    {{ total_quizzes }}
+                </h3>
+                <p class="text-cyber-text-lighter text-lg font-semibold mb-2">Quiz total</p>
+                <p class="text-cyber-text-muted text-sm">tous statuts confondus</p>
+            </div>
+
+            <div class="feature-box text-center">
+                <h3 class="text-cyber-accent text-5xl font-bold mb-3">
+                    {{ published_quizzes }}
+                </h3>
+                <p class="text-cyber-text-lighter text-lg font-semibold mb-2">Quiz publiés</p>
+                <p class="text-cyber-text-muted text-sm">accessibles aux joueurs</p>
+            </div>
+
+            <div class="feature-box text-center">
+                <h3 class="text-cyber-accent text-5xl font-bold mb-3">
+                    {{ global_avg }}%
+                </h3>
+                <p class="text-cyber-text-lighter text-lg font-semibold mb-2">Score moyen</p>
+                <p class="text-cyber-text-muted text-sm">sur l'ensemble des joueurs</p>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- Quiz en attente de validation                                 -->
+        <!-- ============================================================ -->
+        <div class="max-w-6xl mx-auto mb-12">
+            <div class="feature-box" style="min-height: auto; align-items: stretch; text-align: left;">
+                <div class="flex justify-between items-center mb-5 w-full">
+                    <h3 class="text-cyber-text-lighter text-2xl font-bold tracking-wide">
+                        Quiz en attente de validation
+                    </h3>
+                    {% if pending_data %}
+                    <span class="px-3 py-1 rounded-full text-sm font-semibold bg-orange-500/20 text-orange-400">
+                        {{ pending_data|length }} en attente
+                    </span>
+                    {% endif %}
+                </div>
+
+                {% if pending_data %}
+                <div class="overflow-x-auto w-full">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="border-b border-cyber-border">
+                                <th class="text-cyber-text-lighter font-semibold py-3 px-4">Titre</th>
+                                <th class="text-cyber-text-lighter font-semibold py-3 px-4">Créateur</th>
+                                <th class="text-cyber-text-lighter font-semibold py-3 px-4">Difficulté</th>
+                                <th class="text-cyber-text-lighter font-semibold py-3 px-4 text-center">Questions</th>
+                                <th class="text-cyber-text-lighter font-semibold py-3 px-4">Date</th>
+                                <th class="text-cyber-text-lighter font-semibold py-3 px-4 text-center">Catégorie</th>
+                                <th class="text-cyber-text-lighter font-semibold py-3 px-4 text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for quiz in pending_data %}
+                            <tr class="border-b border-cyber-border/30 hover:bg-cyber-border/20 transition-colors">
+                                <td class="text-cyber-text-muted py-3 px-4">{{ quiz.title }}</td>
+                                <td class="text-cyber-text-muted py-3 px-4">{{ quiz.creator }}</td>
+                                <td class="py-3 px-4">
+                                    <span class="px-3 py-1 rounded-full text-xs font-semibold
+                                        {% if quiz.difficulty == 'EASY' %}bg-green-500/20 text-green-400
+                                        {% elif quiz.difficulty == 'MEDIUM' %}bg-yellow-500/20 text-yellow-400
+                                        {% else %}bg-red-500/20 text-red-400{% endif %}">
+                                        {{ quiz.difficulty }}
+                                    </span>
+                                </td>
+                                <td class="text-cyber-text-muted py-3 px-4 text-center">{{ quiz.questions_count }}</td>
+                                <td class="text-cyber-text-muted py-3 px-4">{{ quiz.date }}</td>
+                                <td class="py-3 px-4">
+                                    <!-- Formulaire de validation avec sélection de catégorie -->
+                                    <form method="POST" action="{{ url_for('profile.admin_quiz_approve', quiz_id=quiz.id) }}" class="flex items-center gap-2">
+                                        <select name="category" class="input-cyber text-xs py-1 px-2" required>
+                                            <option value="" disabled selected>Catégorie</option>
+                                            {% for key, label in quiz_categories.items() %}
+                                            <option value="{{ key }}">{{ label }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <button type="submit"
+                                            class="px-3 py-1 rounded text-xs font-semibold bg-green-500/20 text-green-400 border border-green-500/30 hover:bg-green-500/30 transition-colors whitespace-nowrap">
+                                            Valider
+                                        </button>
+                                    </form>
+                                </td>
+                                <td class="py-3 px-4 text-center">
+                                    <!-- Bouton refuser -->
+                                    <form method="POST" action="{{ url_for('profile.admin_quiz_reject', quiz_id=quiz.id) }}" class="inline"
+                                          onsubmit="return confirm('Refuser ce quiz ? Il sera remis en brouillon.')">
+                                        <button type="submit"
+                                            class="px-3 py-1 rounded text-xs font-semibold bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30 transition-colors">
+                                            Refuser
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-cyber-text-muted text-center py-8 w-full">
+                    Aucun quiz en attente de validation.
+                </p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- CU-03 : Gestion des Quiz                                     -->
+        <!-- ============================================================ -->
+        <div class="max-w-6xl mx-auto mb-12">
+            <div class="feature-box" style="min-height: auto; align-items: stretch; text-align: left;">
+                <div class="flex justify-between items-center mb-5 w-full">
+                    <h3 class="text-cyber-text-lighter text-2xl font-bold tracking-wide">
+                        Gestion des Quiz
+                    </h3>
+                    <!-- TODO Backend : lier ce bouton à GET /profile/admin/quiz/create -->
+                    <button class="btn-cyber-primary text-sm" style="padding: 0.5rem 1.25rem;" disabled
+                        title="Fonctionnalité à implémenter">
+                        + Ajouter un quiz
+                    </button>
+                </div>
+
+                {% if quizzes_data %}
+                <div class="overflow-x-auto w-full">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="border-b border-cyber-border">
+                                <th class="text-cyber-text-lighter font-semibold py-3 px-4">Titre</th>
+                                <th class="text-cyber-text-lighter font-semibold py-3 px-4">Créateur</th>
+                                <th class="text-cyber-text-lighter font-semibold py-3 px-4">Catégorie</th>
+                                <th class="text-cyber-text-lighter font-semibold py-3 px-4">Difficulté</th>
+                                <th class="text-cyber-text-lighter font-semibold py-3 px-4">Statut</th>
+                                <th class="text-cyber-text-lighter font-semibold py-3 px-4">Date</th>
+                                <th class="text-cyber-text-lighter font-semibold py-3 px-4 text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for quiz in quizzes_data %}
+                            <tr class="border-b border-cyber-border/30 hover:bg-cyber-border/20 transition-colors">
+                                <td class="text-cyber-text-muted py-3 px-4">{{ quiz.title }}</td>
+                                <td class="text-cyber-text-muted py-3 px-4">{{ quiz.creator }}</td>
+                                <td class="text-cyber-text-muted py-3 px-4">{{ quiz.category }}</td>
+                                <td class="py-3 px-4">
+                                    <span class="px-3 py-1 rounded-full text-xs font-semibold
+                                        {% if quiz.difficulty == 'EASY' %}bg-green-500/20 text-green-400
+                                        {% elif quiz.difficulty == 'MEDIUM' %}bg-yellow-500/20 text-yellow-400
+                                        {% else %}bg-red-500/20 text-red-400{% endif %}">
+                                        {{ quiz.difficulty }}
+                                    </span>
+                                </td>
+                                <td class="py-3 px-4">
+                                    <span class="px-3 py-1 rounded-full text-xs font-semibold
+                                        {% if quiz.statut == 'PUBLISHED' %}bg-green-500/20 text-green-400
+                                        {% elif quiz.statut == 'DRAFT' %}bg-yellow-500/20 text-yellow-400
+                                        {% else %}bg-blue-500/20 text-blue-400{% endif %}">
+                                        {{ quiz.statut }}
+                                    </span>
+                                </td>
+                                <td class="text-cyber-text-muted py-3 px-4">{{ quiz.date }}</td>
+                                <td class="py-3 px-4 text-center">
+                                    <div class="flex gap-2 justify-center flex-wrap">
+                                        <!-- Bouton Modifier → lien vers le formulaire d'édition admin -->
+                                        <a href="{{ url_for('profile.admin_quiz_edit', quiz_id=quiz.id) }}"
+                                            class="px-3 py-1 rounded text-xs font-semibold bg-blue-500/20 text-blue-400 border border-blue-500/30 hover:bg-blue-500/30 transition-colors">
+                                            Modifier
+                                        </a>
+                                        <!-- Bouton Archiver → remet en brouillon -->
+                                        {% if quiz.statut == 'PUBLISHED' %}
+                                        <form method="POST" action="{{ url_for('profile.admin_quiz_archive', quiz_id=quiz.id) }}" class="inline"
+                                              onsubmit="return confirm('Archiver ce quiz ? Il sera remis en brouillon.')">
+                                            <button type="submit"
+                                                class="px-3 py-1 rounded text-xs font-semibold bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 hover:bg-yellow-500/30 transition-colors">
+                                                Archiver
+                                            </button>
+                                        </form>
+                                        {% endif %}
+                                        <!-- Bouton Supprimer → suppression avec confirmation -->
+                                        <form method="POST" action="{{ url_for('profile.admin_quiz_delete', quiz_id=quiz.id) }}" class="inline"
+                                              onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce quiz ? Cette action est irréversible.')">
+                                            <button type="submit"
+                                                class="px-3 py-1 rounded text-xs font-semibold bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30 transition-colors">
+                                                Supprimer
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-cyber-text-muted text-center py-8 w-full">
+                    Aucun quiz n'a encore été créé.
+                </p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- CU-01 : Gestion des Utilisateurs                            -->
+        <!-- TODO Backend : Créer les routes POST suivantes :             -->
+        <!--   - POST /profile/admin/user/<id>/delete        (supprimer)  -->
+        <!--   - POST /profile/admin/user/<id>/reset-password (reset mdp) -->
+        <!--   - POST /profile/admin/user/<id>/assign-quiz    (assigner)  -->
+        <!-- ============================================================ -->
+        <div class="max-w-6xl mx-auto mb-12">
+            <div class="feature-box" style="min-height: auto; align-items: stretch; text-align: left;">
+                <h3 class="text-cyber-text-lighter text-2xl font-bold mb-5 tracking-wide w-full">
+                    Gestion des Utilisateurs
+                </h3>
+
+                {% if users_data %}
+                <div class="overflow-x-auto w-full">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="border-b border-cyber-border">
+                                <th class="text-cyber-text-lighter font-semibold py-3 px-4">Utilisateur</th>
+                                <th class="text-cyber-text-lighter font-semibold py-3 px-4">Email</th>
+                                <th class="text-cyber-text-lighter font-semibold py-3 px-4">Rôles</th>
+                                <th class="text-cyber-text-lighter font-semibold py-3 px-4 text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users_data %}
+                            <tr class="border-b border-cyber-border/30 hover:bg-cyber-border/20 transition-colors">
+                                <td class="text-cyber-text-muted py-3 px-4">{{ user.username }}</td>
+                                <td class="text-cyber-text-muted py-3 px-4">{{ user.email }}</td>
+                                <td class="py-3 px-4">
+                                    {% for role in user.roles %}
+                                    <span class="px-3 py-1 rounded-full text-xs font-semibold
+                                        {% if role == 'admin' %}bg-red-500/20 text-red-400
+                                        {% elif role == 'creator' %}bg-blue-500/20 text-blue-400
+                                        {% else %}bg-green-500/20 text-green-400{% endif %}">
+                                        {{ role }}
+                                    </span>
+                                    {% endfor %}
+                                </td>
+                                <td class="py-3 px-4 text-center">
+                                    <div class="flex gap-2 justify-center flex-wrap items-center">
+                                        <!-- Bouton Reset mot de passe -->
+                                        <form method="POST" action="{{ url_for('profile.admin_user_reset_password', user_id=user.id) }}" class="inline"
+                                              onsubmit="return confirm('Générer un lien de réinitialisation de mot de passe pour {{ user.username }} ?')">
+                                            <button type="submit"
+                                                class="px-3 py-1 rounded text-xs font-semibold bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 hover:bg-yellow-500/30 transition-colors">
+                                                Reset mdp
+                                            </button>
+                                        </form>
+                                        <!-- Assigner / retirer un rôle -->
+                                        <form method="POST" action="{{ url_for('profile.admin_user_assign_role', user_id=user.id) }}" class="inline flex items-center gap-1">
+                                            <select name="role" class="input-cyber text-xs py-1 px-2" required>
+                                                <option value="" disabled selected>Rôle</option>
+                                                <option value="player">player</option>
+                                                <option value="creator">creator</option>
+                                                <option value="admin">admin</option>
+                                            </select>
+                                            <button type="submit"
+                                                class="px-3 py-1 rounded text-xs font-semibold bg-blue-500/20 text-blue-400 border border-blue-500/30 hover:bg-blue-500/30 transition-colors whitespace-nowrap">
+                                                +/- Rôle
+                                            </button>
+                                        </form>
+                                        <!-- Bouton Supprimer utilisateur -->
+                                        <form method="POST" action="{{ url_for('profile.admin_user_delete', user_id=user.id) }}" class="inline"
+                                              onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer l\'utilisateur {{ user.username }} ? Cette action est irréversible.')">
+                                            <button type="submit"
+                                                class="px-3 py-1 rounded text-xs font-semibold bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30 transition-colors">
+                                                Supprimer
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-cyber-text-muted text-center py-8 w-full">
+                    Aucun utilisateur trouvé.
+                </p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- CU-02 : Configuration des Badges                            -->
+        <!-- TODO Backend : Créer les routes suivantes :                  -->
+        <!--   - GET  /profile/admin/badge/create       (formulaire)      -->
+        <!--   - POST /profile/admin/badge/create       (créer badge)     -->
+        <!--   - POST /profile/admin/badge/<id>/edit    (modifier)        -->
+        <!--   - POST /profile/admin/badge/<id>/delete  (supprimer)       -->
+        <!-- ============================================================ -->
+        <div class="max-w-6xl mx-auto mb-12">
+            <div class="feature-box" style="min-height: auto; align-items: stretch; text-align: left;">
+                <div class="flex justify-between items-center mb-5 w-full">
+                    <h3 class="text-cyber-text-lighter text-2xl font-bold tracking-wide">
+                        Configuration des Badges
+                    </h3>
+                    <!-- TODO Backend : lier ce bouton à GET /profile/admin/badge/create -->
+                    <button class="btn-cyber-primary text-sm" style="padding: 0.5rem 1.25rem;" disabled
+                        title="Fonctionnalité à implémenter">
+                        + Ajouter un badge
+                    </button>
+                </div>
+
+                {% if badges_data %}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+                    {% for badge in badges_data %}
+                    <div
+                        class="flex items-center justify-between p-4 border border-cyber-border rounded-lg hover:border-cyber-border-light transition-colors">
+                        <div>
+                            <p class="text-cyber-text-lighter font-semibold">{{ badge.name }}</p>
+                            <p class="text-cyber-text-muted text-sm">Quiz : {{ badge.quiz_title }}</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <!-- TODO Backend : lier à POST /profile/admin/badge/{{ badge.id }}/edit -->
+                            <button
+                                class="px-3 py-1 rounded text-xs font-semibold bg-blue-500/20 text-blue-400 border border-blue-500/30 hover:bg-blue-500/30 transition-colors"
+                                disabled title="Fonctionnalité à implémenter">
+                                Modifier
+                            </button>
+                            <!-- TODO Backend : lier à POST /profile/admin/badge/{{ badge.id }}/delete -->
+                            <button
+                                class="px-3 py-1 rounded text-xs font-semibold bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30 transition-colors"
+                                disabled title="Fonctionnalité à implémenter">
+                                Supprimer
+                            </button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-cyber-text-muted text-center py-8 w-full">
+                    Aucun badge n'a encore été configuré.
+                </p>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
 
     <footer>
         <p class="flex justify-center pt-7">Copyright BTS SIO</p>

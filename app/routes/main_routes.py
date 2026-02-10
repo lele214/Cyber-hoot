@@ -1,8 +1,9 @@
 # import de Flask et des éléments qu'on utilise (les routes, les affichages html)
-from flask import Blueprint, render_template, request, session, jsonify
+from flask import Blueprint, render_template, request, session, jsonify, current_app
 from app.extensions import db_transaction
-from app.models.models import Result, Quiz
+from app.models.models import Result, Quiz, Question, Response
 from datetime import date
+import os
 
 # Création de la route principale de l'application
 main_bp = Blueprint("main", __name__)
@@ -17,18 +18,55 @@ def home():
 # Envoie vers la page listant tous les quiz
 @main_bp.get("/quiz")
 def quiz():
-    return render_template("quiz/quiz.html")
+    # Récupère tous les quiz publiés depuis la base de données
+    published_quizzes = Quiz.query.filter_by(statut="PUBLISHED").all()
+    quizzes_data = [
+        {
+            "id": q.idQUIZ,
+            "title": q.title,
+            "difficulty": q.difficulty,
+            "category": q.category,
+        }
+        for q in published_quizzes
+    ]
+    return render_template("quiz/quiz.html", published_quizzes=quizzes_data)
 
 
 # Envoie vers la page d'un quiz spécifique en fonction de son ID
 @main_bp.get("/quiz/<int:quiz_id>")
 def quiz_detail(quiz_id):
-    # Vérifie que l'ID du quiz existe (entre 1 et 8)
-    if quiz_id < 1 or quiz_id > 8:
-        return "Quiz non trouvé", 404
+    # Vérifie d'abord si un template statique existe (quiz historiques)
+    template_path = os.path.join(current_app.template_folder, f"quiz/quiz{quiz_id}.html")
+    if os.path.exists(template_path):
+        return render_template(f"quiz/quiz{quiz_id}.html")
 
-    # Affiche le template du quiz correspondant à l'ID
-    return render_template(f"quiz/quiz{quiz_id}.html")
+    # Sinon, charge le quiz dynamiquement depuis la base de données
+    quiz = Quiz.query.get_or_404(quiz_id)
+
+    # Prépare les questions et réponses
+    questions_data = []
+    correct_answers = {}
+    for i, question in enumerate(quiz.questions):
+        responses = []
+        for j, response in enumerate(question.responses):
+            responses.append({
+                "index": j,
+                "text": response.responseText,
+            })
+            if response.isCorrect:
+                correct_answers[f"q{i}"] = str(j)
+        questions_data.append({
+            "index": i,
+            "text": question.QuestionText,
+            "responses": responses,
+        })
+
+    return render_template(
+        "quiz/quiz_dynamic.html",
+        quiz=quiz,
+        questions_data=questions_data,
+        correct_answers=correct_answers,
+    )
 
 
 # Route pour soumettre un quiz (nécessite d'être connecté)
@@ -43,10 +81,6 @@ def quiz_submit(quiz_id):
                 "redirect": "/auth/login",
             }
         ), 401
-
-    # Vérifier que l'ID du quiz existe (entre 1 et 8)
-    if quiz_id < 1 or quiz_id > 8:
-        return jsonify({"success": False, "error": "Quiz non trouvé"}), 404
 
     # Récupérer les réponses soumises
     data = request.get_json()

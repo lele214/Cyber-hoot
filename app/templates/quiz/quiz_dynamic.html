@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ quiz.title }} - Cyber-hoot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='output.css') }}">
+</head>
+
+<body class="min-h-screen scanline relative py-10 px-5">
+    <a href="{{ url_for('main.quiz') }}"
+        class="fixed top-5 left-5 px-6 py-3 bg-transparent border-2 border-cyber-accent text-cyber-text-lighter rounded-lg font-semibold text-sm transition-all duration-300 hover:bg-cyber-border hover:border-cyber-accent-light hover:shadow-glow-sm hover:-translate-x-1 z-50">
+        ← Retour aux quiz
+    </a>
+
+    <div class="max-w-4xl mx-auto">
+        <!-- En-tête du quiz -->
+        <div class="text-center mb-12 mt-16">
+            <div class="inline-block px-4 py-2 bg-cyber-bg-lighter border border-cyber-border-light rounded mb-4">
+                <span class="text-cyber-text-light text-sm font-semibold">DIFFICULTÉ : {{ quiz.difficulty }}</span>
+            </div>
+            <h1 class="text-cyber-text-lighter text-4xl md:text-5xl font-bold mb-6 tracking-wide text-glow">
+                {{ quiz.title }}
+            </h1>
+            <p class="text-cyber-text-muted text-lg max-w-2xl mx-auto leading-relaxed" style="margin-bottom: 1.5rem;">
+                {{ questions_data|length }} question(s) — Bonne chance !
+            </p>
+
+            <!-- Message d'information pour la connexion -->
+            {% if not session.get('user_id') %}
+            <div class="mt-6 p-4 bg-cyber-border border border-cyber-accent rounded-lg max-w-2xl mx-auto"
+                style="margin-top: 5rem;">
+                <p class="text-cyber-text-light text-md">
+                    Pour consulter le quiz, <a href="{{ url_for('auth.login_get') }}"
+                        class="text-cyber-accent hover:text-cyber-accent-light underline font-semibold">connectez-vous</a>
+                    !
+                </p>
+            </div>
+            {% else %}
+            <!-- Formulaire du quiz -->
+            <form id="quizForm" class="space-y-8">
+                {% for question in questions_data %}
+                <div class="container-cyber p-8" style="margin-bottom: 1.5rem;">
+                    <h3 class="text-cyber-text-lighter text-xl font-bold mb-4">
+                        Question {{ question.index + 1 }} : {{ question.text }}
+                    </h3>
+                    <div class="space-y-3">
+                        {% for response in question.responses %}
+                        <label
+                            class="flex items-start p-4 bg-cyber-bg-lighter border border-cyber-border rounded cursor-pointer transition-all hover:border-cyber-accent group">
+                            <input type="radio" name="q{{ question.index }}" value="{{ response.index }}" class="mt-1 mr-3 accent-cyber-accent">
+                            <span class="text-cyber-text group-hover:text-cyber-text-light" style="text-align: left;">
+                                {{ response.text }}
+                            </span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+
+                <!-- Bouton de soumission -->
+                <div class="flex justify-center py-8" style="margin-bottom: 1.5rem;">
+                    <button type="submit" class="btn-cyber-primary px-12 py-4 text-lg">
+                        Valider le quiz
+                    </button>
+                </div>
+            </form>
+
+            <!-- Section résultats (cachée par défaut) -->
+            <div id="results" class="hidden container-cyber p-8 mt-8">
+                <h2 class="text-cyber-text-lighter text-3xl font-bold mb-6 text-center text-glow">
+                    Résultats
+                </h2>
+                <div class="text-center mb-6">
+                    <p class="text-cyber-text-light text-2xl mb-2">
+                        Score : <span id="score" class="text-cyber-accent font-bold"></span>
+                    </p>
+                    <p id="message" class="text-cyber-text-muted text-lg"></p>
+                </div>
+                <div class="flex justify-center gap-4">
+                    <button onclick="window.location.reload()" class="btn-cyber">
+                        Recommencer
+                    </button>
+                    <a href="{{ url_for('main.quiz') }}" class="btn-cyber-primary">
+                        Retour aux quiz
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <footer class="py-10 text-center mt-12">
+        <p class="text-cyber-text-muted">Copyright BTS SIO</p>
+    </footer>
+
+    {% if session.get('user_id') %}
+    <script>
+        const correctAnswers = {{ correct_answers | tojson }};
+        const quizId = {{ quiz.idQUIZ }};
+
+        document.getElementById('quizForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            let score = 0;
+            const totalQuestions = Object.keys(correctAnswers).length;
+
+            // Collecter les réponses de l'utilisateur
+            const userAnswers = {};
+            for (let question in correctAnswers) {
+                const selectedAnswer = document.querySelector(`input[name="${question}"]:checked`);
+                if (selectedAnswer) {
+                    userAnswers[question] = selectedAnswer.value;
+                    if (selectedAnswer.value === correctAnswers[question]) {
+                        score++;
+                    }
+                }
+            }
+
+            // Envoyer les réponses au backend
+            try {
+                const response = await fetch(`/quiz/${quizId}/submit`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        answers: userAnswers,
+                        score: score,
+                        totalQuestions: totalQuestions
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        alert(data.error + '\n\nVous allez être redirigé vers la page de connexion.');
+                        window.location.href = data.redirect;
+                        return;
+                    }
+                    throw new Error(data.error || 'Erreur lors de la soumission du quiz');
+                }
+
+                // Afficher les résultats
+                const percentage = (score / totalQuestions) * 100;
+                document.getElementById('score').textContent = `${score}/${totalQuestions} (${percentage.toFixed(0)}%)`;
+
+                let message = '';
+                if (percentage === 100) {
+                    message = 'Parfait ! Score maximum !';
+                } else if (percentage >= 70) {
+                    message = 'Très bien ! Vous avez de bonnes connaissances.';
+                } else if (percentage >= 50) {
+                    message = 'Pas mal ! Continuez à vous former.';
+                } else {
+                    message = 'Il est recommandé de revoir les concepts abordés.';
+                }
+
+                document.getElementById('message').textContent = message;
+                document.getElementById('results').classList.remove('hidden');
+                document.getElementById('quizForm').style.display = 'none';
+                document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+
+            } catch (error) {
+                console.error('Erreur:', error);
+                alert('Une erreur est survenue lors de la validation du quiz: ' + error.message);
+            }
+        });
+    </script>
+    {% endif %}
+</body>
+
+</html>
