@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modifier un quiz - Cyber-hoot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='output.css') }}">
+    <script src="{{ url_for('static', filename='js/quiz_create.js') }}" async></script>
+</head>
+
+<body class="min-h-screen scanline relative">
+    <a href="{% if is_admin %}{{ url_for('profile.admin_dashboard') }}{% else %}{{ url_for('profile.creator_dashboard') }}{% endif %}"
+        class="fixed top-5 left-5 px-6 py-3 bg-transparent border-2 border-cyber-accent text-cyber-text-lighter rounded-lg font-semibold text-sm transition-all duration-300 hover:bg-cyber-border hover:border-cyber-accent-light hover:shadow-glow-sm hover:-translate-x-1 z-50">
+        ← Retour au dashboard
+    </a>
+
+    <div class="flex justify-center items-center min-h-screen py-10 px-5">
+        <div class="container-cyber w-full max-w-2xl">
+            <div class="text-center mb-10">
+                <h1 class="text-cyber-text-bright text-4xl mb-2 font-bold text-glow">Modifier le quiz</h1>
+                <p class="text-cyber-text text-sm">Modifiez les informations et les questions de votre quiz</p>
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            {% for category, message in messages %}
+            <div class="flash-message {% if category == 'error' %}flash-error{% else %}flash-success{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+
+            <form method="POST" action="{% if is_admin %}{{ url_for('profile.admin_quiz_edit_post', quiz_id=quiz.idQUIZ) }}{% else %}{{ url_for('profile.creator_quiz_edit_post', quiz_id=quiz.idQUIZ) }}{% endif %}" id="quizForm">
+                <!-- Informations générales du quiz -->
+                <div class="mb-6">
+                    <label for="title" class="block mb-2 text-cyber-text-lighter font-medium text-sm">
+                        Titre du quiz
+                    </label>
+                    <input type="text"
+                           id="title"
+                           name="title"
+                           class="input-cyber"
+                           placeholder="Ex : Les bases de la cybersécurité"
+                           value="{{ quiz.title }}"
+                           required>
+                </div>
+
+                <div class="mb-8">
+                    <label for="difficulty" class="block mb-2 text-cyber-text-lighter font-medium text-sm">
+                        Difficulté
+                    </label>
+                    <select id="difficulty"
+                            name="difficulty"
+                            class="input-cyber"
+                            required>
+                        <option value="" disabled>Choisir une difficulté</option>
+                        <option value="EASY" {% if quiz.difficulty == 'EASY' %}selected{% endif %}>Facile</option>
+                        <option value="MEDIUM" {% if quiz.difficulty == 'MEDIUM' %}selected{% endif %}>Moyen</option>
+                        <option value="HARD" {% if quiz.difficulty == 'HARD' %}selected{% endif %}>Difficile</option>
+                    </select>
+                </div>
+
+                <!-- Section Questions -->
+                <div class="mb-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-cyber-text-bright text-xl font-bold">Questions</h2>
+                        <button type="button" onclick="addQuestion()"
+                                class="px-4 py-2 bg-transparent border-2 border-cyber-accent text-cyber-text-lighter rounded-lg font-semibold text-sm transition-all duration-300 hover:bg-cyber-border hover:border-cyber-accent-light hover:shadow-glow-sm">
+                            + Ajouter une question
+                        </button>
+                    </div>
+
+                    <div id="questionsContainer">
+                        <!-- Les questions existantes seront chargées par le JS ci-dessous -->
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-cyber-primary w-full mt-2">
+                    Enregistrer les modifications
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Données existantes du quiz pour pré-remplir le formulaire -->
+    <script>
+        const existingQuestions = {{ questions_data | tojson }};
+
+        document.addEventListener('DOMContentLoaded', function () {
+            if (existingQuestions.length > 0) {
+                // Charger les questions existantes
+                existingQuestions.forEach(function (q) {
+                    addQuestion();
+                    const qIndex = questionCount - 1;
+
+                    // Remplir le texte de la question
+                    const questionInput = document.querySelector(`input[name="question_text_${qIndex}"]`);
+                    if (questionInput) questionInput.value = q.text;
+
+                    // Supprimer les 2 réponses vides créées par défaut
+                    const responsesDiv = document.getElementById('responses_' + qIndex);
+                    responsesDiv.innerHTML = '';
+
+                    // Ajouter les réponses existantes
+                    q.responses.forEach(function (r, rIndex) {
+                        addResponse(qIndex);
+                        const responseInput = document.querySelector(`input[name="response_text_${qIndex}_${rIndex}"]`);
+                        if (responseInput) responseInput.value = r.text;
+
+                        // Cocher la bonne réponse
+                        if (r.is_correct) {
+                            const radio = document.querySelector(`input[name="correct_${qIndex}"][value="${rIndex}"]`);
+                            if (radio) radio.checked = true;
+                        }
+                    });
+                });
+            } else {
+                // Aucune question existante, ajouter une question vide
+                addQuestion();
+            }
+        });
+    </script>
+</body>
+
+</html>

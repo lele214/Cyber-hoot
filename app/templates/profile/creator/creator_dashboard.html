@@ -1,21 +1,235 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Createur</title>
+    <title>Dashboard Créateur - Cyber-hoot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='output.css') }}">
 </head>
 
-<body>
+<body class="min-h-screen py-10 px-5 scanline relative">
     <a href="{{ url_for('profile.player_dashboard') }}"
         class="fixed top-5 left-5 px-6 py-3 bg-transparent border-2 border-cyber-accent text-cyber-text-lighter rounded-lg font-semibold text-sm transition-all duration-300 hover:bg-cyber-border hover:border-cyber-accent-light hover:shadow-glow-sm hover:-translate-x-1 z-50">
-        ← Retour
+        ← Retour au profil
     </a>
 
-    <h1>Profil du Createur {{ username }}</h1>
+    <div class="max-w-7xl mx-auto">
 
+        <!-- En-tête -->
+        <div class="text-center mb-12">
+            <h1 class="text-cyber-text-lighter text-4xl md:text-5xl font-bold mb-5 tracking-wide text-glow">
+                Espace Créateur
+            </h1>
+            <p class="text-cyber-text-muted text-base md:text-lg">
+                Bienvenue {{ username }} — Créez et gérez vos quiz
+            </p>
+        </div>
 
+        <!-- ============================================================ -->
+        <!-- Statistiques du créateur (CU-07)                             -->
+        <!-- ============================================================ -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto mb-12">
+            <div class="feature-box text-center">
+                <h3 class="text-cyber-accent text-5xl font-bold mb-3">
+                    {{ total_created }}
+                </h3>
+                <p class="text-cyber-text-lighter text-lg font-semibold mb-2">Quiz créés</p>
+                <p class="text-cyber-text-muted text-sm">au total</p>
+            </div>
+
+            <div class="feature-box text-center">
+                <h3 class="text-cyber-accent text-5xl font-bold mb-3">
+                    {{ published_count }}
+                </h3>
+                <p class="text-cyber-text-lighter text-lg font-semibold mb-2">Quiz publiés</p>
+                <p class="text-cyber-text-muted text-sm">accessibles aux joueurs</p>
+            </div>
+
+            <div class="feature-box text-center">
+                <h3 class="text-cyber-accent text-5xl font-bold mb-3">
+                    {{ draft_count }}
+                </h3>
+                <p class="text-cyber-text-lighter text-lg font-semibold mb-2">Brouillons</p>
+                <p class="text-cyber-text-muted text-sm">en cours de rédaction</p>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- CU-04 / CU-06 : Gestion des Quiz du créateur                -->
+        <!-- TODO Backend : Créer les routes suivantes :                  -->
+        <!--   - GET  /profile/creator/quiz/create          (formulaire)  -->
+        <!--   - POST /profile/creator/quiz/create          (créer quiz)  -->
+        <!--   - GET  /profile/creator/quiz/<id>/edit        (formulaire) -->
+        <!--   - POST /profile/creator/quiz/<id>/edit        (modifier)   -->
+        <!--   - POST /profile/creator/quiz/<id>/publish     (publier)    -->
+        <!--   - POST /profile/creator/quiz/<id>/archive     (archiver)   -->
+        <!--   - POST /profile/creator/quiz/<id>/delete      (supprimer)  -->
+        <!-- ============================================================ -->
+        <div class="max-w-6xl mx-auto mb-12">
+            <div class="feature-box" style="min-height: auto; align-items: stretch; text-align: left;">
+                <div class="flex justify-between items-center mb-5 w-full">
+                    <h3 class="text-cyber-text-lighter text-2xl font-bold tracking-wide">
+                        Mes Quiz
+                    </h3>
+                    <a href="{{ url_for('profile.creator_quiz_create') }}"
+                        class="btn-cyber-primary text-sm" style="padding: 0.5rem 1.25rem;">
+                        + Créer un quiz
+                    </a>
+                </div>
+
+                {% if quizzes_data %}
+                <div class="overflow-x-auto w-full">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="border-b border-cyber-border">
+                                <th class="text-cyber-text-lighter font-semibold py-3 px-4">Titre</th>
+                                <th class="text-cyber-text-lighter font-semibold py-3 px-4">Difficulté</th>
+                                <th class="text-cyber-text-lighter font-semibold py-3 px-4">Statut</th>
+                                <th class="text-cyber-text-lighter font-semibold py-3 px-4 text-center">Questions</th>
+                                <th class="text-cyber-text-lighter font-semibold py-3 px-4 text-center">Joueurs</th>
+                                <th class="text-cyber-text-lighter font-semibold py-3 px-4 text-center">Score moy.</th>
+                                <th class="text-cyber-text-lighter font-semibold py-3 px-4">Date</th>
+                                <th class="text-cyber-text-lighter font-semibold py-3 px-4 text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for quiz in quizzes_data %}
+                            <tr class="border-b border-cyber-border/30 hover:bg-cyber-border/20 transition-colors">
+                                <td class="text-cyber-text-muted py-3 px-4">{{ quiz.title }}</td>
+                                <td class="py-3 px-4">
+                                    <span class="px-3 py-1 rounded-full text-xs font-semibold
+                                        {% if quiz.difficulty == 'EASY' %}bg-green-500/20 text-green-400
+                                        {% elif quiz.difficulty == 'MEDIUM' %}bg-yellow-500/20 text-yellow-400
+                                        {% else %}bg-red-500/20 text-red-400{% endif %}">
+                                        {{ quiz.difficulty }}
+                                    </span>
+                                </td>
+                                <td class="py-3 px-4">
+                                    <span class="px-3 py-1 rounded-full text-xs font-semibold
+                                        {% if quiz.statut == 'PUBLISHED' %}bg-green-500/20 text-green-400
+                                        {% elif quiz.statut == 'DRAFT' %}bg-yellow-500/20 text-yellow-400
+                                        {% elif quiz.statut == 'PENDING' %}bg-orange-500/20 text-orange-400
+                                        {% else %}bg-blue-500/20 text-blue-400{% endif %}">
+                                        {% if quiz.statut == 'PENDING' %}EN ATTENTE{% else %}{{ quiz.statut }}{% endif %}
+                                    </span>
+                                </td>
+                                <td class="text-cyber-text-muted py-3 px-4 text-center">
+                                    {{ quiz.questions_count }}
+                                </td>
+                                <td class="text-cyber-text-muted py-3 px-4 text-center">
+                                    {{ quiz.players_count }}
+                                </td>
+                                <td class="py-3 px-4 text-center">
+                                    <span class="font-bold
+                                        {% if quiz.avg_score >= 80 %}text-green-400
+                                        {% elif quiz.avg_score >= 60 %}text-yellow-400
+                                        {% else %}text-red-400{% endif %}">
+                                        {{ quiz.avg_score }}%
+                                    </span>
+                                </td>
+                                <td class="text-cyber-text-muted py-3 px-4">{{ quiz.date }}</td>
+                                <td class="py-3 px-4 text-center">
+                                    <div class="flex gap-2 justify-center flex-wrap">
+                                        <!-- Bouton Modifier → lien vers le formulaire d'édition -->
+                                        <a href="{{ url_for('profile.creator_quiz_edit', quiz_id=quiz.id) }}"
+                                            class="px-3 py-1 rounded text-xs font-semibold bg-blue-500/20 text-blue-400 border border-blue-500/30 hover:bg-blue-500/30 transition-colors">
+                                            Modifier
+                                        </a>
+
+                                        <!-- Bouton Soumettre pour validation → formulaire POST -->
+                                        {% if quiz.statut not in ['PUBLISHED', 'PENDING'] %}
+                                        <form method="POST" action="{{ url_for('profile.creator_quiz_publish', quiz_id=quiz.id) }}" class="inline">
+                                            <button type="submit"
+                                                class="px-3 py-1 rounded text-xs font-semibold bg-green-500/20 text-green-400 border border-green-500/30 hover:bg-green-500/30 transition-colors">
+                                                Soumettre
+                                            </button>
+                                        </form>
+                                        {% endif %}
+
+                                        <!-- Bouton Archiver (TODO : route à implémenter) -->
+                                        {% if quiz.statut == 'PUBLISHED' %}
+                                        <button
+                                            class="px-3 py-1 rounded text-xs font-semibold bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 hover:bg-yellow-500/30 transition-colors"
+                                            disabled title="Fonctionnalité à implémenter">
+                                            Archiver
+                                        </button>
+                                        {% endif %}
+
+                                        <!-- Bouton Supprimer → formulaire POST avec confirmation -->
+                                        <form method="POST" action="{{ url_for('profile.creator_quiz_delete', quiz_id=quiz.id) }}" class="inline"
+                                              onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce quiz ? Cette action est irréversible.')">
+                                            <button type="submit"
+                                                class="px-3 py-1 rounded text-xs font-semibold bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30 transition-colors">
+                                                Supprimer
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-cyber-text-muted text-center py-8 w-full">
+                    Vous n'avez pas encore créé de quiz. Commencez par en créer un !
+                </p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- CU-05 : Enrichir avec médias                                 -->
+        <!-- TODO Backend : Créer les routes suivantes :                  -->
+        <!--   - GET  /profile/creator/quiz/<id>/media       (formulaire) -->
+        <!--   - POST /profile/creator/quiz/<id>/media       (upload)     -->
+        <!--   - POST /profile/creator/media/<id>/delete     (supprimer)  -->
+        <!-- Note : les médias sont liés aux questions et réponses        -->
+        <!--   via la table MEDIA (idMediaFromQuestion, idMediaFromResponse) -->
+        <!-- ============================================================ -->
+        <div class="max-w-6xl mx-auto mb-12">
+            <div class="feature-box" style="min-height: auto; align-items: stretch; text-align: left;">
+                <h3 class="text-cyber-text-lighter text-2xl font-bold mb-5 tracking-wide w-full">
+                    Enrichir avec des médias
+                </h3>
+                <p class="text-cyber-text-muted text-base leading-relaxed w-full mb-4">
+                    Ajoutez des images, vidéos ou sons à vos questions et réponses pour rendre vos quiz plus interactifs.
+                </p>
+                <!-- TODO Backend : ce bouton redirigera vers la sélection d'un quiz puis l'ajout de médias -->
+                <button class="btn-cyber text-sm" disabled title="Fonctionnalité à implémenter">
+                    Gérer les médias de mes quiz
+                </button>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- CU-07 : Statistiques détaillées des quiz                     -->
+        <!-- TODO Backend : Créer la route suivante :                     -->
+        <!--   - GET /profile/creator/quiz/<id>/stats  (stats détaillées) -->
+        <!-- Données à afficher :                                         -->
+        <!--   - Nombre de tentatives par quiz                            -->
+        <!--   - Score moyen, min, max par quiz                           -->
+        <!--   - Taux de réussite par question                            -->
+        <!--   - Évolution dans le temps                                  -->
+        <!-- ============================================================ -->
+        <div class="max-w-6xl mx-auto mb-12">
+            <div class="feature-box" style="min-height: auto; align-items: stretch; text-align: left;">
+                <h3 class="text-cyber-text-lighter text-2xl font-bold mb-5 tracking-wide w-full">
+                    Statistiques détaillées
+                </h3>
+                <p class="text-cyber-text-muted text-base leading-relaxed w-full mb-4">
+                    Consultez les performances des joueurs sur vos quiz : scores moyens, taux de réussite par question,
+                    et évolution dans le temps.
+                </p>
+                <!-- TODO Backend : lier à GET /profile/creator/quiz/<id>/stats -->
+                <button class="btn-cyber text-sm" disabled title="Fonctionnalité à implémenter">
+                    Voir les statistiques détaillées
+                </button>
+            </div>
+        </div>
+
+    </div>
 
     <footer>
         <p class="flex justify-center pt-7">Copyright BTS SIO</p>

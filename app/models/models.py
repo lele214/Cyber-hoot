@@ -59,7 +59,11 @@ class Quiz(db.Model):
     )
     difficulty = db.Column(db.Enum("HARD", "MEDIUM", "EASY"), nullable=True)
     title = db.Column(db.String(45), nullable=True)
-    statut = db.Column(db.Enum("MODIFIED", "PUBLISHED", "DRAFT"), nullable=True)
+    statut = db.Column(db.Enum("MODIFIED", "PUBLISHED", "DRAFT", "PENDING"), nullable=True)
+    category = db.Column(
+        db.Enum("PHISHING", "MALWARE", "RESEAUX", "MOTS_DE_PASSE", "INGENIERIE_SOCIALE", "AUTRE", "CATEGORIE_TEST"),
+        nullable=True,
+    )
     createdAt = db.Column(db.Date, nullable=True)
 
     # Relations
@@ -130,7 +134,7 @@ class Question(db.Model):
     idQuestionFromQuiz = db.Column(
         db.Integer, db.ForeignKey("QUIZ.idQUIZ"), nullable=False
     )
-    QuestionText = db.Column(db.String(45), nullable=True)
+    QuestionText = db.Column(db.String(500), nullable=True)
 
     # Relations
     quiz = db.relationship("Quiz", back_populates="questions")
@@ -150,7 +154,7 @@ class Response(db.Model):
     idResponseFromQuestion = db.Column(
         db.Integer, db.ForeignKey("QUESTION.idQUESTION"), nullable=False
     )
-    responseText = db.Column(db.String(45), nullable=True)
+    responseText = db.Column(db.String(500), nullable=True)
     isCorrect = db.Column(db.Boolean, nullable=True)
 
     # Relations
