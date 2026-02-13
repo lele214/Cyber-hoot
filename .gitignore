@@ -52,6 +52,9 @@ static/output.css
 *.sqlite
 *.sqlite3
 *.db
+*.sql
+!database/*.sql
+!test/*.sql
 data/schema_db.sql
 data/db_schemaV3-2.sql
 
@@ -76,3 +79,4 @@ site/
 # Secrets et clés
 *.key
 *.cert
+secrets/

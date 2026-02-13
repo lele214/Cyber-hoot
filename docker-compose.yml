@@ -3,8 +3,16 @@ services:
     image: mysql:8.0
     restart: always
     command: --default-authentication-plugin=mysql_native_password
-    env_file:
-      - .env
+    environment:
+      # Variables non sensibles lues depuis le .env via interpolation
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      # Le suffixe _FILE indique à MySQL de lire le mot de passe depuis un fichier secret
+      MYSQL_PASSWORD_FILE: /run/secrets/db_password
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
+    secrets:
+      - db_password
+      - db_root_password
     volumes:
       - db_data:/var/lib/mysql
       # ici est l'initialisation de la base de donnée au démarrage du docker
@@ -18,6 +26,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - backend
 
   app:
     build:
@@ -33,12 +43,40 @@ services:
       - .env
     environment:
       MYSQL_HOST: db
+    secrets:
+      - db_password
     depends_on:
       db:
         condition: service_healthy
     command: sh -c "npm run build:css && python3 run.py"
+    networks:
+      - frontend
+      - backend
+
+  adminer:
+    image: adminer:latest
+    restart: always
+    ports:
+      - "8181:8080"
+    depends_on:
+      - db
+    networks:
+      - frontend
+      - backend
 
 # Volume créé avec les paramètres par défaut
 # Persistance des données de la DB ici
 volumes:
   db_data: # driver: local
+
+# Réseaux isolés : frontend (accès externe) / backend (communication interne)
+networks:
+  frontend:
+  backend:
+
+# Secrets Docker : montés en fichiers dans /run/secrets/ (lecture seule)
+secrets:
+  db_password:
+    file: ./secrets/db_password.txt
+  db_root_password:
+    file: ./secrets/db_root_password.txt
