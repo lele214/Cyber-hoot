@@ -23,7 +23,7 @@ USE `cyberhoot` ;
 CREATE TABLE IF NOT EXISTS `cyberhoot`.`USER` (
   `idUSER` INT NOT NULL AUTO_INCREMENT,
   `username` VARCHAR(45) NULL,
-  `hashpassword` VARCHAR(60) NULL,
+  `hashpassword` VARCHAR(255) NULL,
   `emailUser` VARCHAR(45) NULL,
   PRIMARY KEY (`idUSER`))
 ENGINE = InnoDB;
@@ -37,7 +37,8 @@ CREATE TABLE IF NOT EXISTS `cyberhoot`.`QUIZ` (
   `idCreatedByUser` INT NOT NULL,
   `difficulty` ENUM('HARD', 'MEDIUM', 'EASY') NULL,
   `title` VARCHAR(45) NULL,
-  `statut` ENUM('MODIFIED', 'PUBLISHED', 'DRAFT') NULL,
+  `statut` ENUM('MODIFIED', 'PUBLISHED', 'DRAFT', 'PENDING') NULL,
+  `category` ENUM('PHISHING', 'MALWARE', 'RESEAUX', 'MOTS_DE_PASSE', 'INGENIERIE_SOCIALE', 'AUTRE', 'CATEGORIE_TEST') NULL,
   `createdAt` DATE NULL,
   PRIMARY KEY (`idQUIZ`),
   INDEX `idCreatedByUser_idx` (`idCreatedByUser` ASC) VISIBLE,
@@ -117,7 +118,7 @@ ENGINE = InnoDB;
 CREATE TABLE IF NOT EXISTS `cyberhoot`.`QUESTION` (
   `idQUESTION` INT NOT NULL AUTO_INCREMENT,
   `idQuestionFromQuiz` INT NOT NULL,
-  `QuestionText` VARCHAR(45) NULL,
+  `QuestionText` VARCHAR(500) NULL,
   PRIMARY KEY (`idQUESTION`),
   INDEX `idQuestionFromQuiz_idx` (`idQuestionFromQuiz` ASC) VISIBLE,
   CONSTRAINT `fk_question_quiz`
@@ -134,7 +135,7 @@ ENGINE = InnoDB;
 CREATE TABLE IF NOT EXISTS `cyberhoot`.`RESPONSE` (
   `idRESPONSE` INT NOT NULL AUTO_INCREMENT,
   `idResponseFromQuestion` INT NOT NULL,
-  `responseText` VARCHAR(45) NULL,
+  `responseText` VARCHAR(500) NULL,
   `isCorrect` TINYINT(1) NULL,
   PRIMARY KEY (`idRESPONSE`),
   INDEX `idResponseFromQuestion_idx` (`idResponseFromQuestion` ASC) VISIBLE,
