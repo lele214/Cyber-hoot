@@ -72,8 +72,8 @@
                     <h3 class="text-cyber-text-lighter text-2xl font-bold tracking-wide">
                         Mes Quiz
                     </h3>
-                    <a href="{{ url_for('profile.creator_quiz_create') }}"
-                        class="btn-cyber-primary text-sm" style="padding: 0.5rem 1.25rem;">
+                    <a href="{{ url_for('profile.creator_quiz_create') }}" class="btn-cyber-primary text-sm"
+                        style="padding: 0.5rem 1.25rem;">
                         + Créer un quiz
                     </a>
                 </div>
@@ -111,7 +111,8 @@
                                         {% elif quiz.statut == 'DRAFT' %}bg-yellow-500/20 text-yellow-400
                                         {% elif quiz.statut == 'PENDING' %}bg-orange-500/20 text-orange-400
                                         {% else %}bg-blue-500/20 text-blue-400{% endif %}">
-                                        {% if quiz.statut == 'PENDING' %}EN ATTENTE{% else %}{{ quiz.statut }}{% endif %}
+                                        {% if quiz.statut == 'PENDING' %}EN ATTENTE{% else %}{{ quiz.statut }}{% endif
+                                        %}
                                     </span>
                                 </td>
                                 <td class="text-cyber-text-muted py-3 px-4 text-center">
@@ -139,7 +140,9 @@
 
                                         <!-- Bouton Soumettre pour validation → formulaire POST -->
                                         {% if quiz.statut not in ['PUBLISHED', 'PENDING'] %}
-                                        <form method="POST" action="{{ url_for('profile.creator_quiz_publish', quiz_id=quiz.id) }}" class="inline">
+                                        <form method="POST"
+                                            action="{{ url_for('profile.creator_quiz_publish', quiz_id=quiz.id) }}"
+                                            class="inline">
                                             <button type="submit"
                                                 class="px-3 py-1 rounded text-xs font-semibold bg-green-500/20 text-green-400 border border-green-500/30 hover:bg-green-500/30 transition-colors">
                                                 Soumettre
@@ -157,8 +160,10 @@
                                         {% endif %}
 
                                         <!-- Bouton Supprimer → formulaire POST avec confirmation -->
-                                        <form method="POST" action="{{ url_for('profile.creator_quiz_delete', quiz_id=quiz.id) }}" class="inline"
-                                              onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce quiz ? Cette action est irréversible.')">
+                                        <form method="POST"
+                                            action="{{ url_for('profile.creator_quiz_delete', quiz_id=quiz.id) }}"
+                                            class="inline"
+                                            onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce quiz ? Cette action est irréversible.')">
                                             <button type="submit"
                                                 class="px-3 py-1 rounded text-xs font-semibold bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30 transition-colors">
                                                 Supprimer
@@ -176,30 +181,6 @@
                     Vous n'avez pas encore créé de quiz. Commencez par en créer un !
                 </p>
                 {% endif %}
-            </div>
-        </div>
-
-        <!-- ============================================================ -->
-        <!-- CU-05 : Enrichir avec médias                                 -->
-        <!-- TODO Backend : Créer les routes suivantes :                  -->
-        <!--   - GET  /profile/creator/quiz/<id>/media       (formulaire) -->
-        <!--   - POST /profile/creator/quiz/<id>/media       (upload)     -->
-        <!--   - POST /profile/creator/media/<id>/delete     (supprimer)  -->
-        <!-- Note : les médias sont liés aux questions et réponses        -->
-        <!--   via la table MEDIA (idMediaFromQuestion, idMediaFromResponse) -->
-        <!-- ============================================================ -->
-        <div class="max-w-6xl mx-auto mb-12">
-            <div class="feature-box" style="min-height: auto; align-items: stretch; text-align: left;">
-                <h3 class="text-cyber-text-lighter text-2xl font-bold mb-5 tracking-wide w-full">
-                    Enrichir avec des médias
-                </h3>
-                <p class="text-cyber-text-muted text-base leading-relaxed w-full mb-4">
-                    Ajoutez des images, vidéos ou sons à vos questions et réponses pour rendre vos quiz plus interactifs.
-                </p>
-                <!-- TODO Backend : ce bouton redirigera vers la sélection d'un quiz puis l'ajout de médias -->
-                <button class="btn-cyber text-sm" disabled title="Fonctionnalité à implémenter">
-                    Gérer les médias de mes quiz
-                </button>
             </div>
         </div>
 

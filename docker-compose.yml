@@ -39,6 +39,7 @@ services:
       - ./app:/app/app
       - ./database:/app/database
       - ./run.py:/app/run.py
+      - ./uploads:/app/uploads
     env_file:
       - .env
     environment:

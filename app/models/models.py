@@ -5,6 +5,7 @@ from app.extensions import db
 class UserToRole(db.Model):
     __tablename__ = "userToRoles"
 
+    # attention pour les tables de relation : pas besoin d'une clé primaire, puisque ce sont les clés étrangères qui sont l'id
     userToRole_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     idUser = db.Column(db.Integer, db.ForeignKey("USER.idUSER"), nullable=False)
     idROLES = db.Column(db.Integer, db.ForeignKey("ROLES.idROLES"), nullable=False)
@@ -33,7 +34,6 @@ class User(db.Model):
     username = db.Column(db.String(45), nullable=True)
     hashpassword = db.Column(db.String(255), nullable=True)
     emailUser = db.Column(db.String(45), nullable=True)
-
     # Relation many-to-many avec Role via userToRoles
     roles = db.relationship("Role", secondary="userToRoles", back_populates="users")
 
@@ -59,9 +59,19 @@ class Quiz(db.Model):
     )
     difficulty = db.Column(db.Enum("HARD", "MEDIUM", "EASY"), nullable=True)
     title = db.Column(db.String(45), nullable=True)
-    statut = db.Column(db.Enum("MODIFIED", "PUBLISHED", "DRAFT", "PENDING"), nullable=True)
+    statut = db.Column(
+        db.Enum("MODIFIED", "PUBLISHED", "DRAFT", "PENDING"), nullable=True
+    )
     category = db.Column(
-        db.Enum("PHISHING", "MALWARE", "RESEAUX", "MOTS_DE_PASSE", "INGENIERIE_SOCIALE", "AUTRE", "CATEGORIE_TEST"),
+        db.Enum(
+            "PHISHING",
+            "MALWARE",
+            "RESEAUX",
+            "MOTS_DE_PASSE",
+            "INGENIERIE_SOCIALE",
+            "AUTRE",
+            "CATEGORIE_TEST",
+        ),
         nullable=True,
     )
     createdAt = db.Column(db.Date, nullable=True)
@@ -205,7 +215,8 @@ class Result(db.Model):
     totalQuestions = db.Column(
         db.Integer, nullable=True, comment="Nombre total de questions dans le quiz"
     )
-    resultHistory = db.Column(db.String(45), nullable=True, comment="commentaire")
+    # resultHistory = db.Column(db.String(45), nullable=True, comment="commentaire")
+    answer = db.Column(db.String(45), nullable=True, comment="commentaire")
 
     # Relations
     quiz = db.relationship("Quiz", back_populates="results")

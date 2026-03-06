@@ -8,11 +8,12 @@ SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
 
 -- -----------------------------------------------------
--- Schema cyberhoot
+-- Schéma cyberhoot - en cas de réinitialisation, 
+-- ce schéma permet de récupérer la base de donnée
 -- -----------------------------------------------------
 
 -- -----------------------------------------------------
--- Schema cyberhoot
+-- Schéma cyberhoot
 -- -----------------------------------------------------
 CREATE SCHEMA IF NOT EXISTS `cyberhoot` DEFAULT CHARACTER SET utf8 ;
 USE `cyberhoot` ;
@@ -27,7 +28,6 @@ CREATE TABLE IF NOT EXISTS `cyberhoot`.`USER` (
   `emailUser` VARCHAR(45) NULL,
   PRIMARY KEY (`idUSER`))
 ENGINE = InnoDB;
-
 
 -- -----------------------------------------------------
 -- Table `cyberhoot`.`QUIZ`
@@ -153,6 +153,8 @@ CREATE TABLE IF NOT EXISTS `cyberhoot`.`MEDIA` (
   `idMEDIA` INT NOT NULL AUTO_INCREMENT,
   `idMediaFromQuestion` INT NULL,
   `idMediaFromResponse` INT NULL,
+  `mediaUrl` VARCHAR(255) NULL,
+  `mediaType` VARCHAR(50) NULL,
   PRIMARY KEY (`idMEDIA`),
   INDEX `idMediaFromQuestion_idx` (`idMediaFromQuestion` ASC) VISIBLE,
   INDEX `idMediaFromResponse_idx` (`idMediaFromResponse` ASC) VISIBLE,

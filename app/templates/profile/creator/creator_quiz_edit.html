@@ -32,7 +32,7 @@
             {% endif %}
             {% endwith %}
 
-            <form method="POST" action="{% if is_admin %}{{ url_for('profile.admin_quiz_edit_post', quiz_id=quiz.idQUIZ) }}{% else %}{{ url_for('profile.creator_quiz_edit_post', quiz_id=quiz.idQUIZ) }}{% endif %}" id="quizForm">
+            <form method="POST" action="{% if is_admin %}{{ url_for('profile.admin_quiz_edit_post', quiz_id=quiz.idQUIZ) }}{% else %}{{ url_for('profile.creator_quiz_edit_post', quiz_id=quiz.idQUIZ) }}{% endif %}" id="quizForm" enctype="multipart/form-data">
                 <!-- Informations générales du quiz -->
                 <div class="mb-6">
                     <label for="title" class="block mb-2 text-cyber-text-lighter font-medium text-sm">
@@ -99,6 +99,15 @@
                     const questionInput = document.querySelector(`input[name="question_text_${qIndex}"]`);
                     if (questionInput) questionInput.value = q.text;
 
+                    // Afficher l'image existante si elle existe
+                    if (q.media_id) {
+                        const preview = document.getElementById('preview_' + qIndex);
+                        if (preview) {
+                            preview.src = `/media/${q.media_id}`;
+                            preview.classList.remove('hidden');
+                        }
+                    }
+
                     // Supprimer les 2 réponses vides créées par défaut
                     const responsesDiv = document.getElementById('responses_' + qIndex);
                     responsesDiv.innerHTML = '';
@@ -108,6 +117,15 @@
                         addResponse(qIndex);
                         const responseInput = document.querySelector(`input[name="response_text_${qIndex}_${rIndex}"]`);
                         if (responseInput) responseInput.value = r.text;
+
+                        // Afficher l'image existante de la réponse si elle existe
+                        if (r.media_id) {
+                            const respPreview = document.getElementById(`resp_preview_${qIndex}_${rIndex}`);
+                            if (respPreview) {
+                                respPreview.src = `/media/${r.media_id}`;
+                                respPreview.classList.remove('hidden');
+                            }
+                        }
 
                         // Cocher la bonne réponse
                         if (r.is_correct) {

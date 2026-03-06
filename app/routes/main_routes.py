@@ -1,7 +1,16 @@
 # import de Flask et des éléments qu'on utilise (les routes, les affichages html)
-from flask import Blueprint, render_template, request, session, jsonify, current_app
+from flask import (
+    Blueprint,
+    render_template,
+    request,
+    session,
+    jsonify,
+    current_app,
+    send_from_directory,
+)
 from app.extensions import db_transaction
-from app.models.models import Result, Quiz, Question, Response
+from app.models.models import Result, Quiz, Question, Response, Media
+from app.decorators import login_required
 from datetime import date
 import os
 
@@ -36,7 +45,9 @@ def quiz():
 @main_bp.get("/quiz/<int:quiz_id>")
 def quiz_detail(quiz_id):
     # Vérifie d'abord si un template statique existe (quiz historiques)
-    template_path = os.path.join(current_app.template_folder, f"quiz/quiz{quiz_id}.html")
+    template_path = os.path.join(
+        current_app.template_folder, f"quiz/quiz{quiz_id}.html"
+    )
     if os.path.exists(template_path):
         return render_template(f"quiz/quiz{quiz_id}.html")
 
@@ -49,17 +60,27 @@ def quiz_detail(quiz_id):
     for i, question in enumerate(quiz.questions):
         responses = []
         for j, response in enumerate(question.responses):
-            responses.append({
-                "index": j,
-                "text": response.responseText,
-            })
+            resp_media = Media.query.filter_by(
+                idMediaFromResponse=response.idRESPONSE
+            ).first()
+            responses.append(
+                {
+                    "index": j,
+                    "text": response.responseText,
+                    "media_id": resp_media.idMEDIA if resp_media else None,
+                }
+            )
             if response.isCorrect:
                 correct_answers[f"q{i}"] = str(j)
-        questions_data.append({
-            "index": i,
-            "text": question.QuestionText,
-            "responses": responses,
-        })
+        media = Media.query.filter_by(idMediaFromQuestion=question.idQUESTION).first()
+        questions_data.append(
+            {
+                "index": i,
+                "text": question.QuestionText,
+                "responses": responses,
+                "media_id": media.idMEDIA if media else None,
+            }
+        )
 
     return render_template(
         "quiz/quiz_dynamic.html",
@@ -67,6 +88,16 @@ def quiz_detail(quiz_id):
         questions_data=questions_data,
         correct_answers=correct_answers,
     )
+
+
+# Route protégée pour servir les images uploadées (hors de static/)
+@main_bp.get("/media/<int:media_id>")
+@login_required
+def serve_media(media_id):
+    media = Media.query.get_or_404(media_id)
+    upload_folder = current_app.config["UPLOAD_FOLDER"]
+    # mediaUrl contient juste le nom du fichier (ex: "abc123.jpg")
+    return send_from_directory(upload_folder, media.mediaUrl)
 
 
 # Route pour soumettre un quiz (nécessite d'être connecté)
@@ -106,7 +137,8 @@ def quiz_submit(quiz_id):
             date=date.today(),
             score=score,
             totalQuestions=total_questions,
-            resultHistory=str(answers),  # Stocker les réponses en format texte
+            # resultHistory=str(answers),
+            answer=str(answers),  # Stocker les réponses en format texte
         )
 
         # Ajouter et enregistrer le résultat

@@ -1,5 +1,14 @@
 # import de Flask et des éléments qu'on utilise (les routes, les affichages html, la session, les redirections, les messages flash)
-from flask import Blueprint, render_template, session, redirect, url_for, flash, request
+from flask import (
+    Blueprint,
+    render_template,
+    session,
+    redirect,
+    url_for,
+    flash,
+    request,
+    current_app,
+)
 from app.models.models import (
     Result,
     Quiz,
@@ -8,6 +17,7 @@ from app.models.models import (
     Badge,
     Question,
     Response,
+    Media,
     ConnexionLog,
     Notification,
     Trophy,
@@ -16,7 +26,29 @@ from app.models.models import (
 from app.extensions import db, db_transaction
 from app.decorators import login_required, role_required
 from app.routes.auth import generate_reset_token
+from werkzeug.utils import secure_filename
 from datetime import date
+import uuid
+import os
+
+
+# Fonction pour ajouter des images (en cours/en test)
+def allowed_file(filename):
+    """Vérifie que l'extension du fichier est autorisée."""
+    return (
+        "." in filename
+        and filename.rsplit(".", 1)[1].lower()
+        in current_app.config["ALLOWED_EXTENSIONS"]
+    )
+
+
+def save_upload(file):
+    """Sauvegarde un fichier uploadé avec un nom unique. Retourne le nom du fichier."""
+    ext = secure_filename(file.filename).rsplit(".", 1)[1].lower()
+    unique_name = f"{uuid.uuid4().hex}.{ext}"
+    file.save(os.path.join(current_app.config["UPLOAD_FOLDER"], unique_name))
+    return unique_name
+
 
 # Création de la route liée aux profils utilisateurs
 profile_bp = Blueprint("profile", __name__, url_prefix="/profile")
@@ -373,19 +405,17 @@ def creator_quiz_create_post():
         correct_index = request.form.get(f"correct_{q_index}", "0")
         r_index = 0
         while True:
+            # response_exists est le champ caché ajouté par le JS pour chaque ligne de réponse
+            if f"response_exists_{q_index}_{r_index}" not in request.form:
+                break
             response_text = request.form.get(
                 f"response_text_{q_index}_{r_index}", ""
             ).strip()
-            if not response_text:
-                if f"response_text_{q_index}_{r_index}" not in request.form:
-                    break
-                r_index += 1
-                continue
-
             responses_data.append(
                 {
                     "text": response_text,
                     "is_correct": str(r_index) == correct_index,
+                    "form_rindex": r_index,
                 }
             )
             r_index += 1
@@ -401,6 +431,7 @@ def creator_quiz_create_post():
             {
                 "text": question_text,
                 "responses": responses_data,
+                "form_index": q_index,
             }
         )
         q_index += 1
@@ -429,6 +460,18 @@ def creator_quiz_create_post():
             db_session.add(new_question)
             db_session.flush()  # Pour obtenir l'ID de la question
 
+            # Gérer l'image optionnelle de la question
+            file_key = f"question_image_{q_data['form_index']}"
+            file = request.files.get(file_key)
+            if file and file.filename and allowed_file(file.filename):
+                filename = save_upload(file)
+                new_media = Media(
+                    mediaUrl=filename,
+                    mediaType=file.content_type,
+                    idMediaFromQuestion=new_question.idQUESTION,
+                )
+                db_session.add(new_media)
+
             for r_data in q_data["responses"]:
                 new_response = Response(
                     responseText=r_data["text"],
@@ -436,6 +479,22 @@ def creator_quiz_create_post():
                     idResponseFromQuestion=new_question.idQUESTION,
                 )
                 db_session.add(new_response)
+                db_session.flush()
+
+                # Gérer l'image optionnelle de la réponse
+                file_key = (
+                    f"response_image_{q_data['form_index']}_{r_data['form_rindex']}"
+                )
+                file = request.files.get(file_key)
+                if file and file.filename and allowed_file(file.filename):
+                    filename = save_upload(file)
+                    db_session.add(
+                        Media(
+                            mediaUrl=filename,
+                            mediaType=file.content_type,
+                            idMediaFromResponse=new_response.idRESPONSE,
+                        )
+                    )
 
     flash("Quiz créé avec succès !", "success")
     return redirect(url_for("profile.creator_dashboard"))
@@ -457,16 +516,22 @@ def creator_quiz_edit(quiz_id):
     for question in quiz.questions:
         responses = []
         for response in question.responses:
+            resp_media = Media.query.filter_by(
+                idMediaFromResponse=response.idRESPONSE
+            ).first()
             responses.append(
                 {
                     "text": response.responseText,
                     "is_correct": response.isCorrect,
+                    "media_id": resp_media.idMEDIA if resp_media else None,
                 }
             )
+        media = Media.query.filter_by(idMediaFromQuestion=question.idQUESTION).first()
         questions_data.append(
             {
                 "text": question.QuestionText,
                 "responses": responses,
+                "media_id": media.idMEDIA if media else None,
             }
         )
 
@@ -516,19 +581,16 @@ def creator_quiz_edit_post(quiz_id):
         correct_index = request.form.get(f"correct_{q_index}", "0")
         r_index = 0
         while True:
+            if f"response_exists_{q_index}_{r_index}" not in request.form:
+                break
             response_text = request.form.get(
                 f"response_text_{q_index}_{r_index}", ""
             ).strip()
-            if not response_text:
-                if f"response_text_{q_index}_{r_index}" not in request.form:
-                    break
-                r_index += 1
-                continue
-
             responses_data.append(
                 {
                     "text": response_text,
                     "is_correct": str(r_index) == correct_index,
+                    "form_rindex": r_index,
                 }
             )
             r_index += 1
@@ -544,6 +606,7 @@ def creator_quiz_edit_post(quiz_id):
             {
                 "text": question_text,
                 "responses": responses_data,
+                "form_index": q_index,
             }
         )
         q_index += 1
@@ -560,12 +623,43 @@ def creator_quiz_edit_post(quiz_id):
         if quiz.statut == "PUBLISHED":
             quiz.statut = "MODIFIED"
 
-        # Supprime les anciennes réponses puis questions (requêtes directes pour éviter le lazy-load des medias)
+        # Supprime les anciens médias (question + réponse) du disque + de la DB
         question_ids = [
             q.idQUESTION
             for q in Question.query.filter_by(idQuestionFromQuiz=quiz.idQUIZ).all()
         ]
         if question_ids:
+            # Médias des questions
+            for m in Media.query.filter(
+                Media.idMediaFromQuestion.in_(question_ids)
+            ).all():
+                filepath = os.path.join(current_app.config["UPLOAD_FOLDER"], m.mediaUrl)
+                if os.path.exists(filepath):
+                    os.remove(filepath)
+            Media.query.filter(Media.idMediaFromQuestion.in_(question_ids)).delete(
+                synchronize_session=False
+            )
+
+            # Médias des réponses
+            response_ids = [
+                r.idRESPONSE
+                for r in Response.query.filter(
+                    Response.idResponseFromQuestion.in_(question_ids)
+                ).all()
+            ]
+            if response_ids:
+                for m in Media.query.filter(
+                    Media.idMediaFromResponse.in_(response_ids)
+                ).all():
+                    filepath = os.path.join(
+                        current_app.config["UPLOAD_FOLDER"], m.mediaUrl
+                    )
+                    if os.path.exists(filepath):
+                        os.remove(filepath)
+                Media.query.filter(Media.idMediaFromResponse.in_(response_ids)).delete(
+                    synchronize_session=False
+                )
+
             Response.query.filter(
                 Response.idResponseFromQuestion.in_(question_ids)
             ).delete(synchronize_session=False)
@@ -575,7 +669,7 @@ def creator_quiz_edit_post(quiz_id):
 
         db_session.flush()
 
-        # Recrée les nouvelles questions et réponses
+        # Recrée les nouvelles questions, réponses et médias
         for q_data in questions_data:
             new_question = Question(
                 QuestionText=q_data["text"],
@@ -584,6 +678,19 @@ def creator_quiz_edit_post(quiz_id):
             db_session.add(new_question)
             db_session.flush()
 
+            # Gérer l'image optionnelle de la question
+            file_key = f"question_image_{q_data['form_index']}"
+            file = request.files.get(file_key)
+            if file and file.filename and allowed_file(file.filename):
+                filename = save_upload(file)
+                db_session.add(
+                    Media(
+                        mediaUrl=filename,
+                        mediaType=file.content_type,
+                        idMediaFromQuestion=new_question.idQUESTION,
+                    )
+                )
+
             for r_data in q_data["responses"]:
                 new_response = Response(
                     responseText=r_data["text"],
@@ -591,6 +698,22 @@ def creator_quiz_edit_post(quiz_id):
                     idResponseFromQuestion=new_question.idQUESTION,
                 )
                 db_session.add(new_response)
+                db_session.flush()
+
+                # Gérer l'image optionnelle de la réponse
+                file_key = (
+                    f"response_image_{q_data['form_index']}_{r_data['form_rindex']}"
+                )
+                file = request.files.get(file_key)
+                if file and file.filename and allowed_file(file.filename):
+                    filename = save_upload(file)
+                    db_session.add(
+                        Media(
+                            mediaUrl=filename,
+                            mediaType=file.content_type,
+                            idMediaFromResponse=new_response.idRESPONSE,
+                        )
+                    )
 
     flash("Quiz modifié avec succès !", "success")
     return redirect(url_for("profile.creator_dashboard"))
@@ -629,12 +752,41 @@ def creator_quiz_delete(quiz_id):
         return redirect(url_for("profile.creator_dashboard"))
 
     with db_transaction() as db_session:
-        # Supprime les réponses → questions → résultats → quiz (requêtes directes pour éviter le lazy-load des medias)
         question_ids = [
             q.idQUESTION
             for q in Question.query.filter_by(idQuestionFromQuiz=quiz.idQUIZ).all()
         ]
         if question_ids:
+            # Supprimer les fichiers média (questions + réponses) du disque
+            for m in Media.query.filter(
+                Media.idMediaFromQuestion.in_(question_ids)
+            ).all():
+                filepath = os.path.join(current_app.config["UPLOAD_FOLDER"], m.mediaUrl)
+                if os.path.exists(filepath):
+                    os.remove(filepath)
+            Media.query.filter(Media.idMediaFromQuestion.in_(question_ids)).delete(
+                synchronize_session=False
+            )
+
+            response_ids = [
+                r.idRESPONSE
+                for r in Response.query.filter(
+                    Response.idResponseFromQuestion.in_(question_ids)
+                ).all()
+            ]
+            if response_ids:
+                for m in Media.query.filter(
+                    Media.idMediaFromResponse.in_(response_ids)
+                ).all():
+                    filepath = os.path.join(
+                        current_app.config["UPLOAD_FOLDER"], m.mediaUrl
+                    )
+                    if os.path.exists(filepath):
+                        os.remove(filepath)
+                Media.query.filter(Media.idMediaFromResponse.in_(response_ids)).delete(
+                    synchronize_session=False
+                )
+
             Response.query.filter(
                 Response.idResponseFromQuestion.in_(question_ids)
             ).delete(synchronize_session=False)
@@ -723,12 +875,41 @@ def admin_quiz_delete(quiz_id):
     quiz = Quiz.query.get_or_404(quiz_id)
 
     with db_transaction() as db_session:
-        # Supprime réponses → questions → résultats → quiz (requêtes directes)
         question_ids = [
             q.idQUESTION
             for q in Question.query.filter_by(idQuestionFromQuiz=quiz.idQUIZ).all()
         ]
         if question_ids:
+            # Supprimer les fichiers média (questions + réponses) du disque
+            for m in Media.query.filter(
+                Media.idMediaFromQuestion.in_(question_ids)
+            ).all():
+                filepath = os.path.join(current_app.config["UPLOAD_FOLDER"], m.mediaUrl)
+                if os.path.exists(filepath):
+                    os.remove(filepath)
+            Media.query.filter(Media.idMediaFromQuestion.in_(question_ids)).delete(
+                synchronize_session=False
+            )
+
+            response_ids = [
+                r.idRESPONSE
+                for r in Response.query.filter(
+                    Response.idResponseFromQuestion.in_(question_ids)
+                ).all()
+            ]
+            if response_ids:
+                for m in Media.query.filter(
+                    Media.idMediaFromResponse.in_(response_ids)
+                ).all():
+                    filepath = os.path.join(
+                        current_app.config["UPLOAD_FOLDER"], m.mediaUrl
+                    )
+                    if os.path.exists(filepath):
+                        os.remove(filepath)
+                Media.query.filter(Media.idMediaFromResponse.in_(response_ids)).delete(
+                    synchronize_session=False
+                )
+
             Response.query.filter(
                 Response.idResponseFromQuestion.in_(question_ids)
             ).delete(synchronize_session=False)
@@ -770,16 +951,22 @@ def admin_quiz_edit(quiz_id):
     for question in quiz.questions:
         responses = []
         for response in question.responses:
+            resp_media = Media.query.filter_by(
+                idMediaFromResponse=response.idRESPONSE
+            ).first()
             responses.append(
                 {
                     "text": response.responseText,
                     "is_correct": response.isCorrect,
+                    "media_id": resp_media.idMEDIA if resp_media else None,
                 }
             )
+        media = Media.query.filter_by(idMediaFromQuestion=question.idQUESTION).first()
         questions_data.append(
             {
                 "text": question.QuestionText,
                 "responses": responses,
+                "media_id": media.idMEDIA if media else None,
             }
         )
 
@@ -825,19 +1012,16 @@ def admin_quiz_edit_post(quiz_id):
         correct_index = request.form.get(f"correct_{q_index}", "0")
         r_index = 0
         while True:
+            if f"response_exists_{q_index}_{r_index}" not in request.form:
+                break
             response_text = request.form.get(
                 f"response_text_{q_index}_{r_index}", ""
             ).strip()
-            if not response_text:
-                if f"response_text_{q_index}_{r_index}" not in request.form:
-                    break
-                r_index += 1
-                continue
-
             responses_data.append(
                 {
                     "text": response_text,
                     "is_correct": str(r_index) == correct_index,
+                    "form_rindex": r_index,
                 }
             )
             r_index += 1
@@ -853,6 +1037,7 @@ def admin_quiz_edit_post(quiz_id):
             {
                 "text": question_text,
                 "responses": responses_data,
+                "form_index": q_index,
             }
         )
         q_index += 1
@@ -866,12 +1051,43 @@ def admin_quiz_edit_post(quiz_id):
         quiz.title = title
         quiz.difficulty = difficulty
 
-        # Supprime les anciennes réponses puis questions (requêtes directes)
+        # Supprime les anciens médias (question + réponse) du disque + de la DB
         question_ids = [
             q.idQUESTION
             for q in Question.query.filter_by(idQuestionFromQuiz=quiz.idQUIZ).all()
         ]
         if question_ids:
+            # Médias des questions
+            for m in Media.query.filter(
+                Media.idMediaFromQuestion.in_(question_ids)
+            ).all():
+                filepath = os.path.join(current_app.config["UPLOAD_FOLDER"], m.mediaUrl)
+                if os.path.exists(filepath):
+                    os.remove(filepath)
+            Media.query.filter(Media.idMediaFromQuestion.in_(question_ids)).delete(
+                synchronize_session=False
+            )
+
+            # Médias des réponses
+            response_ids = [
+                r.idRESPONSE
+                for r in Response.query.filter(
+                    Response.idResponseFromQuestion.in_(question_ids)
+                ).all()
+            ]
+            if response_ids:
+                for m in Media.query.filter(
+                    Media.idMediaFromResponse.in_(response_ids)
+                ).all():
+                    filepath = os.path.join(
+                        current_app.config["UPLOAD_FOLDER"], m.mediaUrl
+                    )
+                    if os.path.exists(filepath):
+                        os.remove(filepath)
+                Media.query.filter(Media.idMediaFromResponse.in_(response_ids)).delete(
+                    synchronize_session=False
+                )
+
             Response.query.filter(
                 Response.idResponseFromQuestion.in_(question_ids)
             ).delete(synchronize_session=False)
@@ -881,7 +1097,7 @@ def admin_quiz_edit_post(quiz_id):
 
         db_session.flush()
 
-        # Recrée les nouvelles questions et réponses
+        # Recrée les nouvelles questions, réponses et médias
         for q_data in questions_data:
             new_question = Question(
                 QuestionText=q_data["text"],
@@ -890,6 +1106,19 @@ def admin_quiz_edit_post(quiz_id):
             db_session.add(new_question)
             db_session.flush()
 
+            # Gérer l'image optionnelle de la question
+            file_key = f"question_image_{q_data['form_index']}"
+            file = request.files.get(file_key)
+            if file and file.filename and allowed_file(file.filename):
+                filename = save_upload(file)
+                db_session.add(
+                    Media(
+                        mediaUrl=filename,
+                        mediaType=file.content_type,
+                        idMediaFromQuestion=new_question.idQUESTION,
+                    )
+                )
+
             for r_data in q_data["responses"]:
                 new_response = Response(
                     responseText=r_data["text"],
@@ -897,6 +1126,22 @@ def admin_quiz_edit_post(quiz_id):
                     idResponseFromQuestion=new_question.idQUESTION,
                 )
                 db_session.add(new_response)
+                db_session.flush()
+
+                # Gérer l'image optionnelle de la réponse
+                file_key = (
+                    f"response_image_{q_data['form_index']}_{r_data['form_rindex']}"
+                )
+                file = request.files.get(file_key)
+                if file and file.filename and allowed_file(file.filename):
+                    filename = save_upload(file)
+                    db_session.add(
+                        Media(
+                            mediaUrl=filename,
+                            mediaType=file.content_type,
+                            idMediaFromResponse=new_response.idRESPONSE,
+                        )
+                    )
 
     flash("Quiz modifié avec succès !", "success")
     return redirect(url_for("profile.admin_dashboard"))

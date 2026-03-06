@@ -33,7 +33,7 @@
             {% endif %}
             {% endwith %} -->
 
-            <form method="POST" action="{{ url_for('profile.creator_quiz_create_post') }}" id="quizForm">
+            <form method="POST" action="{{ url_for('profile.creator_quiz_create_post') }}" id="quizForm" enctype="multipart/form-data">
                 <!-- Informations générales du quiz -->
                 <div class="mb-6">
                     <label for="title" class="block mb-2 text-cyber-text-lighter font-medium text-sm">

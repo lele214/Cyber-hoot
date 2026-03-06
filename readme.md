@@ -80,23 +80,48 @@ docker compose up -d
 
 ```
 Cyber-hoot/
-├── app/                   # Code de l'application Flask
-│   ├── __init__.py        # Factory pattern Flask
-│   ├── main.py            # Point d'entrée
-│   ├── config.py          # Configuration (dev/prod)
-│   ├── database.py        # Configuration SQLAlchemy
-│   ├── routes/            # Routes Flask
-│   ├── templates/         # Templates Jinja2
-│   └── static/            # Fichiers statiques (CSS, JS)
-├── docker/                # Configuration Docker
-│   ├── Dockerfile
-│   └── wait-for-it.sh     # Script d'attente de la DB
-├── data/init/             # Scripts SQL d'initialisation
-└── docker-compose.yml     # Configuration des services
+├── app/                        # Code de l'application Flask
+│   ├── __init__.py             # Factory pattern (création de l'app, blueprints)
+│   ├── config.py               # Configuration dev/prod (DB, upload, clé secrète)
+│   ├── extensions.py           # Instance SQLAlchemy + gestionnaire de transactions
+│   ├── decorators.py           # Décorateurs login_required, role_required
+│   ├── models/
+│   │   └── models.py           # Tous les modèles SQLAlchemy (User, Quiz, Question…)
+│   ├── routes/
+│   │   ├── auth.py             # Inscription, connexion, réinitialisation mdp
+│   │   ├── main_routes.py      # Accueil, liste des quiz, détail quiz, serve_media
+│   │   └── profile.py          # Dashboards player/creator/admin, gestion des quiz
+│   ├── templates/
+│   │   ├── auth/               # Templates connexion / inscription
+│   │   ├── profile/
+│   │   │   ├── admin/          # Dashboard administrateur
+│   │   │   ├── creator/        # Dashboard créateur, création/édition de quiz
+│   │   │   └── player/         # Dashboard joueur
+│   │   └── quiz/               # Liste des quiz, quiz dynamique
+│   └── static/
+│       ├── js/
+│       │   ├── quiz.js         # Soumission du quiz (fetch)
+│       │   └── quiz_create.js  # Formulaire dynamique de création/édition
+│       ├── src/input.css       # Source Tailwind CSS
+│       └── output.css          # CSS compilé
+├── database/
+│   └── db_schemaV3-3.sql       # Schéma MySQL (tables, relations, enums)
+├── test/
+│   └── seed_data.sql           # Données de test (utilisateurs, quiz, rôles)
+├── secrets/                    # Fichiers secrets Docker (non versionnés)
+│   ├── db_password.txt
+│   └── db_root_password.txt
+├── uploads/                    # Images uploadées pour les quiz (hors static/)
+│   └── ...                     # Fichiers servis uniquement via /media/<id>
+├── Dockerfile                  # Build de l'image Flask (Python 3.11 + npm)
+├── docker-compose.yml          # Services : app, db (MySQL 8), adminer
+├── run.py                      # Point d'entrée Flask
+├── requirements.txt            # Dépendances Python
+├── package.json                # Dépendances npm (Tailwind CSS)
+└── .env                        # Variables d'environnement (non versionné)
 ```
 
 ## Base de données
 
-La base de données MySQL est automatiquement créée avec :
-- `data/init/01-schema.sql` - Schéma de la base de données
-- `data/init/02-seed-data.sql` - Données de test
+La base de données MySQL 8 est automatiquement initialisée au démarrage Docker.
+

@@ -13,6 +13,12 @@ def get_secret(env_var, secret_name, default=""):
 class Config:
     SECRET_KEY = os.getenv("SECRET_KEY", "cle_secrete_a_changer_en_production")
 
+    # --- Upload de médias (images pour les quiz) ---
+    # Dossier HORS de static/ pour ne pas être accessible publiquement
+    UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.dirname(__file__)), "uploads")
+    MAX_CONTENT_LENGTH = 5 * 1024 * 1024  # 5 Mo max par fichier
+    ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
+
     MYSQL_USER = os.getenv("MYSQL_USER", "")
     MYSQL_PASSWORD = get_secret("MYSQL_PASSWORD", "db_password")
     MYSQL_HOST = os.getenv("MYSQL_HOST", "")

@@ -110,7 +110,9 @@
                                 <td class="text-cyber-text-muted py-3 px-4">{{ quiz.date }}</td>
                                 <td class="py-3 px-4">
                                     <!-- Formulaire de validation avec sélection de catégorie -->
-                                    <form method="POST" action="{{ url_for('profile.admin_quiz_approve', quiz_id=quiz.id) }}" class="flex items-center gap-2">
+                                    <form method="POST"
+                                        action="{{ url_for('profile.admin_quiz_approve', quiz_id=quiz.id) }}"
+                                        class="flex items-center gap-2">
                                         <select name="category" class="input-cyber text-xs py-1 px-2" required>
                                             <option value="" disabled selected>Catégorie</option>
                                             {% for key, label in quiz_categories.items() %}
@@ -125,8 +127,10 @@
                                 </td>
                                 <td class="py-3 px-4 text-center">
                                     <!-- Bouton refuser -->
-                                    <form method="POST" action="{{ url_for('profile.admin_quiz_reject', quiz_id=quiz.id) }}" class="inline"
-                                          onsubmit="return confirm('Refuser ce quiz ? Il sera remis en brouillon.')">
+                                    <form method="POST"
+                                        action="{{ url_for('profile.admin_quiz_reject', quiz_id=quiz.id) }}"
+                                        class="inline"
+                                        onsubmit="return confirm('Refuser ce quiz ? Il sera remis en brouillon.')">
                                         <button type="submit"
                                             class="px-3 py-1 rounded text-xs font-semibold bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30 transition-colors">
                                             Refuser
@@ -208,8 +212,10 @@
                                         </a>
                                         <!-- Bouton Archiver → remet en brouillon -->
                                         {% if quiz.statut == 'PUBLISHED' %}
-                                        <form method="POST" action="{{ url_for('profile.admin_quiz_archive', quiz_id=quiz.id) }}" class="inline"
-                                              onsubmit="return confirm('Archiver ce quiz ? Il sera remis en brouillon.')">
+                                        <form method="POST"
+                                            action="{{ url_for('profile.admin_quiz_archive', quiz_id=quiz.id) }}"
+                                            class="inline"
+                                            onsubmit="return confirm('Archiver ce quiz ? Il sera remis en brouillon.')">
                                             <button type="submit"
                                                 class="px-3 py-1 rounded text-xs font-semibold bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 hover:bg-yellow-500/30 transition-colors">
                                                 Archiver
@@ -217,8 +223,10 @@
                                         </form>
                                         {% endif %}
                                         <!-- Bouton Supprimer → suppression avec confirmation -->
-                                        <form method="POST" action="{{ url_for('profile.admin_quiz_delete', quiz_id=quiz.id) }}" class="inline"
-                                              onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce quiz ? Cette action est irréversible.')">
+                                        <form method="POST"
+                                            action="{{ url_for('profile.admin_quiz_delete', quiz_id=quiz.id) }}"
+                                            class="inline"
+                                            onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce quiz ? Cette action est irréversible.')">
                                             <button type="submit"
                                                 class="px-3 py-1 rounded text-xs font-semibold bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30 transition-colors">
                                                 Supprimer
@@ -241,10 +249,6 @@
 
         <!-- ============================================================ -->
         <!-- CU-01 : Gestion des Utilisateurs                            -->
-        <!-- TODO Backend : Créer les routes POST suivantes :             -->
-        <!--   - POST /profile/admin/user/<id>/delete        (supprimer)  -->
-        <!--   - POST /profile/admin/user/<id>/reset-password (reset mdp) -->
-        <!--   - POST /profile/admin/user/<id>/assign-quiz    (assigner)  -->
         <!-- ============================================================ -->
         <div class="max-w-6xl mx-auto mb-12">
             <div class="feature-box" style="min-height: auto; align-items: stretch; text-align: left;">
@@ -281,15 +285,19 @@
                                 <td class="py-3 px-4 text-center">
                                     <div class="flex gap-2 justify-center flex-wrap items-center">
                                         <!-- Bouton Reset mot de passe -->
-                                        <form method="POST" action="{{ url_for('profile.admin_user_reset_password', user_id=user.id) }}" class="inline"
-                                              onsubmit="return confirm('Générer un lien de réinitialisation de mot de passe pour {{ user.username }} ?')">
+                                        <form method="POST"
+                                            action="{{ url_for('profile.admin_user_reset_password', user_id=user.id) }}"
+                                            class="inline"
+                                            onsubmit="return confirm('Générer un lien de réinitialisation de mot de passe pour {{ user.username }} ?')">
                                             <button type="submit"
                                                 class="px-3 py-1 rounded text-xs font-semibold bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 hover:bg-yellow-500/30 transition-colors">
                                                 Reset mdp
                                             </button>
                                         </form>
                                         <!-- Assigner / retirer un rôle -->
-                                        <form method="POST" action="{{ url_for('profile.admin_user_assign_role', user_id=user.id) }}" class="inline flex items-center gap-1">
+                                        <form method="POST"
+                                            action="{{ url_for('profile.admin_user_assign_role', user_id=user.id) }}"
+                                            class="inline flex items-center gap-1">
                                             <select name="role" class="input-cyber text-xs py-1 px-2" required>
                                                 <option value="" disabled selected>Rôle</option>
                                                 <option value="player">player</option>
@@ -302,8 +310,10 @@
                                             </button>
                                         </form>
                                         <!-- Bouton Supprimer utilisateur -->
-                                        <form method="POST" action="{{ url_for('profile.admin_user_delete', user_id=user.id) }}" class="inline"
-                                              onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer l\'utilisateur {{ user.username }} ? Cette action est irréversible.')">
+                                        <form method="POST"
+                                            action="{{ url_for('profile.admin_user_delete', user_id=user.id) }}"
+                                            class="inline"
+                                            onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer l\'utilisateur {{ user.username }} ? Cette action est irréversible.')">
                                             <button type="submit"
                                                 class="px-3 py-1 rounded text-xs font-semibold bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30 transition-colors">
                                                 Supprimer

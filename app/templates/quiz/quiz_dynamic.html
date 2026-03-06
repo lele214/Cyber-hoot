@@ -45,8 +45,28 @@
                     <h3 class="text-cyber-text-lighter text-xl font-bold mb-4">
                         Question {{ question.index + 1 }} : {{ question.text }}
                     </h3>
-                    <div class="space-y-3">
+                    {% if question.media_id %}
+                    <img src="{{ url_for('main.serve_media', media_id=question.media_id) }}"
+                         alt="Illustration de la question"
+                         class="max-h-64 mx-auto mb-4 rounded border border-cyber-border">
+                    {% endif %}
+                    <div class="{% if question.responses | selectattr('media_id') | list | length > 0 %}grid grid-cols-2 gap-4{% else %}space-y-3{% endif %}">
                         {% for response in question.responses %}
+                        {% if response.media_id %}
+                        <label class="relative cursor-pointer group">
+                            <input type="radio" name="q{{ question.index }}" value="{{ response.index }}" class="sr-only peer">
+                            <div class="border-2 border-cyber-border rounded-lg overflow-hidden transition-all peer-checked:border-cyber-accent peer-checked:shadow-glow-sm group-hover:border-cyber-accent-light">
+                                <img src="{{ url_for('main.serve_media', media_id=response.media_id) }}"
+                                     alt="{{ response.text or 'Réponse ' ~ loop.index }}"
+                                     class="w-full object-cover max-h-48">
+                                {% if response.text %}
+                                <div class="px-3 py-2 bg-cyber-bg-lighter text-cyber-text text-sm text-center">
+                                    {{ response.text }}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </label>
+                        {% else %}
                         <label
                             class="flex items-start p-4 bg-cyber-bg-lighter border border-cyber-border rounded cursor-pointer transition-all hover:border-cyber-accent group">
                             <input type="radio" name="q{{ question.index }}" value="{{ response.index }}" class="mt-1 mr-3 accent-cyber-accent">
@@ -54,6 +74,7 @@
                                 {{ response.text }}
                             </span>
                         </label>
+                        {% endif %}
                         {% endfor %}
                     </div>
                 </div>

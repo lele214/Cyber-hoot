@@ -29,4 +29,7 @@ def create_app(config_name=None):
     app.register_blueprint(auth_bp)
     app.register_blueprint(profile_bp)
 
+    # Créer le dossier d'uploads s'il n'existe pas
+    os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
+
     return app
