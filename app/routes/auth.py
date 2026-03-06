@@ -21,7 +21,7 @@ from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 # import de l'application (base de donnée, les models de page, la config de l'appli flask)
 # fonction try/except dans extensions.py
 from app.extensions import db_transaction
-from app.models.models import User, ConnexionLog, Role
+from app.models.models import User, ConnectionLog, Role
 from flask import current_app
 
 
@@ -55,7 +55,7 @@ def login_post():
         session["user_roles"] = user_roles
 
         with db_transaction() as db_session:
-            connexion_log = ConnexionLog(idUSERforConnexion=user.idUSER)
+            connexion_log = ConnectionLog(idUserForConnection=user.idUSER)
             db_session.add(connexion_log)
         # db.session.add(connexion_log)
         # db.session.commit()

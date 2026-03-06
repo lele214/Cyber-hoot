@@ -18,7 +18,7 @@ from app.models.models import (
     Question,
     Response,
     Media,
-    ConnexionLog,
+    ConnectionLog,
     Notification,
     Trophy,
     UserToRole,
@@ -146,7 +146,7 @@ def admin_dashboard():
     for badge, quiz in badges:
         badges_data.append(
             {
-                "id": badge.idBADGES,
+                "id": badge.idBadges,
                 "name": badge.name,
                 "quiz_title": quiz.title,
             }
@@ -1222,7 +1222,7 @@ def admin_user_delete(user_id):
         Result.query.filter_by(idUSERinResult=user.idUSER).delete(
             synchronize_session=False
         )
-        ConnexionLog.query.filter_by(idUSERforConnexion=user.idUSER).delete(
+        ConnectionLog.query.filter_by(idUserForConnection=user.idUSER).delete(
             synchronize_session=False
         )
         Trophy.query.filter_by(idUser=user.idUSER).delete(synchronize_session=False)

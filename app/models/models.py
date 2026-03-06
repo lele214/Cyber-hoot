@@ -44,7 +44,7 @@ class User(db.Model):
     notifications = db.relationship("Notification", back_populates="user")
     trophies = db.relationship("Trophy", back_populates="user")
     results = db.relationship("Result", back_populates="user")
-    connexion_logs = db.relationship("ConnexionLog", back_populates="user")
+    connection_logs = db.relationship("ConnectionLog", back_populates="user")
 
     def __repr__(self):
         return f"<User {self.username}>"
@@ -91,7 +91,7 @@ class Quiz(db.Model):
 class Badge(db.Model):
     __tablename__ = "BADGES"
 
-    idBADGES = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    idBadges = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(45), nullable=True)
     image = db.Column(db.LargeBinary, nullable=True)
     idQuiz = db.Column(db.Integer, db.ForeignKey("QUIZ.idQUIZ"), nullable=False)
@@ -125,7 +125,7 @@ class Trophy(db.Model):
     __tablename__ = "TROPHY"
 
     idTrophy = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    idBadge = db.Column(db.Integer, db.ForeignKey("BADGES.idBADGES"), nullable=False)
+    idBadge = db.Column(db.Integer, db.ForeignKey("BADGES.idBadges"), nullable=False)
     idUser = db.Column(db.Integer, db.ForeignKey("USER.idUSER"), nullable=False)
     obtainedAt = db.Column(db.Date, nullable=True)
 
@@ -226,16 +226,16 @@ class Result(db.Model):
         return f"<Result {self.idRESULT}>"
 
 
-class ConnexionLog(db.Model):
-    __tablename__ = "CONNEXION_LOG"
+class ConnectionLog(db.Model):
+    __tablename__ = "CONNECTION_LOG"
 
-    idCONNEXION_LOG = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    idUSERforConnexion = db.Column(
+    idConnection_log = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    idUserForConnection = db.Column(
         db.Integer, db.ForeignKey("USER.idUSER"), nullable=False
     )
 
     # Relations
-    user = db.relationship("User", back_populates="connexion_logs")
+    user = db.relationship("User", back_populates="connection_logs")
 
     def __repr__(self):
-        return f"<ConnexionLog {self.idCONNEXION_LOG}>"
+        return f"<ConnectionLog {self.idConnection_log}>"
