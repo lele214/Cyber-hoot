@@ -813,6 +813,7 @@ QUIZ_CATEGORIES = {
     "RESEAUX": "Réseaux",
     "MOTS_DE_PASSE": "Mots de passe",
     "INGENIERIE_SOCIALE": "Ingénierie sociale",
+    "INTRODUCTION_CYBER": "Introduction à la cybersécurité",
     "CATEGORIE_TEST": "Catégorie Test",
 }
 

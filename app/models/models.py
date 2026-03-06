@@ -69,7 +69,7 @@ class Quiz(db.Model):
             "RESEAUX",
             "MOTS_DE_PASSE",
             "INGENIERIE_SOCIALE",
-            "AUTRE",
+            "INTRODUCTION_CYBER",
             "CATEGORIE_TEST",
         ),
         nullable=True,
