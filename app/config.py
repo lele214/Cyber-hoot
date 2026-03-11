@@ -1,16 +1,22 @@
 import os
 
 
+# Dossier secrets/ local (dev), équivalent de /run/secrets/ en Docker
+_LOCAL_SECRETS_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "secrets")
+
+
 def get_secret(env_var, secret_name, default=""):
-    """Lit un secret depuis /run/secrets/ (Docker) ou une variable d'environnement (dev local)."""
-    secret_path = f"/run/secrets/{secret_name}"
-    if os.path.exists(secret_path):
-        with open(secret_path, "r") as f:
-            return f.read().strip()
+    """Priorité : /run/secrets/ (Docker prod) > secrets/ local (dev) > variable d'environnement > default."""
+    for secrets_dir in ("/run/secrets", _LOCAL_SECRETS_DIR):
+        secret_path = os.path.join(secrets_dir, secret_name)
+        if os.path.exists(secret_path):
+            with open(secret_path, "r") as f:
+                return f.read().strip()
     return os.getenv(env_var, default)
 
 
 class Config:
+    # ATTENTION : créer un fichier dans "secret/" avec la clé
     SECRET_KEY = os.getenv("SECRET_KEY", "cle_secrete_a_changer_en_production")
 
     # --- Upload de médias (images pour les quiz) ---
@@ -18,6 +24,9 @@ class Config:
     UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.dirname(__file__)), "uploads")
     MAX_CONTENT_LENGTH = 5 * 1024 * 1024  # 5 Mo max par fichier
     ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
+
+    # --- VirusTotal API ---
+    VIRUSTOTAL_API_KEY = get_secret("VIRUSTOTAL_API_KEY", "api_key")
 
     MYSQL_USER = os.getenv("MYSQL_USER", "")
     MYSQL_PASSWORD = get_secret("MYSQL_PASSWORD", "db_password")

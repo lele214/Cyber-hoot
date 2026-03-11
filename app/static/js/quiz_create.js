@@ -25,6 +25,21 @@ function addQuestion() {
                    placeholder="Entrez votre question"
                    required>
         </div>
+        <div class="mb-4">
+            <label class="block mb-2 text-cyber-text text-sm">
+                Lien ressource <span class="text-cyber-text-lighter text-xs">(optionnel — affiché après la question)</span>
+            </label>
+            <div class="flex gap-2">
+                <input type="url"
+                       name="question_link_url_${qIndex}"
+                       class="input-cyber flex-1"
+                       placeholder="https://...">
+                <input type="text"
+                       name="question_link_label_${qIndex}"
+                       class="input-cyber w-48"
+                       placeholder="Texte du lien">
+            </div>
+        </div>
         <div class="mb-2">
             <label class="block mb-2 text-cyber-text text-sm">
                 Réponses <span class="text-cyber-text-lighter text-xs">(cochez la bonne réponse)</span>

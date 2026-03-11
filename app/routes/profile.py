@@ -20,7 +20,7 @@ from app.models.models import (
     Media,
     ConnectionLog,
     Notification,
-    Trophy,
+    UserBadge,
     UserToRole,
 )
 from app.extensions import db, db_transaction
@@ -472,6 +472,19 @@ def creator_quiz_create_post():
                 )
                 db_session.add(new_media)
 
+            # Gérer le lien ressource optionnel de la question
+            link_url = request.form.get(f"question_link_url_{q_data['form_index']}", "").strip()
+            link_label = request.form.get(f"question_link_label_{q_data['form_index']}", "").strip()
+            if link_url and link_url.startswith(("http://", "https://")):
+                db_session.add(
+                    Media(
+                        mediaUrl=link_url,
+                        mediaType="link",
+                        mediaLabel=link_label or link_url,
+                        idMediaFromQuestion=new_question.idQUESTION,
+                    )
+                )
+
             for r_data in q_data["responses"]:
                 new_response = Response(
                     responseText=r_data["text"],
@@ -526,12 +539,16 @@ def creator_quiz_edit(quiz_id):
                     "media_id": resp_media.idMEDIA if resp_media else None,
                 }
             )
-        media = Media.query.filter_by(idMediaFromQuestion=question.idQUESTION).first()
+        q_medias = Media.query.filter_by(idMediaFromQuestion=question.idQUESTION).all()
+        image_media = next((m for m in q_medias if m.mediaType != "link"), None)
+        link_media = next((m for m in q_medias if m.mediaType == "link"), None)
         questions_data.append(
             {
                 "text": question.QuestionText,
                 "responses": responses,
-                "media_id": media.idMEDIA if media else None,
+                "media_id": image_media.idMEDIA if image_media else None,
+                "link_url": link_media.mediaUrl if link_media else "",
+                "link_label": link_media.mediaLabel if link_media else "",
             }
         )
 
@@ -687,6 +704,19 @@ def creator_quiz_edit_post(quiz_id):
                     Media(
                         mediaUrl=filename,
                         mediaType=file.content_type,
+                        idMediaFromQuestion=new_question.idQUESTION,
+                    )
+                )
+
+            # Gérer le lien ressource optionnel de la question
+            link_url = request.form.get(f"question_link_url_{q_data['form_index']}", "").strip()
+            link_label = request.form.get(f"question_link_label_{q_data['form_index']}", "").strip()
+            if link_url and link_url.startswith(("http://", "https://")):
+                db_session.add(
+                    Media(
+                        mediaUrl=link_url,
+                        mediaType="link",
+                        mediaLabel=link_label or link_url,
                         idMediaFromQuestion=new_question.idQUESTION,
                     )
                 )
@@ -962,12 +992,16 @@ def admin_quiz_edit(quiz_id):
                     "media_id": resp_media.idMEDIA if resp_media else None,
                 }
             )
-        media = Media.query.filter_by(idMediaFromQuestion=question.idQUESTION).first()
+        q_medias = Media.query.filter_by(idMediaFromQuestion=question.idQUESTION).all()
+        image_media = next((m for m in q_medias if m.mediaType != "link"), None)
+        link_media = next((m for m in q_medias if m.mediaType == "link"), None)
         questions_data.append(
             {
                 "text": question.QuestionText,
                 "responses": responses,
-                "media_id": media.idMEDIA if media else None,
+                "media_id": image_media.idMEDIA if image_media else None,
+                "link_url": link_media.mediaUrl if link_media else "",
+                "link_label": link_media.mediaLabel if link_media else "",
             }
         )
 
@@ -1120,6 +1154,19 @@ def admin_quiz_edit_post(quiz_id):
                     )
                 )
 
+            # Gérer le lien ressource optionnel de la question
+            link_url = request.form.get(f"question_link_url_{q_data['form_index']}", "").strip()
+            link_label = request.form.get(f"question_link_label_{q_data['form_index']}", "").strip()
+            if link_url and link_url.startswith(("http://", "https://")):
+                db_session.add(
+                    Media(
+                        mediaUrl=link_url,
+                        mediaType="link",
+                        mediaLabel=link_label or link_url,
+                        idMediaFromQuestion=new_question.idQUESTION,
+                    )
+                )
+
             for r_data in q_data["responses"]:
                 new_response = Response(
                     responseText=r_data["text"],
@@ -1226,7 +1273,7 @@ def admin_user_delete(user_id):
         ConnectionLog.query.filter_by(idUserForConnection=user.idUSER).delete(
             synchronize_session=False
         )
-        Trophy.query.filter_by(idUser=user.idUSER).delete(synchronize_session=False)
+        UserBadge.query.filter_by(idUser=user.idUSER).delete(synchronize_session=False)
         Notification.query.filter_by(idUser=user.idUSER).delete(
             synchronize_session=False
         )

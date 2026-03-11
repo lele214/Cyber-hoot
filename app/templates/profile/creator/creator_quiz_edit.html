@@ -108,6 +108,16 @@
                         }
                     }
 
+                    // Pré-remplir les champs de lien si existants
+                    if (q.link_url) {
+                        const linkUrlInput = document.querySelector(`input[name="question_link_url_${qIndex}"]`);
+                        if (linkUrlInput) linkUrlInput.value = q.link_url;
+                    }
+                    if (q.link_label) {
+                        const linkLabelInput = document.querySelector(`input[name="question_link_label_${qIndex}"]`);
+                        if (linkLabelInput) linkLabelInput.value = q.link_label;
+                    }
+
                     // Supprimer les 2 réponses vides créées par défaut
                     const responsesDiv = document.getElementById('responses_' + qIndex);
                     responsesDiv.innerHTML = '';

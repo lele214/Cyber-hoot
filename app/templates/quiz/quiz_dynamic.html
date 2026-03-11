@@ -50,6 +50,16 @@
                          alt="Illustration de la question"
                          class="max-h-64 mx-auto mb-4 rounded border border-cyber-border">
                     {% endif %}
+                    {% if question.link_url %}
+                    <div class="mb-4">
+                        <a href="{{ question.link_url }}"
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           class="inline-flex items-center gap-2 px-4 py-2 border border-cyber-accent text-cyber-accent rounded text-sm hover:bg-cyber-border hover:text-cyber-accent-light transition-all duration-200">
+                            ↗ {{ question.link_label or question.link_url }}
+                        </a>
+                    </div>
+                    {% endif %}
                     <div class="{% if question.responses | selectattr('media_id') | list | length > 0 %}grid grid-cols-2 gap-4{% else %}space-y-3{% endif %}">
                         {% for response in question.responses %}
                         {% if response.media_id %}

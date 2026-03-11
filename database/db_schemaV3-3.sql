@@ -24,7 +24,7 @@ USE `cyberhoot` ;
 CREATE TABLE IF NOT EXISTS `cyberhoot`.`USER` (
   `idUSER` INT NOT NULL AUTO_INCREMENT,
   `username` VARCHAR(45) NULL,
-  `hashpassword` VARCHAR(60) NULL,
+  `hashpassword` VARCHAR(512) NULL,
   `emailUser` VARCHAR(45) NULL,
   PRIMARY KEY (`idUSER`))
 ENGINE = InnoDB;
@@ -88,24 +88,22 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `cyberhoot`.`TROPHY`
+-- Table `cyberhoot`.`user_badges`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `cyberhoot`.`TROPHY` (
-  `idBadge` INT NOT NULL,
+CREATE TABLE IF NOT EXISTS `cyberhoot`.`user_badges` (
   `idUser` INT NOT NULL,
+  `idBadge` INT NOT NULL,
   `obtainedAt` DATE NULL,
-  `idTrophy` INT NOT NULL,
-  PRIMARY KEY (`idTrophy`),
-  INDEX `idBadges_idx` (`idBadge` ASC) VISIBLE,
-  INDEX `idUser_idx` (`idUser` ASC) VISIBLE,
-  CONSTRAINT `fk_trophy_badges`
-    FOREIGN KEY (`idBadge`)
-    REFERENCES `cyberhoot`.`BADGES` (`idBADGES`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `fk_badges_user`
+  PRIMARY KEY (`idUser`, `idBadge`),
+  INDEX `idBadge_idx` (`idBadge` ASC) VISIBLE,
+  CONSTRAINT `fk_user_badges_user`
     FOREIGN KEY (`idUser`)
     REFERENCES `cyberhoot`.`USER` (`idUSER`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_user_badges_badge`
+    FOREIGN KEY (`idBadge`)
+    REFERENCES `cyberhoot`.`BADGES` (`idBADGES`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -155,6 +153,7 @@ CREATE TABLE IF NOT EXISTS `cyberhoot`.`MEDIA` (
   `idMediaFromResponse` INT NULL,
   `mediaUrl` VARCHAR(255) NULL,
   `mediaType` VARCHAR(50) NULL,
+  `mediaLabel` VARCHAR(255) NULL,
   PRIMARY KEY (`idMEDIA`),
   INDEX `idMediaFromQuestion_idx` (`idMediaFromQuestion` ASC) VISIBLE,
   INDEX `idMediaFromResponse_idx` (`idMediaFromResponse` ASC) VISIBLE,
@@ -179,7 +178,7 @@ CREATE TABLE IF NOT EXISTS `cyberhoot`.`RESULT` (
   `idQUIZinResult` INT NOT NULL,
   `idUSERinResult` INT NOT NULL,
   `date` DATE NULL,
-  `resultHistory` VARCHAR(255) NULL COMMENT "ici prévoir un champ pour garder en mémoire les réponses à chaque question qu\'un utilisateur a donné pour un quiz",
+  `answer` TEXT NULL,
   `score` INT NULL,
   `totalQuestions` INT NULL,
   PRIMARY KEY (`idRESULT`),
@@ -199,15 +198,15 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `cyberhoot`.`CONNEXION_LOG`
+-- Table `cyberhoot`.`CONNECTION_LOG`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `cyberhoot`.`CONNEXION_LOG` (
-  `idCONNEXION_LOG` INT NOT NULL AUTO_INCREMENT,
-  `idUSERforConnexion` INT NOT NULL,
-  PRIMARY KEY (`idCONNEXION_LOG`),
-  INDEX `idUSERforConnexion_idx` (`idUSERforConnexion` ASC) VISIBLE,
-  CONSTRAINT `fk_connexionlog_user`
-    FOREIGN KEY (`idUSERforConnexion`)
+CREATE TABLE IF NOT EXISTS `cyberhoot`.`CONNECTION_LOG` (
+  `idConnection_log` INT NOT NULL AUTO_INCREMENT,
+  `idUserForConnection` INT NOT NULL,
+  PRIMARY KEY (`idConnection_log`),
+  INDEX `idUserForConnection_idx` (`idUserForConnection` ASC) VISIBLE,
+  CONSTRAINT `fk_connectionlog_user`
+    FOREIGN KEY (`idUserForConnection`)
     REFERENCES `cyberhoot`.`USER` (`idUSER`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)

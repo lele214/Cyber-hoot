@@ -32,7 +32,7 @@ class User(db.Model):
 
     idUSER = db.Column(db.Integer, primary_key=True, autoincrement=True)
     username = db.Column(db.String(45), nullable=True)
-    hashpassword = db.Column(db.String(255), nullable=True)
+    hashpassword = db.Column(db.String(512), nullable=True)
     emailUser = db.Column(db.String(45), nullable=True)
     # Relation many-to-many avec Role via userToRoles
     roles = db.relationship("Role", secondary="userToRoles", back_populates="users")
@@ -42,7 +42,7 @@ class User(db.Model):
         "Quiz", back_populates="creator", foreign_keys="Quiz.idCreatedByUser"
     )
     notifications = db.relationship("Notification", back_populates="user")
-    trophies = db.relationship("Trophy", back_populates="user")
+    user_badges = db.relationship("UserBadge", back_populates="user")
     results = db.relationship("Result", back_populates="user")
     connection_logs = db.relationship("ConnectionLog", back_populates="user")
 
@@ -98,7 +98,7 @@ class Badge(db.Model):
 
     # Relations
     quiz = db.relationship("Quiz", back_populates="badges")
-    trophies = db.relationship("Trophy", back_populates="badge")
+    user_badges = db.relationship("UserBadge", back_populates="badge")
 
     def __repr__(self):
         return f"<Badge {self.name}>"
@@ -121,20 +121,16 @@ class Notification(db.Model):
         return f"<Notification {self.type} for User {self.idUser}>"
 
 
-class Trophy(db.Model):
-    __tablename__ = "TROPHY"
+class UserBadge(db.Model):
+    __tablename__ = "user_badges"
 
-    idTrophy = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    idBadge = db.Column(db.Integer, db.ForeignKey("BADGES.idBadges"), nullable=False)
-    idUser = db.Column(db.Integer, db.ForeignKey("USER.idUSER"), nullable=False)
+    idUser = db.Column(db.Integer, db.ForeignKey("USER.idUSER"), nullable=False, primary_key=True)
+    idBadge = db.Column(db.Integer, db.ForeignKey("BADGES.idBadges"), nullable=False, primary_key=True)
     obtainedAt = db.Column(db.Date, nullable=True)
 
     # Relations
-    badge = db.relationship("Badge", back_populates="trophies")
-    user = db.relationship("User", back_populates="trophies")
-
-    def __repr__(self):
-        return f"<Trophy {self.idTrophy}>"
+    user = db.relationship("User", back_populates="user_badges")
+    badge = db.relationship("Badge", back_populates="user_badges")
 
 
 class Question(db.Model):
@@ -189,6 +185,7 @@ class Media(db.Model):
     )
     mediaUrl = db.Column(db.String(255), nullable=True)
     mediaType = db.Column(db.String(50), nullable=True)
+    mediaLabel = db.Column(db.String(255), nullable=True)
 
     # Relations
     question = db.relationship(
@@ -216,7 +213,7 @@ class Result(db.Model):
         db.Integer, nullable=True, comment="Nombre total de questions dans le quiz"
     )
     # resultHistory = db.Column(db.String(45), nullable=True, comment="commentaire")
-    answer = db.Column(db.String(45), nullable=True, comment="commentaire")
+    answer = db.Column(db.Text, nullable=True)
 
     # Relations
     quiz = db.relationship("Quiz", back_populates="results")

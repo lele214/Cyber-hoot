@@ -72,13 +72,17 @@ def quiz_detail(quiz_id):
             )
             if response.isCorrect:
                 correct_answers[f"q{i}"] = str(j)
-        media = Media.query.filter_by(idMediaFromQuestion=question.idQUESTION).first()
+        q_medias = Media.query.filter_by(idMediaFromQuestion=question.idQUESTION).all()
+        image_media = next((m for m in q_medias if m.mediaType != "link"), None)
+        link_media = next((m for m in q_medias if m.mediaType == "link"), None)
         questions_data.append(
             {
                 "index": i,
                 "text": question.QuestionText,
                 "responses": responses,
-                "media_id": media.idMEDIA if media else None,
+                "media_id": image_media.idMEDIA if image_media else None,
+                "link_url": link_media.mediaUrl if link_media else None,
+                "link_label": link_media.mediaLabel if link_media else None,
             }
         )
 
