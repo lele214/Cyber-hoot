@@ -21,7 +21,7 @@ from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 # import de l'application (base de donnée, les models de page, la config de l'appli flask)
 # fonction try/except dans extensions.py
 from app.extensions import db_transaction
-from app.models.models import User, ConnexionLog, Role
+from app.models.models import User, ConnectionLog, Role
 from flask import current_app
 
 
@@ -45,7 +45,6 @@ def login_post():
         flash("Veuillez remplir tous les champs", "error")
         return render_template("auth/login.html")
 
-    # Vérifier dans la base de données
     user = User.query.filter_by(username=username).first()
 
     if user and check_password_hash(user.hashpassword, password):
@@ -56,7 +55,7 @@ def login_post():
         session["user_roles"] = user_roles
 
         with db_transaction() as db_session:
-            connexion_log = ConnexionLog(idUSERforConnexion=user.idUSER)
+            connexion_log = ConnectionLog(idUserForConnection=user.idUSER)
             db_session.add(connexion_log)
         # db.session.add(connexion_log)
         # db.session.commit()
@@ -81,7 +80,6 @@ def register_post():
     username = request.form.get("username")
     password = request.form.get("password")
     password_confirm = request.form.get("password_confirm")
-
     # Ici est noté toutes les restrictions liées au mot de passe
     if not email or not username or not password or not password_confirm:
         flash("Veuillez remplir tous les champs", "error")
