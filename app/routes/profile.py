@@ -28,6 +28,7 @@ from app.decorators import login_required, role_required
 from app.routes.auth import generate_reset_token
 from werkzeug.utils import secure_filename
 from datetime import date
+from app.services.virustotal import scan_file, VirusTotalError
 import uuid
 import os
 
@@ -43,10 +44,16 @@ def allowed_file(filename):
 
 
 def save_upload(file):
-    """Sauvegarde un fichier uploadé avec un nom unique. Retourne le nom du fichier."""
+    """Sauvegarde un fichier uploadé après scan VirusTotal. Lève VirusTotalError si rejeté."""
     ext = secure_filename(file.filename).rsplit(".", 1)[1].lower()
     unique_name = f"{uuid.uuid4().hex}.{ext}"
-    file.save(os.path.join(current_app.config["UPLOAD_FOLDER"], unique_name))
+    filepath = os.path.join(current_app.config["UPLOAD_FOLDER"], unique_name)
+    file.save(filepath)
+    try:
+        scan_file(filepath)
+    except VirusTotalError:
+        os.remove(filepath)
+        raise
     return unique_name
 
 
@@ -441,73 +448,77 @@ def creator_quiz_create_post():
         return render_template("profile/creator/creator_quiz_create.html")
 
     # Création du quiz, des questions et des réponses en base de données
-    with db_transaction() as db_session:
-        new_quiz = Quiz(
-            title=title,
-            difficulty=difficulty,
-            statut="DRAFT",
-            createdAt=date.today(),
-            idCreatedByUser=session.get("user_id"),
-        )
-        db_session.add(new_quiz)
-        db_session.flush()  # Pour obtenir l'ID du quiz
-
-        for q_data in questions_data:
-            new_question = Question(
-                QuestionText=q_data["text"],
-                idQuestionFromQuiz=new_quiz.idQUIZ,
+    try:
+        with db_transaction() as db_session:
+            new_quiz = Quiz(
+                title=title,
+                difficulty=difficulty,
+                statut="DRAFT",
+                createdAt=date.today(),
+                idCreatedByUser=session.get("user_id"),
             )
-            db_session.add(new_question)
-            db_session.flush()  # Pour obtenir l'ID de la question
+            db_session.add(new_quiz)
+            db_session.flush()  # Pour obtenir l'ID du quiz
 
-            # Gérer l'image optionnelle de la question
-            file_key = f"question_image_{q_data['form_index']}"
-            file = request.files.get(file_key)
-            if file and file.filename and allowed_file(file.filename):
-                filename = save_upload(file)
-                new_media = Media(
-                    mediaUrl=filename,
-                    mediaType=file.content_type,
-                    idMediaFromQuestion=new_question.idQUESTION,
+            for q_data in questions_data:
+                new_question = Question(
+                    QuestionText=q_data["text"],
+                    idQuestionFromQuiz=new_quiz.idQUIZ,
                 )
-                db_session.add(new_media)
+                db_session.add(new_question)
+                db_session.flush()  # Pour obtenir l'ID de la question
 
-            # Gérer le lien ressource optionnel de la question
-            link_url = request.form.get(f"question_link_url_{q_data['form_index']}", "").strip()
-            link_label = request.form.get(f"question_link_label_{q_data['form_index']}", "").strip()
-            if link_url and link_url.startswith(("http://", "https://")):
-                db_session.add(
-                    Media(
-                        mediaUrl=link_url,
-                        mediaType="link",
-                        mediaLabel=link_label or link_url,
-                        idMediaFromQuestion=new_question.idQUESTION,
-                    )
-                )
-
-            for r_data in q_data["responses"]:
-                new_response = Response(
-                    responseText=r_data["text"],
-                    isCorrect=r_data["is_correct"],
-                    idResponseFromQuestion=new_question.idQUESTION,
-                )
-                db_session.add(new_response)
-                db_session.flush()
-
-                # Gérer l'image optionnelle de la réponse
-                file_key = (
-                    f"response_image_{q_data['form_index']}_{r_data['form_rindex']}"
-                )
+                # Gérer l'image optionnelle de la question
+                file_key = f"question_image_{q_data['form_index']}"
                 file = request.files.get(file_key)
                 if file and file.filename and allowed_file(file.filename):
                     filename = save_upload(file)
+                    new_media = Media(
+                        mediaUrl=filename,
+                        mediaType=file.content_type,
+                        idMediaFromQuestion=new_question.idQUESTION,
+                    )
+                    db_session.add(new_media)
+
+                # Gérer le lien ressource optionnel de la question
+                link_url = request.form.get(f"question_link_url_{q_data['form_index']}", "").strip()
+                link_label = request.form.get(f"question_link_label_{q_data['form_index']}", "").strip()
+                if link_url and link_url.startswith(("http://", "https://")):
                     db_session.add(
                         Media(
-                            mediaUrl=filename,
-                            mediaType=file.content_type,
-                            idMediaFromResponse=new_response.idRESPONSE,
+                            mediaUrl=link_url,
+                            mediaType="link",
+                            mediaLabel=link_label or link_url,
+                            idMediaFromQuestion=new_question.idQUESTION,
                         )
                     )
+
+                for r_data in q_data["responses"]:
+                    new_response = Response(
+                        responseText=r_data["text"],
+                        isCorrect=r_data["is_correct"],
+                        idResponseFromQuestion=new_question.idQUESTION,
+                    )
+                    db_session.add(new_response)
+                    db_session.flush()
+
+                    # Gérer l'image optionnelle de la réponse
+                    file_key = (
+                        f"response_image_{q_data['form_index']}_{r_data['form_rindex']}"
+                    )
+                    file = request.files.get(file_key)
+                    if file and file.filename and allowed_file(file.filename):
+                        filename = save_upload(file)
+                        db_session.add(
+                            Media(
+                                mediaUrl=filename,
+                                mediaType=file.content_type,
+                                idMediaFromResponse=new_response.idRESPONSE,
+                            )
+                        )
+    except VirusTotalError as e:
+        flash(str(e), "error")
+        return render_template("profile/creator/creator_quiz_create.html")
 
     flash("Quiz créé avec succès !", "success")
     return redirect(url_for("profile.creator_dashboard"))
@@ -633,107 +644,71 @@ def creator_quiz_edit_post(quiz_id):
         return redirect(url_for("profile.creator_quiz_edit", quiz_id=quiz_id))
 
     # Mise à jour du quiz en base de données
-    with db_transaction() as db_session:
-        # Met à jour les infos du quiz
-        quiz.title = title
-        quiz.difficulty = difficulty
-        if quiz.statut == "PUBLISHED":
-            quiz.statut = "MODIFIED"
+    try:
+        with db_transaction() as db_session:
+            # Met à jour les infos du quiz
+            quiz.title = title
+            quiz.difficulty = difficulty
+            if quiz.statut == "PUBLISHED":
+                quiz.statut = "MODIFIED"
 
-        # Supprime les anciens médias (question + réponse) du disque + de la DB
-        question_ids = [
-            q.idQUESTION
-            for q in Question.query.filter_by(idQuestionFromQuiz=quiz.idQUIZ).all()
-        ]
-        if question_ids:
-            # Médias des questions
-            for m in Media.query.filter(
-                Media.idMediaFromQuestion.in_(question_ids)
-            ).all():
-                filepath = os.path.join(current_app.config["UPLOAD_FOLDER"], m.mediaUrl)
-                if os.path.exists(filepath):
-                    os.remove(filepath)
-            Media.query.filter(Media.idMediaFromQuestion.in_(question_ids)).delete(
-                synchronize_session=False
-            )
-
-            # Médias des réponses
-            response_ids = [
-                r.idRESPONSE
-                for r in Response.query.filter(
-                    Response.idResponseFromQuestion.in_(question_ids)
-                ).all()
+            # Supprime les anciens médias (question + réponse) du disque + de la DB
+            question_ids = [
+                q.idQUESTION
+                for q in Question.query.filter_by(idQuestionFromQuiz=quiz.idQUIZ).all()
             ]
-            if response_ids:
+            if question_ids:
+                # Médias des questions
                 for m in Media.query.filter(
-                    Media.idMediaFromResponse.in_(response_ids)
+                    Media.idMediaFromQuestion.in_(question_ids)
                 ).all():
-                    filepath = os.path.join(
-                        current_app.config["UPLOAD_FOLDER"], m.mediaUrl
-                    )
+                    filepath = os.path.join(current_app.config["UPLOAD_FOLDER"], m.mediaUrl)
                     if os.path.exists(filepath):
                         os.remove(filepath)
-                Media.query.filter(Media.idMediaFromResponse.in_(response_ids)).delete(
+                Media.query.filter(Media.idMediaFromQuestion.in_(question_ids)).delete(
                     synchronize_session=False
                 )
 
-            Response.query.filter(
-                Response.idResponseFromQuestion.in_(question_ids)
-            ).delete(synchronize_session=False)
-            Question.query.filter(Question.idQuestionFromQuiz == quiz.idQUIZ).delete(
-                synchronize_session=False
-            )
+                # Médias des réponses
+                response_ids = [
+                    r.idRESPONSE
+                    for r in Response.query.filter(
+                        Response.idResponseFromQuestion.in_(question_ids)
+                    ).all()
+                ]
+                if response_ids:
+                    for m in Media.query.filter(
+                        Media.idMediaFromResponse.in_(response_ids)
+                    ).all():
+                        filepath = os.path.join(
+                            current_app.config["UPLOAD_FOLDER"], m.mediaUrl
+                        )
+                        if os.path.exists(filepath):
+                            os.remove(filepath)
+                    Media.query.filter(Media.idMediaFromResponse.in_(response_ids)).delete(
+                        synchronize_session=False
+                    )
 
-        db_session.flush()
+                Response.query.filter(
+                    Response.idResponseFromQuestion.in_(question_ids)
+                ).delete(synchronize_session=False)
+                Question.query.filter(Question.idQuestionFromQuiz == quiz.idQUIZ).delete(
+                    synchronize_session=False
+                )
 
-        # Recrée les nouvelles questions, réponses et médias
-        for q_data in questions_data:
-            new_question = Question(
-                QuestionText=q_data["text"],
-                idQuestionFromQuiz=quiz.idQUIZ,
-            )
-            db_session.add(new_question)
             db_session.flush()
 
-            # Gérer l'image optionnelle de la question
-            file_key = f"question_image_{q_data['form_index']}"
-            file = request.files.get(file_key)
-            if file and file.filename and allowed_file(file.filename):
-                filename = save_upload(file)
-                db_session.add(
-                    Media(
-                        mediaUrl=filename,
-                        mediaType=file.content_type,
-                        idMediaFromQuestion=new_question.idQUESTION,
-                    )
+            # Recrée les nouvelles questions, réponses et médias
+            for q_data in questions_data:
+                new_question = Question(
+                    QuestionText=q_data["text"],
+                    idQuestionFromQuiz=quiz.idQUIZ,
                 )
-
-            # Gérer le lien ressource optionnel de la question
-            link_url = request.form.get(f"question_link_url_{q_data['form_index']}", "").strip()
-            link_label = request.form.get(f"question_link_label_{q_data['form_index']}", "").strip()
-            if link_url and link_url.startswith(("http://", "https://")):
-                db_session.add(
-                    Media(
-                        mediaUrl=link_url,
-                        mediaType="link",
-                        mediaLabel=link_label or link_url,
-                        idMediaFromQuestion=new_question.idQUESTION,
-                    )
-                )
-
-            for r_data in q_data["responses"]:
-                new_response = Response(
-                    responseText=r_data["text"],
-                    isCorrect=r_data["is_correct"],
-                    idResponseFromQuestion=new_question.idQUESTION,
-                )
-                db_session.add(new_response)
+                db_session.add(new_question)
                 db_session.flush()
 
-                # Gérer l'image optionnelle de la réponse
-                file_key = (
-                    f"response_image_{q_data['form_index']}_{r_data['form_rindex']}"
-                )
+                # Gérer l'image optionnelle de la question
+                file_key = f"question_image_{q_data['form_index']}"
                 file = request.files.get(file_key)
                 if file and file.filename and allowed_file(file.filename):
                     filename = save_upload(file)
@@ -741,9 +716,49 @@ def creator_quiz_edit_post(quiz_id):
                         Media(
                             mediaUrl=filename,
                             mediaType=file.content_type,
-                            idMediaFromResponse=new_response.idRESPONSE,
+                            idMediaFromQuestion=new_question.idQUESTION,
                         )
                     )
+
+                # Gérer le lien ressource optionnel de la question
+                link_url = request.form.get(f"question_link_url_{q_data['form_index']}", "").strip()
+                link_label = request.form.get(f"question_link_label_{q_data['form_index']}", "").strip()
+                if link_url and link_url.startswith(("http://", "https://")):
+                    db_session.add(
+                        Media(
+                            mediaUrl=link_url,
+                            mediaType="link",
+                            mediaLabel=link_label or link_url,
+                            idMediaFromQuestion=new_question.idQUESTION,
+                        )
+                    )
+
+                for r_data in q_data["responses"]:
+                    new_response = Response(
+                        responseText=r_data["text"],
+                        isCorrect=r_data["is_correct"],
+                        idResponseFromQuestion=new_question.idQUESTION,
+                    )
+                    db_session.add(new_response)
+                    db_session.flush()
+
+                    # Gérer l'image optionnelle de la réponse
+                    file_key = (
+                        f"response_image_{q_data['form_index']}_{r_data['form_rindex']}"
+                    )
+                    file = request.files.get(file_key)
+                    if file and file.filename and allowed_file(file.filename):
+                        filename = save_upload(file)
+                        db_session.add(
+                            Media(
+                                mediaUrl=filename,
+                                mediaType=file.content_type,
+                                idMediaFromResponse=new_response.idRESPONSE,
+                            )
+                        )
+    except VirusTotalError as e:
+        flash(str(e), "error")
+        return redirect(url_for("profile.creator_quiz_edit", quiz_id=quiz_id))
 
     flash("Quiz modifié avec succès !", "success")
     return redirect(url_for("profile.creator_dashboard"))
@@ -1082,104 +1097,68 @@ def admin_quiz_edit_post(quiz_id):
         return redirect(url_for("profile.admin_quiz_edit", quiz_id=quiz_id))
 
     # Mise à jour du quiz en base de données
-    with db_transaction() as db_session:
-        quiz.title = title
-        quiz.difficulty = difficulty
+    try:
+        with db_transaction() as db_session:
+            quiz.title = title
+            quiz.difficulty = difficulty
 
-        # Supprime les anciens médias (question + réponse) du disque + de la DB
-        question_ids = [
-            q.idQUESTION
-            for q in Question.query.filter_by(idQuestionFromQuiz=quiz.idQUIZ).all()
-        ]
-        if question_ids:
-            # Médias des questions
-            for m in Media.query.filter(
-                Media.idMediaFromQuestion.in_(question_ids)
-            ).all():
-                filepath = os.path.join(current_app.config["UPLOAD_FOLDER"], m.mediaUrl)
-                if os.path.exists(filepath):
-                    os.remove(filepath)
-            Media.query.filter(Media.idMediaFromQuestion.in_(question_ids)).delete(
-                synchronize_session=False
-            )
-
-            # Médias des réponses
-            response_ids = [
-                r.idRESPONSE
-                for r in Response.query.filter(
-                    Response.idResponseFromQuestion.in_(question_ids)
-                ).all()
+            # Supprime les anciens médias (question + réponse) du disque + de la DB
+            question_ids = [
+                q.idQUESTION
+                for q in Question.query.filter_by(idQuestionFromQuiz=quiz.idQUIZ).all()
             ]
-            if response_ids:
+            if question_ids:
+                # Médias des questions
                 for m in Media.query.filter(
-                    Media.idMediaFromResponse.in_(response_ids)
+                    Media.idMediaFromQuestion.in_(question_ids)
                 ).all():
-                    filepath = os.path.join(
-                        current_app.config["UPLOAD_FOLDER"], m.mediaUrl
-                    )
+                    filepath = os.path.join(current_app.config["UPLOAD_FOLDER"], m.mediaUrl)
                     if os.path.exists(filepath):
                         os.remove(filepath)
-                Media.query.filter(Media.idMediaFromResponse.in_(response_ids)).delete(
+                Media.query.filter(Media.idMediaFromQuestion.in_(question_ids)).delete(
                     synchronize_session=False
                 )
 
-            Response.query.filter(
-                Response.idResponseFromQuestion.in_(question_ids)
-            ).delete(synchronize_session=False)
-            Question.query.filter(Question.idQuestionFromQuiz == quiz.idQUIZ).delete(
-                synchronize_session=False
-            )
+                # Médias des réponses
+                response_ids = [
+                    r.idRESPONSE
+                    for r in Response.query.filter(
+                        Response.idResponseFromQuestion.in_(question_ids)
+                    ).all()
+                ]
+                if response_ids:
+                    for m in Media.query.filter(
+                        Media.idMediaFromResponse.in_(response_ids)
+                    ).all():
+                        filepath = os.path.join(
+                            current_app.config["UPLOAD_FOLDER"], m.mediaUrl
+                        )
+                        if os.path.exists(filepath):
+                            os.remove(filepath)
+                    Media.query.filter(Media.idMediaFromResponse.in_(response_ids)).delete(
+                        synchronize_session=False
+                    )
 
-        db_session.flush()
+                Response.query.filter(
+                    Response.idResponseFromQuestion.in_(question_ids)
+                ).delete(synchronize_session=False)
+                Question.query.filter(Question.idQuestionFromQuiz == quiz.idQUIZ).delete(
+                    synchronize_session=False
+                )
 
-        # Recrée les nouvelles questions, réponses et médias
-        for q_data in questions_data:
-            new_question = Question(
-                QuestionText=q_data["text"],
-                idQuestionFromQuiz=quiz.idQUIZ,
-            )
-            db_session.add(new_question)
             db_session.flush()
 
-            # Gérer l'image optionnelle de la question
-            file_key = f"question_image_{q_data['form_index']}"
-            file = request.files.get(file_key)
-            if file and file.filename and allowed_file(file.filename):
-                filename = save_upload(file)
-                db_session.add(
-                    Media(
-                        mediaUrl=filename,
-                        mediaType=file.content_type,
-                        idMediaFromQuestion=new_question.idQUESTION,
-                    )
+            # Recrée les nouvelles questions, réponses et médias
+            for q_data in questions_data:
+                new_question = Question(
+                    QuestionText=q_data["text"],
+                    idQuestionFromQuiz=quiz.idQUIZ,
                 )
-
-            # Gérer le lien ressource optionnel de la question
-            link_url = request.form.get(f"question_link_url_{q_data['form_index']}", "").strip()
-            link_label = request.form.get(f"question_link_label_{q_data['form_index']}", "").strip()
-            if link_url and link_url.startswith(("http://", "https://")):
-                db_session.add(
-                    Media(
-                        mediaUrl=link_url,
-                        mediaType="link",
-                        mediaLabel=link_label or link_url,
-                        idMediaFromQuestion=new_question.idQUESTION,
-                    )
-                )
-
-            for r_data in q_data["responses"]:
-                new_response = Response(
-                    responseText=r_data["text"],
-                    isCorrect=r_data["is_correct"],
-                    idResponseFromQuestion=new_question.idQUESTION,
-                )
-                db_session.add(new_response)
+                db_session.add(new_question)
                 db_session.flush()
 
-                # Gérer l'image optionnelle de la réponse
-                file_key = (
-                    f"response_image_{q_data['form_index']}_{r_data['form_rindex']}"
-                )
+                # Gérer l'image optionnelle de la question
+                file_key = f"question_image_{q_data['form_index']}"
                 file = request.files.get(file_key)
                 if file and file.filename and allowed_file(file.filename):
                     filename = save_upload(file)
@@ -1187,9 +1166,49 @@ def admin_quiz_edit_post(quiz_id):
                         Media(
                             mediaUrl=filename,
                             mediaType=file.content_type,
-                            idMediaFromResponse=new_response.idRESPONSE,
+                            idMediaFromQuestion=new_question.idQUESTION,
                         )
                     )
+
+                # Gérer le lien ressource optionnel de la question
+                link_url = request.form.get(f"question_link_url_{q_data['form_index']}", "").strip()
+                link_label = request.form.get(f"question_link_label_{q_data['form_index']}", "").strip()
+                if link_url and link_url.startswith(("http://", "https://")):
+                    db_session.add(
+                        Media(
+                            mediaUrl=link_url,
+                            mediaType="link",
+                            mediaLabel=link_label or link_url,
+                            idMediaFromQuestion=new_question.idQUESTION,
+                        )
+                    )
+
+                for r_data in q_data["responses"]:
+                    new_response = Response(
+                        responseText=r_data["text"],
+                        isCorrect=r_data["is_correct"],
+                        idResponseFromQuestion=new_question.idQUESTION,
+                    )
+                    db_session.add(new_response)
+                    db_session.flush()
+
+                    # Gérer l'image optionnelle de la réponse
+                    file_key = (
+                        f"response_image_{q_data['form_index']}_{r_data['form_rindex']}"
+                    )
+                    file = request.files.get(file_key)
+                    if file and file.filename and allowed_file(file.filename):
+                        filename = save_upload(file)
+                        db_session.add(
+                            Media(
+                                mediaUrl=filename,
+                                mediaType=file.content_type,
+                                idMediaFromResponse=new_response.idRESPONSE,
+                            )
+                        )
+    except VirusTotalError as e:
+        flash(str(e), "error")
+        return redirect(url_for("profile.admin_quiz_edit", quiz_id=quiz_id))
 
     flash("Quiz modifié avec succès !", "success")
     return redirect(url_for("profile.admin_dashboard"))
