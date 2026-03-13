@@ -4,3 +4,4 @@ pymysql
 python-dotenv
 werkzeug
 itsdangerous
+alembic

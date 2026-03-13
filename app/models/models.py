@@ -141,6 +141,7 @@ class Question(db.Model):
         db.Integer, db.ForeignKey("QUIZ.idQUIZ"), nullable=False
     )
     QuestionText = db.Column(db.String(500), nullable=True)
+    explanation = db.Column(db.Text, nullable=True)
 
     # Relations
     quiz = db.relationship("Quiz", back_populates="questions")
