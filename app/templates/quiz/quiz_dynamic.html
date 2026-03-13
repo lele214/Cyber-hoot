@@ -103,12 +103,16 @@
                 <h2 class="text-cyber-text-lighter text-3xl font-bold mb-6 text-center text-glow">
                     Résultats
                 </h2>
-                <div class="text-center mb-6">
+                <div class="text-center mb-8">
                     <p class="text-cyber-text-light text-2xl mb-2">
                         Score : <span id="score" class="text-cyber-accent font-bold"></span>
                     </p>
                     <p id="message" class="text-cyber-text-muted text-lg"></p>
                 </div>
+
+                <!-- Détail par question -->
+                <div id="results-detail" class="space-y-4 mb-8"></div>
+
                 <div class="flex justify-center gap-4">
                     <button onclick="window.location.reload()" class="btn-cyber">
                         Recommencer
@@ -127,7 +131,10 @@
     </footer>
 
     {% if session.get('user_id') %}
-    <div id="quizData" data-answers='{{ correct_answers | tojson }}' data-quiz-id="{{ quiz.idQUIZ }}"></div>
+    <div id="quizData"
+         data-answers='{{ correct_answers | tojson }}'
+         data-quiz-id="{{ quiz.idQUIZ }}"
+         data-questions='{{ questions_data | tojson }}'></div>
     <script src="{{ url_for('static', filename='js/quiz_dynamic.js') }}"></script>
     {% endif %}
 </body>

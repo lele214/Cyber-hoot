@@ -40,6 +40,8 @@ services:
       - ./database:/app/database
       - ./run.py:/app/run.py
       - ./uploads:/app/uploads
+      - ./alembic:/app/alembic
+      - ./alembic.ini:/app/alembic.ini
     env_file:
       - .env
     environment:
