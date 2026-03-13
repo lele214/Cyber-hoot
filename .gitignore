@@ -80,3 +80,4 @@ site/
 *.key
 *.cert
 secrets/
+2026-*-exercice-*.md
