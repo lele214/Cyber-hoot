@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modifier le badge - Cyber-hoot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='output.css') }}">
+</head>
+
+<body class="min-h-screen py-10 px-5 scanline relative">
+    <a href="{{ url_for('profile.admin_dashboard') }}"
+        class="fixed top-5 left-5 px-6 py-3 bg-transparent border-2 border-cyber-accent text-cyber-text-lighter rounded-lg font-semibold text-sm transition-all duration-300 hover:bg-cyber-border hover:border-cyber-accent-light hover:shadow-glow-sm hover:-translate-x-1 z-50">
+        ← Retour Admin
+    </a>
+
+    <div class="max-w-2xl mx-auto">
+        <div class="text-center mb-10">
+            <h1 class="text-cyber-text-lighter text-3xl font-bold tracking-wide text-glow">
+                Modifier le badge
+            </h1>
+            <p class="text-cyber-text-muted mt-2">{{ badge.icon }} {{ badge.name }}</p>
+        </div>
+
+        <div class="feature-box">
+            <form method="post" class="space-y-5">
+
+                <div>
+                    <label class="block text-cyber-text-lighter text-sm font-semibold mb-1">Icône (emoji)</label>
+                    <input type="text" name="icon" value="{{ badge.icon or '' }}" maxlength="10"
+                        class="w-full bg-cyber-border/30 border border-cyber-border rounded-lg px-4 py-2 text-cyber-text-lighter focus:border-cyber-accent outline-none text-2xl">
+                </div>
+
+                <div>
+                    <label class="block text-cyber-text-lighter text-sm font-semibold mb-1">Nom du badge</label>
+                    <input type="text" name="name" value="{{ badge.name or '' }}" maxlength="100" required
+                        class="w-full bg-cyber-border/30 border border-cyber-border rounded-lg px-4 py-2 text-cyber-text-lighter focus:border-cyber-accent outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-cyber-text-lighter text-sm font-semibold mb-1">Description</label>
+                    <input type="text" name="description" value="{{ badge.description or '' }}" maxlength="255"
+                        class="w-full bg-cyber-border/30 border border-cyber-border rounded-lg px-4 py-2 text-cyber-text-lighter focus:border-cyber-accent outline-none">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-cyber-text-lighter text-sm font-semibold mb-1">Score min (%)</label>
+                        <input type="number" name="score_min" value="{{ badge.score_min if badge.score_min is not none else '' }}"
+                            min="0" max="100"
+                            class="w-full bg-cyber-border/30 border border-cyber-border rounded-lg px-4 py-2 text-cyber-text-lighter focus:border-cyber-accent outline-none">
+                        <p class="text-cyber-text-muted text-xs mt-1">Laisser vide si non applicable</p>
+                    </div>
+                    <div>
+                        <label class="block text-cyber-text-lighter text-sm font-semibold mb-1">Score max (%)</label>
+                        <input type="number" name="score_max" value="{{ badge.score_max if badge.score_max is not none else '' }}"
+                            min="0" max="100"
+                            class="w-full bg-cyber-border/30 border border-cyber-border rounded-lg px-4 py-2 text-cyber-text-lighter focus:border-cyber-accent outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-cyber-text-lighter text-sm font-semibold mb-1">Catégorie (vide = global)</label>
+                    <select name="category"
+                        class="w-full bg-cyber-border/30 border border-cyber-border rounded-lg px-4 py-2 text-cyber-text-lighter focus:border-cyber-accent outline-none">
+                        <option value="">Global (toutes catégories)</option>
+                        <option value="INTRODUCTION_CYBER" {% if badge.category == 'INTRODUCTION_CYBER' %}selected{% endif %}>Introduction Cyber</option>
+                        <option value="SECURITE_WEB" {% if badge.category == 'SECURITE_WEB' %}selected{% endif %}>Sécurité Web</option>
+                        <option value="MALWARE" {% if badge.category == 'MALWARE' %}selected{% endif %}>Malware</option>
+                        <option value="RESEAUX" {% if badge.category == 'RESEAUX' %}selected{% endif %}>Réseaux</option>
+                        <option value="CRYPTOGRAPHIE" {% if badge.category == 'CRYPTOGRAPHIE' %}selected{% endif %}>Cryptographie</option>
+                        <option value="INGENIERIE_SOCIALE" {% if badge.category == 'INGENIERIE_SOCIALE' %}selected{% endif %}>Ingénierie sociale</option>
+                    </select>
+                </div>
+
+                <div class="pt-4 flex gap-4">
+                    <button type="submit" class="btn-cyber-primary flex-1">
+                        Enregistrer les modifications
+                    </button>
+                    <a href="{{ url_for('profile.admin_dashboard') }}"
+                        class="btn-cyber flex-1 text-center">
+                        Annuler
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        <p class="flex justify-center pt-7">Copyright BTS SIO</p>
+    </footer>
+</body>
+
+</html>
