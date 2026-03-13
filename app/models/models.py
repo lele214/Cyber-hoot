@@ -45,6 +45,7 @@ class User(db.Model):
     user_badges = db.relationship("UserBadge", back_populates="user")
     results = db.relationship("Result", back_populates="user")
     connection_logs = db.relationship("ConnectionLog", back_populates="user")
+    reviews = db.relationship("Review", back_populates="user")
 
     def __repr__(self):
         return f"<User {self.username}>"
@@ -82,6 +83,7 @@ class Quiz(db.Model):
     badges = db.relationship("Badge", back_populates="quiz")
     questions = db.relationship("Question", back_populates="quiz")
     results = db.relationship("Result", back_populates="quiz")
+    reviews = db.relationship("Review", back_populates="quiz")
 
     def __repr__(self):
         return f"<Quiz {self.title}>"
@@ -220,6 +222,28 @@ class Result(db.Model):
 
     def __repr__(self):
         return f"<Result {self.idRESULT}>"
+
+
+class Review(db.Model):
+    __tablename__ = "REVIEW"
+
+    idREVIEW = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    idUSERinReview = db.Column(db.Integer, db.ForeignKey("USER.idUSER"), nullable=False)
+    idQUIZinReview = db.Column(db.Integer, db.ForeignKey("QUIZ.idQUIZ"), nullable=False)
+    rating = db.Column(db.Integer, nullable=False)  # 1 à 5
+    comment = db.Column(db.Text, nullable=True)
+    date = db.Column(db.Date, nullable=True)
+
+    __table_args__ = (
+        db.UniqueConstraint("idUSERinReview", "idQUIZinReview", name="unique_user_quiz_review"),
+    )
+
+    # Relations
+    user = db.relationship("User", back_populates="reviews")
+    quiz = db.relationship("Quiz", back_populates="reviews")
+
+    def __repr__(self):
+        return f"<Review user={self.idUSERinReview} quiz={self.idQUIZinReview} rating={self.rating}>"
 
 
 class ConnectionLog(db.Model):

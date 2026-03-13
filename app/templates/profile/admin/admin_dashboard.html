@@ -14,6 +14,28 @@
         ← Retour au profil
     </a>
 
+    <!-- Messages flash -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div id="flash-container" class="fixed top-5 right-5 z-50 space-y-2 max-w-sm">
+        {% for category, message in messages %}
+        <div class="flash-msg p-4 rounded-lg border flex items-start gap-3
+            {% if category == 'error' %}border-red-500/50 bg-red-500/10 text-red-400
+            {% else %}border-green-500/50 bg-green-500/10 text-green-400{% endif %}">
+            <span class="flex-1 text-sm">{{ message }}</span>
+            <button onclick="this.parentElement.remove()" class="opacity-60 hover:opacity-100 text-lg leading-none">&times;</button>
+        </div>
+        {% endfor %}
+    </div>
+    <script>
+        setTimeout(() => {
+            const c = document.getElementById('flash-container');
+            if (c) c.remove();
+        }, 4000);
+    </script>
+    {% endif %}
+    {% endwith %}
+
     <div class="max-w-7xl mx-auto">
 
         <!-- En-tête -->

@@ -7,11 +7,15 @@ from flask import (
     jsonify,
     current_app,
     send_from_directory,
+    redirect,
+    url_for,
+    flash,
 )
-from app.extensions import db_transaction
-from app.models.models import Result, Quiz, Question, Response, Media
+from app.extensions import db, db_transaction
+from app.models.models import Result, Quiz, Question, Response, Media, Review
 from app.decorators import login_required
 from datetime import date
+from sqlalchemy import func
 import os
 
 # Création de la route principale de l'application
@@ -29,12 +33,29 @@ def home():
 def quiz():
     # Récupère tous les quiz publiés depuis la base de données
     published_quizzes = Quiz.query.filter_by(statut="PUBLISHED").all()
+
+    # Récupère les notes moyennes et le nombre d'avis par quiz
+    avg_ratings = {
+        r[0]: round(r[1], 1)
+        for r in db.session.query(Review.idQUIZinReview, func.avg(Review.rating))
+        .group_by(Review.idQUIZinReview)
+        .all()
+    }
+    review_counts = {
+        r[0]: r[1]
+        for r in db.session.query(Review.idQUIZinReview, func.count(Review.idREVIEW))
+        .group_by(Review.idQUIZinReview)
+        .all()
+    }
+
     quizzes_data = [
         {
             "id": q.idQUIZ,
             "title": q.title,
             "difficulty": q.difficulty,
             "category": q.category,
+            "avg_rating": avg_ratings.get(q.idQUIZ),
+            "review_count": review_counts.get(q.idQUIZ, 0),
         }
         for q in published_quizzes
     ]
@@ -170,3 +191,104 @@ def quiz_submit(quiz_id):
                 "error": f"Erreur lors de l'enregistrement du résultat: {str(e)}",
             }
         ), 500
+
+
+# Formulaire pour laisser un avis sur un quiz
+@main_bp.route("/quiz/<int:quiz_id>/review", methods=["GET", "POST"])
+@login_required
+def quiz_review(quiz_id):
+    quiz = Quiz.query.get_or_404(quiz_id)
+    user_id = session.get("user_id")
+
+    # Vérifie que l'utilisateur a bien complété ce quiz
+    has_completed = Result.query.filter_by(
+        idQUIZinResult=quiz_id, idUSERinResult=user_id
+    ).first()
+    if not has_completed:
+        flash("Vous devez d'abord compléter ce quiz pour laisser un avis.", "error")
+        return redirect(url_for("main.quiz_detail", quiz_id=quiz_id))
+
+    # Récupère un éventuel avis existant
+    existing_review = Review.query.filter_by(
+        idQUIZinReview=quiz_id, idUSERinReview=user_id
+    ).first()
+
+    if request.method == "POST":
+        rating = request.form.get("rating", type=int)
+        comment = request.form.get("comment", "").strip() or None
+
+        if not rating or not (1 <= rating <= 5):
+            flash("Veuillez sélectionner une note entre 1 et 5 étoiles.", "error")
+            return render_template(
+                "quiz/review_form.html",
+                quiz=quiz,
+                existing_review=existing_review,
+            )
+
+        try:
+            if existing_review:
+                existing_review.rating = rating
+                existing_review.comment = comment
+                existing_review.date = date.today()
+                with db_transaction() as db_session:
+                    db_session.merge(existing_review)
+                flash("Votre avis a été mis à jour.", "success")
+            else:
+                new_review = Review(
+                    idUSERinReview=user_id,
+                    idQUIZinReview=quiz_id,
+                    rating=rating,
+                    comment=comment,
+                    date=date.today(),
+                )
+                with db_transaction() as db_session:
+                    db_session.add(new_review)
+                flash("Votre avis a été enregistré. Merci !", "success")
+        except Exception as e:
+            flash(f"Erreur lors de l'enregistrement : {str(e)}", "error")
+
+        return redirect(url_for("profile.player_dashboard"))
+
+    return render_template(
+        "quiz/review_form.html",
+        quiz=quiz,
+        existing_review=existing_review,
+    )
+
+
+# Liste des avis pour un quiz
+@main_bp.get("/quiz/<int:quiz_id>/reviews")
+def quiz_reviews(quiz_id):
+    quiz = Quiz.query.get_or_404(quiz_id)
+
+    reviews = (
+        Review.query
+        .filter(Review.idQUIZinReview == quiz_id)
+        .order_by(Review.date.desc())
+        .all()
+    )
+
+    avg_rating = (
+        db.session.query(func.avg(Review.rating))
+        .filter(Review.idQUIZinReview == quiz_id)
+        .scalar()
+    )
+    avg_rating = round(avg_rating, 1) if avg_rating else None
+
+    reviews_data = [
+        {
+            "username": review.user.username,
+            "rating": review.rating,
+            "comment": review.comment,
+            "date": review.date.strftime("%d/%m/%Y") if review.date else "N/A",
+        }
+        for review in reviews
+    ]
+
+    return render_template(
+        "quiz/quiz_reviews.html",
+        quiz=quiz,
+        reviews=reviews_data,
+        avg_rating=avg_rating,
+        review_count=len(reviews_data),
+    )

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laisser un avis - {{ quiz.title }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='output.css') }}">
+</head>
+
+<body class="min-h-screen py-10 px-5 scanline relative">
+    <a href="{{ url_for('profile.player_dashboard') }}"
+        class="fixed top-5 left-5 px-6 py-3 bg-transparent border-2 border-cyber-accent text-cyber-text-lighter rounded-lg font-semibold text-sm transition-all duration-300 hover:bg-cyber-border hover:border-cyber-accent-light hover:shadow-glow-sm hover:-translate-x-1 z-50">
+        ← Retour au profil
+    </a>
+
+    <div class="max-w-2xl mx-auto mt-16">
+        <div class="text-center mb-10">
+            <h1 class="text-cyber-text-lighter text-4xl font-bold mb-3 tracking-wide text-glow">
+                {% if existing_review %}Modifier mon avis{% else %}Laisser un avis{% endif %}
+            </h1>
+            <p class="text-cyber-text-muted text-lg">{{ quiz.title }}</p>
+        </div>
+
+        <!-- Messages flash -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="mb-6 space-y-2">
+            {% for category, message in messages %}
+            <div class="p-4 rounded-lg border
+                {% if category == 'error' %}border-red-500/50 bg-red-500/10 text-red-400
+                {% else %}border-green-500/50 bg-green-500/10 text-green-400{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <div class="feature-box">
+            <form method="POST" action="{{ url_for('main.quiz_review', quiz_id=quiz.idQUIZ) }}">
+
+                <!-- Notation par étoiles -->
+                <div class="mb-8">
+                    <label class="block text-cyber-text-lighter font-semibold mb-4 text-lg">
+                        Note <span class="text-cyber-accent">*</span>
+                    </label>
+                    <div class="flex gap-3 justify-center" id="star-rating">
+                        {% for i in range(1, 6) %}
+                        <label class="cursor-pointer group" for="star{{ i }}">
+                            <input type="radio" name="rating" id="star{{ i }}" value="{{ i }}" class="sr-only"
+                                {% if existing_review and existing_review.rating == i %}checked{% endif %}>
+                            <span class="text-5xl transition-all duration-150 select-none star-icon
+                                {% if existing_review and existing_review.rating >= i %}text-yellow-400{% else %}text-cyber-border-light{% endif %}"
+                                data-value="{{ i }}">★</span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                    <p class="text-cyber-text-muted text-sm text-center mt-3" id="rating-label">
+                        {% if existing_review %}
+                            {{ existing_review.rating }} étoile{% if existing_review.rating > 1 %}s{% endif %}
+                        {% else %}
+                            Cliquez pour noter
+                        {% endif %}
+                    </p>
+                </div>
+
+                <!-- Commentaire (optionnel) -->
+                <div class="mb-8">
+                    <label for="comment" class="block text-cyber-text-lighter font-semibold mb-3 text-lg">
+                        Commentaire <span class="text-cyber-text-muted text-sm font-normal">(facultatif)</span>
+                    </label>
+                    <textarea id="comment" name="comment" rows="5"
+                        class="w-full bg-cyber-bg-lighter border border-cyber-border rounded-lg px-4 py-3 text-cyber-text focus:outline-none focus:border-cyber-accent transition-colors resize-none"
+                        placeholder="Partagez votre expérience avec ce quiz...">{% if existing_review and existing_review.comment %}{{ existing_review.comment }}{% endif %}</textarea>
+                </div>
+
+                <!-- Boutons -->
+                <div class="flex gap-4 justify-center">
+                    <a href="{{ url_for('profile.player_dashboard') }}"
+                        class="px-8 py-3 border-2 border-cyber-border text-cyber-text-muted rounded-lg font-semibold text-sm transition-all duration-300 hover:bg-cyber-border">
+                        Annuler
+                    </a>
+                    <button type="submit"
+                        class="btn-cyber-primary px-8 py-3 text-sm font-semibold">
+                        {% if existing_review %}Mettre à jour{% else %}Envoyer mon avis{% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Lien vers les avis existants -->
+        <div class="text-center mt-6">
+            <a href="{{ url_for('main.quiz_reviews', quiz_id=quiz.idQUIZ) }}"
+                class="text-cyber-accent hover:text-cyber-accent-light text-sm underline">
+                Voir tous les avis pour ce quiz
+            </a>
+        </div>
+    </div>
+
+    <footer class="py-10 text-center mt-12">
+        <p class="text-cyber-text-muted">Copyright BTS SIO</p>
+    </footer>
+
+    <script>
+        const stars = document.querySelectorAll('.star-icon');
+        const radios = document.querySelectorAll('input[name="rating"]');
+        const ratingLabel = document.getElementById('rating-label');
+        const labels = ['', 'Très mauvais', 'Mauvais', 'Correct', 'Bon', 'Excellent'];
+
+        function updateStars(value) {
+            stars.forEach((star, idx) => {
+                if (idx < value) {
+                    star.classList.add('text-yellow-400');
+                    star.classList.remove('text-cyber-border-light');
+                } else {
+                    star.classList.remove('text-yellow-400');
+                    star.classList.add('text-cyber-border-light');
+                }
+            });
+            ratingLabel.textContent = value + ' étoile' + (value > 1 ? 's' : '') + ' — ' + labels[value];
+        }
+
+        // Survol
+        stars.forEach((star, idx) => {
+            star.addEventListener('mouseenter', () => updateStars(idx + 1));
+        });
+
+        document.getElementById('star-rating').addEventListener('mouseleave', () => {
+            const checked = document.querySelector('input[name="rating"]:checked');
+            if (checked) {
+                updateStars(parseInt(checked.value));
+            } else {
+                stars.forEach(s => {
+                    s.classList.remove('text-yellow-400');
+                    s.classList.add('text-cyber-border-light');
+                });
+                ratingLabel.textContent = 'Cliquez pour noter';
+            }
+        });
+
+        // Clic
+        radios.forEach(radio => {
+            radio.addEventListener('change', () => updateStars(parseInt(radio.value)));
+        });
+
+        // Initialisation si avis existant
+        const checkedRadio = document.querySelector('input[name="rating"]:checked');
+        if (checkedRadio) updateStars(parseInt(checkedRadio.value));
+    </script>
+</body>
+
+</html>
