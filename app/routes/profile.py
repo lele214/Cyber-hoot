@@ -22,6 +22,7 @@ from app.models.models import (
     Notification,
     UserBadge,
     UserToRole,
+    Review,
 )
 from app.extensions import db, db_transaction
 from app.decorators import login_required, role_required
@@ -317,6 +318,12 @@ def player_dashboard():
         average_score = 0
 
     # 5. Formater les résultats pour l'affichage
+    # Récupère les quiz déjà notés par l'utilisateur
+    reviewed_quiz_ids = {
+        r.idQUIZinReview
+        for r in Review.query.filter_by(idUSERinReview=user_id).all()
+    }
+
     quiz_history = []
     for result, quiz in user_results:
         if result.totalQuestions > 0:
@@ -326,12 +333,14 @@ def player_dashboard():
 
         quiz_history.append(
             {
+                "quiz_id": quiz.idQUIZ,
                 "quiz_title": quiz.title,
                 "quiz_difficulty": quiz.difficulty,
                 "score": result.score,
                 "total_questions": result.totalQuestions,
                 "percentage": percentage,
                 "date": result.date.strftime("%d/%m/%Y") if result.date else "N/A",
+                "has_review": quiz.idQUIZ in reviewed_quiz_ids,
             }
         )
 

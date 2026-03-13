@@ -121,12 +121,20 @@
                 <!-- Détail par question -->
                 <div id="results-detail" class="space-y-4 mb-8"></div>
 
-                <div class="flex justify-center gap-4">
+                <div class="flex justify-center gap-4 flex-wrap">
                     <button onclick="window.location.reload()" class="btn-cyber">
                         Recommencer
                     </button>
                     <a href="{{ url_for('main.quiz') }}" class="btn-cyber-primary">
                         Retour aux quiz
+                    </a>
+                    <a href="{{ url_for('main.quiz_review', quiz_id=quiz.idQUIZ) }}"
+                        class="inline-block px-6 py-3 border-2 border-yellow-500 text-yellow-400 rounded-lg font-semibold text-sm transition-all duration-300 hover:bg-yellow-500/10">
+                        Laisser un avis
+                    </a>
+                    <a href="{{ url_for('main.quiz_reviews', quiz_id=quiz.idQUIZ) }}"
+                        class="inline-block px-6 py-3 border-2 border-cyber-border-light text-cyber-text-muted rounded-lg font-semibold text-sm transition-all duration-300 hover:bg-cyber-border">
+                        Voir les avis
                     </a>
                 </div>
             </div>

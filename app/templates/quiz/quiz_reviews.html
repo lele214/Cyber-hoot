@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avis - {{ quiz.title }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='output.css') }}">
+</head>
+
+<body class="min-h-screen py-10 px-5 scanline relative">
+    <a href="{{ url_for('main.quiz') }}"
+        class="fixed top-5 left-5 px-6 py-3 bg-transparent border-2 border-cyber-accent text-cyber-text-lighter rounded-lg font-semibold text-sm transition-all duration-300 hover:bg-cyber-border hover:border-cyber-accent-light hover:shadow-glow-sm hover:-translate-x-1 z-50">
+        ← Retour aux quiz
+    </a>
+
+    <div class="max-w-3xl mx-auto mt-16">
+        <!-- En-tête -->
+        <div class="text-center mb-10">
+            <h1 class="text-cyber-text-lighter text-4xl font-bold mb-3 tracking-wide text-glow">
+                Avis des joueurs
+            </h1>
+            <p class="text-cyber-text-muted text-lg">{{ quiz.title }}</p>
+        </div>
+
+        <!-- Résumé de la note -->
+        <div class="feature-box text-center mb-8">
+            {% if avg_rating %}
+            <div class="mb-2">
+                <span class="text-yellow-400 text-5xl">
+                    {% for i in range(1, 6) %}{% if i <= avg_rating | round %}★{% else %}☆{% endif %}{% endfor %}
+                </span>
+            </div>
+            <p class="text-cyber-accent text-4xl font-bold mb-1">{{ avg_rating }}<span class="text-cyber-text-muted text-xl">/5</span></p>
+            <p class="text-cyber-text-muted text-sm">Basé sur {{ review_count }} avis</p>
+            {% else %}
+            <p class="text-cyber-text-muted text-lg py-4">Aucun avis pour ce quiz pour l'instant.</p>
+            {% endif %}
+
+            <div class="flex gap-4 justify-center mt-6">
+                <a href="{{ url_for('main.quiz_detail', quiz_id=quiz.idQUIZ) }}"
+                    class="btn-cyber-primary px-6 py-3 text-sm">
+                    Lancer le quiz
+                </a>
+                {% if session.get('user_id') %}
+                <a href="{{ url_for('main.quiz_review', quiz_id=quiz.idQUIZ) }}"
+                    class="inline-block px-6 py-3 border-2 border-yellow-500 text-yellow-400 rounded-lg font-semibold text-sm transition-all duration-300 hover:bg-yellow-500/10">
+                    Laisser un avis
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Liste des avis -->
+        {% if reviews %}
+        <div class="space-y-4">
+            {% for review in reviews %}
+            <div class="feature-box">
+                <div class="flex items-start justify-between mb-3">
+                    <div>
+                        <span class="text-cyber-text-lighter font-semibold">{{ review.username }}</span>
+                        <span class="text-cyber-text-muted text-xs ml-3">{{ review.date }}</span>
+                    </div>
+                    <div class="text-yellow-400 text-lg">
+                        {% for i in range(1, 6) %}{% if i <= review.rating %}★{% else %}☆{% endif %}{% endfor %}
+                        <span class="text-cyber-text-muted text-xs ml-1">{{ review.rating }}/5</span>
+                    </div>
+                </div>
+                {% if review.comment %}
+                <p class="text-cyber-text-muted text-sm leading-relaxed">{{ review.comment }}</p>
+                {% else %}
+                <p class="text-cyber-text-muted text-xs italic">Aucun commentaire.</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="feature-box text-center py-10">
+            <p class="text-cyber-text-muted">
+                Soyez le premier à laisser un avis !
+            </p>
+            {% if session.get('user_id') %}
+            <a href="{{ url_for('main.quiz_review', quiz_id=quiz.idQUIZ) }}"
+                class="inline-block mt-4 px-6 py-3 border-2 border-yellow-500 text-yellow-400 rounded-lg font-semibold text-sm transition-all duration-300 hover:bg-yellow-500/10">
+                Laisser un avis
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    <footer class="py-10 text-center mt-12">
+        <p class="text-cyber-text-muted">Copyright BTS SIO</p>
+    </footer>
+</body>
+
+</html>
