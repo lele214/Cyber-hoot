@@ -32,13 +32,12 @@ Le projet tourne sous Docker sur Windows et Linux — `just` garantit que tout l
 
 ## Installation
 
-**Windows** (dans un terminal PowerShell) :
-```powershell
-# Avec Scoop
-scoop install just
-
-# Ou avec winget
-winget install Casey.Just
+**Windows** (dans Git Bash) :
+```bash
+mkdir -p ~/bin
+curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -- --to ~/bin
+echo 'export PATH="$HOME/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc
 ```
 
 **Linux / macOS** :
