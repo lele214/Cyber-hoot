@@ -141,6 +141,7 @@ class Question(db.Model):
         db.Integer, db.ForeignKey("QUIZ.idQUIZ"), nullable=False
     )
     QuestionText = db.Column(db.String(500), nullable=True)
+    explanation = db.Column(db.Text, nullable=True)
 
     # Relations
     quiz = db.relationship("Quiz", back_populates="questions")
@@ -212,7 +213,6 @@ class Result(db.Model):
     totalQuestions = db.Column(
         db.Integer, nullable=True, comment="Nombre total de questions dans le quiz"
     )
-    # resultHistory = db.Column(db.String(45), nullable=True, comment="commentaire")
     answer = db.Column(db.Text, nullable=True)
 
     # Relations
