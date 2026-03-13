@@ -853,13 +853,12 @@ def creator_quiz_delete(quiz_id):
 
 # Liste des catégories disponibles (utilisée dans le template admin)
 QUIZ_CATEGORIES = {
-    "PHISHING": "Phishing",
+    "SECURITE_WEB": "Sécurité Web",
     "MALWARE": "Malware",
     "RESEAUX": "Réseaux",
-    "MOTS_DE_PASSE": "Mots de passe",
+    "CRYPTOGRAPHIE": "Cryptographie",
     "INGENIERIE_SOCIALE": "Ingénierie sociale",
     "INTRODUCTION_CYBER": "Introduction à la cybersécurité",
-    "CATEGORIE_TEST": "Catégorie Test",
 }
 
 

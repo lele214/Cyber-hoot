@@ -72,35 +72,38 @@ document.getElementById('quizForm').addEventListener('submit', async function (e
                 ? q.responses[userAnswer].text : '—';
             const correctResponseText = q.responses[correctIndex] ? q.responses[correctIndex].text : '—';
 
-            const explanationHtml = q.explanation
-                ? `<div class="mt-3 pt-3 border-t border-cyber-border">
+            const correctAnswerHtml = (!isCorrect || unanswered)
+                ? `<div class="mb-2">
+                    <p class="text-sm"><span class="text-cyber-text-muted">Bonne réponse : </span><span class="text-green-400">${correctResponseText}</span></p>
+                   </div>`
+                : '';
+
+            const explanationBody = q.explanation
+                ? `<div class="mt-2 pt-2 border-t border-cyber-border">
                     <p class="text-cyber-text-muted text-xs uppercase tracking-widest mb-1">Explication</p>
                     <p class="text-cyber-text text-sm leading-relaxed">${q.explanation}</p>
                    </div>`
                 : '';
 
+            const hasSolution = (!isCorrect || unanswered || q.explanation);
+            const solutionHtml = hasSolution
+                ? `<div id="exp-${i}" class="hidden mt-3">${correctAnswerHtml}${explanationBody}</div>`
+                : '';
+
             const wrongAnswerHtml = (!isCorrect && !unanswered)
-                ? `<p class="text-sm mt-1"><span class="text-cyber-text-muted">Votre réponse : </span><span class="text-red-400">${userResponseText}</span></p>
-                   <p class="text-sm mt-1"><span class="text-cyber-text-muted">Bonne réponse : </span><span class="text-green-400">${correctResponseText}</span></p>`
+                ? `<p class="text-sm mt-1"><span class="text-cyber-text-muted">Votre réponse : </span><span class="text-red-400">${userResponseText}</span></p>`
                 : '';
 
             detailContainer.innerHTML += `
                 <div class="border ${borderColor} ${bgColor} rounded-lg p-5">
-                    <div class="flex items-start justify-between gap-4">
-                        <div class="flex-1">
-                            <p class="text-cyber-text-lighter font-semibold mb-1">
-                                ${icon} Question ${i + 1} — <span class="${statusColor}">${statusText}</span>
-                            </p>
-                            <p class="text-cyber-text text-sm mb-2">${q.text}</p>
-                            ${wrongAnswerHtml}
-                        </div>
-                        ${q.explanation ? `<button onclick="toggleExplanation(${i})"
-                            class="flex-shrink-0 px-3 py-1 border border-cyber-accent text-cyber-accent text-xs rounded hover:bg-cyber-border transition-all"
-                            id="btn-exp-${i}">
-                            Voir la solution ▼
-                        </button>` : ''}
+                    <div class="flex-1">
+                        <p class="text-cyber-text-lighter font-semibold mb-1">
+                            ${icon} Question ${i + 1} — <span class="${statusColor}">${statusText}</span>
+                        </p>
+                        <p class="text-cyber-text text-sm mb-2">${q.text}</p>
+                        ${wrongAnswerHtml}
                     </div>
-                    ${q.explanation ? `<div id="exp-${i}" class="hidden">${explanationHtml}</div>` : ''}
+                    ${solutionHtml}
                 </div>
             `;
         });
@@ -115,9 +118,10 @@ document.getElementById('quizForm').addEventListener('submit', async function (e
     }
 });
 
-function toggleExplanation(index) {
-    const box = document.getElementById(`exp-${index}`);
-    const btn = document.getElementById(`btn-exp-${index}`);
-    const hidden = box.classList.toggle('hidden');
-    btn.textContent = hidden ? 'Voir la solution ▼' : 'Masquer ▲';
+function toggleAllSolutions() {
+    const btn = document.getElementById('btn-all-solutions');
+    const boxes = document.querySelectorAll('[id^="exp-"]');
+    const allHidden = [...boxes].every(b => b.classList.contains('hidden'));
+    boxes.forEach(b => b.classList.toggle('hidden', !allHidden));
+    btn.textContent = allHidden ? 'Masquer ▲' : 'Voir toutes les solutions ▼';
 }

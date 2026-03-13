@@ -64,13 +64,12 @@ class Quiz(db.Model):
     )
     category = db.Column(
         db.Enum(
-            "PHISHING",
+            "SECURITE_WEB",
             "MALWARE",
             "RESEAUX",
-            "MOTS_DE_PASSE",
+            "CRYPTOGRAPHIE",
             "INGENIERIE_SOCIALE",
             "INTRODUCTION_CYBER",
-            "CATEGORIE_TEST",
         ),
         nullable=True,
     )
