@@ -29,16 +29,24 @@ function addQuestion() {
             <label class="block mb-2 text-cyber-text text-sm">
                 Lien ressource <span class="text-cyber-text-lighter text-xs">(optionnel — affiché après la question)</span>
             </label>
-            <div class="flex gap-2">
+            <div class="flex gap-2 items-center">
                 <input type="url"
                        name="question_link_url_${qIndex}"
                        class="input-cyber flex-1"
-                       placeholder="https://...">
+                       placeholder="https://..."
+                       oninput="updateLinkPreview(${qIndex})">
                 <input type="text"
                        name="question_link_label_${qIndex}"
                        class="input-cyber w-48"
                        placeholder="Texte du lien">
+                <button type="button" onclick="clearLink(${qIndex})"
+                        title="Supprimer le lien"
+                        class="flex-shrink-0 px-2 py-1 text-red-400 hover:text-red-300 text-sm transition-colors">
+                    ✕
+                </button>
             </div>
+            <span id="link_preview_${qIndex}"
+                  class="hidden mt-1 block text-xs text-cyber-text-lighter break-all"></span>
         </div>
         <div class="mb-2">
             <label class="block mb-2 text-cyber-text text-sm">
@@ -66,6 +74,28 @@ function removeQuestion(qIndex) {
     if (block) {
         block.remove();
     }
+}
+
+function updateLinkPreview(qIndex) {
+    const urlInput = document.querySelector(`input[name="question_link_url_${qIndex}"]`);
+    const preview = document.getElementById('link_preview_' + qIndex);
+    if (!urlInput || !preview) return;
+    const val = urlInput.value.trim();
+    if (val) {
+        preview.textContent = val;
+        preview.classList.remove('hidden');
+    } else {
+        preview.textContent = '';
+        preview.classList.add('hidden');
+    }
+}
+
+function clearLink(qIndex) {
+    const urlInput = document.querySelector(`input[name="question_link_url_${qIndex}"]`);
+    const labelInput = document.querySelector(`input[name="question_link_label_${qIndex}"]`);
+    if (urlInput) urlInput.value = '';
+    if (labelInput) labelInput.value = '';
+    updateLinkPreview(qIndex);
 }
 
 function addResponse(qIndex) {
@@ -98,7 +128,13 @@ function addResponse(qIndex) {
                    name="response_image_${qIndex}_${rIndex}"
                    accept="image/png,image/jpeg,image/gif,image/webp"
                    class="block w-full text-cyber-text text-sm file:mr-4 file:py-1 file:px-3 file:rounded file:border file:border-cyber-border file:bg-transparent file:text-cyber-text-lighter file:cursor-pointer hover:file:border-cyber-accent"
-                   onchange="previewImage(this, 'resp_preview_${qIndex}_${rIndex}')">
+                   onchange="previewImage(this, 'resp_preview_${qIndex}_${rIndex}', 'resp_clear_${qIndex}_${rIndex}')">
+            <button type="button"
+                    id="resp_clear_${qIndex}_${rIndex}"
+                    onclick="clearResponseImage(${qIndex}, ${rIndex})"
+                    class="hidden mt-1 text-xs text-red-400 hover:text-red-300 transition-colors">
+                ✕ Supprimer l'image
+            </button>
             <img id="resp_preview_${qIndex}_${rIndex}" src="" alt="aperçu" class="hidden mt-2 max-h-32 rounded border border-cyber-border">
         </div>
     `;
@@ -106,9 +142,29 @@ function addResponse(qIndex) {
     responsesDiv.appendChild(responseRow);
 }
 
+function clearResponseImage(qIndex, rIndex) {
+    const fileInput = document.querySelector(`input[name="response_image_${qIndex}_${rIndex}"]`);
+    if (fileInput) {
+        fileInput.value = '';
+        // Certains navigateurs ne permettent pas de vider un input file directement
+        if (fileInput.value) {
+            const clone = fileInput.cloneNode(true);
+            fileInput.parentNode.replaceChild(clone, fileInput);
+        }
+    }
+    const preview = document.getElementById(`resp_preview_${qIndex}_${rIndex}`);
+    if (preview) {
+        preview.src = '';
+        preview.classList.add('hidden');
+    }
+    const clearBtn = document.getElementById(`resp_clear_${qIndex}_${rIndex}`);
+    if (clearBtn) clearBtn.classList.add('hidden');
+}
+
 // Affiche un aperçu de l'image sélectionnée avant upload
-function previewImage(input, previewId) {
+function previewImage(input, previewId, clearBtnId) {
     const preview = document.getElementById(previewId);
+    const clearBtn = clearBtnId ? document.getElementById(clearBtnId) : null;
     if (input.files && input.files[0]) {
         const reader = new FileReader();
         reader.onload = function (e) {
@@ -116,9 +172,11 @@ function previewImage(input, previewId) {
             preview.classList.remove('hidden');
         };
         reader.readAsDataURL(input.files[0]);
+        if (clearBtn) clearBtn.classList.remove('hidden');
     } else {
         preview.src = '';
         preview.classList.add('hidden');
+        if (clearBtn) clearBtn.classList.add('hidden');
     }
 }
 
