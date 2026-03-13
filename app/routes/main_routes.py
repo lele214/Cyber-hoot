@@ -79,6 +79,7 @@ def quiz_detail(quiz_id):
             {
                 "index": i,
                 "text": question.QuestionText,
+                "explanation": question.explanation,
                 "responses": responses,
                 "media_id": image_media.idMEDIA if image_media else None,
                 "link_url": link_media.mediaUrl if link_media else None,
