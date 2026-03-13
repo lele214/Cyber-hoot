@@ -6,3 +6,4 @@ werkzeug
 itsdangerous
 alembic
 requests
+pytest

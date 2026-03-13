@@ -49,8 +49,19 @@ class ProductionConfig(Config):
     SQLALCHEMY_ECHO = False
 
 
+class TestingConfig(Config):
+    TESTING = True
+    DEBUG = False
+    SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
+    SQLALCHEMY_ECHO = False
+    SECRET_KEY = "test-secret-key"
+    VIRUSTOTAL_API_KEY = ""
+    UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.dirname(__file__)), "test", "uploads")
+
+
 config = {
     "development": DevelopmentConfig,
     "production": ProductionConfig,
+    "testing": TestingConfig,
     "default": DevelopmentConfig,
 }
