@@ -149,16 +149,46 @@ def admin_dashboard():
         )
 
     # --- Liste des badges ---
-    badges = db.session.query(Badge, Quiz).join(Quiz, Badge.idQuiz == Quiz.idQUIZ).all()
+    all_badges = Badge.query.order_by(Badge.trigger, Badge.category, Badge.score_min).all()
     badges_data = []
-    for badge, quiz in badges:
+    TRIGGER_LABELS = {
+        "score": "Score",
+        "review": "Avis",
+        "review_comment": "Avis + commentaire",
+    }
+    CATEGORY_LABELS = {
+        "SECURITE_WEB": "Sécurité Web",
+        "MALWARE": "Malware",
+        "RESEAUX": "Réseaux",
+        "CRYPTOGRAPHIE": "Cryptographie",
+        "INGENIERIE_SOCIALE": "Ingénierie sociale",
+        "INTRODUCTION_CYBER": "Introduction Cyber",
+    }
+    for badge in all_badges:
         badges_data.append(
             {
                 "id": badge.idBadges,
                 "name": badge.name,
-                "quiz_title": quiz.title,
+                "icon": badge.icon or "🏅",
+                "description": badge.description or "",
+                "trigger": TRIGGER_LABELS.get(badge.trigger, badge.trigger),
+                "category": CATEGORY_LABELS.get(badge.category, "Global") if badge.category else "Global",
+                "score_range": f"{badge.score_min}% – {badge.score_max}%"
+                    if badge.score_min is not None and badge.score_max is not None
+                    else "—",
             }
         )
+
+    # --- Statistiques par catégorie (nombre de parties jouées) ---
+    category_stats = {}
+    for key, label in QUIZ_CATEGORIES.items():
+        count = (
+            db.session.query(Result)
+            .join(Quiz, Result.idQUIZinResult == Quiz.idQUIZ)
+            .filter(Quiz.category == key)
+            .count()
+        )
+        category_stats[label] = count
 
     # --- Quiz en attente de validation ---
     pending_quizzes = (
@@ -197,6 +227,7 @@ def admin_dashboard():
         badges_data=badges_data,
         pending_data=pending_data,
         quiz_categories=QUIZ_CATEGORIES,
+        category_stats=category_stats,
     )
 
 
@@ -344,6 +375,24 @@ def player_dashboard():
             }
         )
 
+    # 6. Récupérer les badges de l'utilisateur
+    user_badges_data = (
+        db.session.query(UserBadge, Badge)
+        .join(Badge, UserBadge.idBadge == Badge.idBadges)
+        .filter(UserBadge.idUser == user_id)
+        .order_by(UserBadge.obtainedAt.desc())
+        .all()
+    )
+    badges = [
+        {
+            "name": badge.name,
+            "description": badge.description,
+            "icon": badge.icon,
+            "obtained_at": user_badge.obtainedAt.strftime("%d/%m/%Y") if user_badge.obtainedAt else "N/A",
+        }
+        for user_badge, badge in user_badges_data
+    ]
+
     # Affiche le template du dashboard joueur avec les données de l'utilisateur
     return render_template(
         "profile/player/player_dashboard.html",
@@ -354,6 +403,7 @@ def player_dashboard():
         remaining_quizzes=remaining_quizzes,
         average_score=average_score,
         quiz_history=quiz_history,
+        badges=badges,
     )
 
 
@@ -1309,3 +1359,42 @@ def admin_user_delete(user_id):
 
     flash(f"Utilisateur « {username} » supprimé avec succès", "success")
     return redirect(url_for("profile.admin_dashboard"))
+
+
+# ---------------------------------------------------------------------------
+# Gestion admin des badges
+# ---------------------------------------------------------------------------
+
+@profile_bp.post("/admin/badge/<int:badge_id>/delete")
+@login_required
+@role_required("admin")
+def admin_badge_delete(badge_id):
+    badge = Badge.query.get_or_404(badge_id)
+    name = badge.name
+    with db_transaction() as db_session:
+        UserBadge.query.filter_by(idBadge=badge_id).delete(synchronize_session=False)
+        db_session.delete(badge)
+    flash(f"Badge « {name} » supprimé avec succès", "success")
+    return redirect(url_for("profile.admin_dashboard"))
+
+
+@profile_bp.route("/admin/badge/<int:badge_id>/edit", methods=["GET", "POST"])
+@login_required
+@role_required("admin")
+def admin_badge_edit(badge_id):
+    badge = Badge.query.get_or_404(badge_id)
+    if request.method == "POST":
+        badge.name = request.form.get("name", badge.name).strip()
+        badge.description = request.form.get("description", badge.description or "").strip() or None
+        badge.icon = request.form.get("icon", badge.icon or "").strip() or None
+        score_min = request.form.get("score_min", "")
+        score_max = request.form.get("score_max", "")
+        badge.score_min = int(score_min) if score_min.strip().isdigit() else None
+        badge.score_max = int(score_max) if score_max.strip().isdigit() else None
+        category = request.form.get("category", "")
+        badge.category = category if category else None
+        with db_transaction() as db_session:
+            db_session.merge(badge)
+        flash(f"Badge « {badge.name} » modifié avec succès", "success")
+        return redirect(url_for("profile.admin_dashboard"))
+    return render_template("profile/admin/admin_badge_edit.html", badge=badge)

@@ -13,6 +13,7 @@ from flask import (
 )
 from app.extensions import db, db_transaction
 from app.models.models import Result, Quiz, Question, Response, Media, Review
+from app.services.badge_service import award_score_badges, award_review_badges
 from app.decorators import login_required
 from datetime import date
 from sqlalchemy import func
@@ -173,12 +174,25 @@ def quiz_submit(quiz_id):
         with db_transaction() as db_session:
             db_session.add(new_result)
 
+        # Attribution automatique des badges
+        new_badges = award_score_badges(
+            user_id=user_id,
+            quiz_id=quiz_id,
+            score=score,
+            total_questions=total_questions,
+        )
+        badges_earned = [
+            {"name": b.name, "icon": b.icon, "description": b.description}
+            for b in new_badges
+        ]
+
         return jsonify(
             {
                 "success": True,
                 "message": "Quiz validé avec succès",
                 "score": score,
                 "totalQuestions": total_questions,
+                "badges_earned": badges_earned,
             }
         ), 200
 
@@ -243,6 +257,12 @@ def quiz_review(quiz_id):
                 )
                 with db_transaction() as db_session:
                     db_session.add(new_review)
+                # Attribution des badges liés aux avis
+                has_comment = bool(comment and comment.strip())
+                new_badges = award_review_badges(user_id=user_id, has_comment=has_comment)
+                if new_badges:
+                    names = ", ".join(f"{b.icon} {b.name}" for b in new_badges)
+                    flash(f"Nouveau(x) badge(s) débloqué(s) : {names} !", "success")
                 flash("Votre avis a été enregistré. Merci !", "success")
         except Exception as e:
             flash(f"Erreur lors de l'enregistrement : {str(e)}", "error")
@@ -254,6 +274,50 @@ def quiz_review(quiz_id):
         quiz=quiz,
         existing_review=existing_review,
     )
+
+
+# Page publique listant tous les badges disponibles
+@main_bp.get("/badges")
+def badges_page():
+    from app.models.models import Badge, UserBadge
+
+    all_badges = Badge.query.order_by(Badge.trigger, Badge.category, Badge.score_min).all()
+
+    CATEGORY_LABELS = {
+        "SECURITE_WEB": "Sécurité Web",
+        "MALWARE": "Malware",
+        "RESEAUX": "Réseaux",
+        "CRYPTOGRAPHIE": "Cryptographie",
+        "INGENIERIE_SOCIALE": "Ingénierie sociale",
+        "INTRODUCTION_CYBER": "Introduction Cyber",
+    }
+
+    # Badges déjà obtenus par l'utilisateur connecté
+    earned_ids = set()
+    if "user_id" in session:
+        user_id = session["user_id"]
+        earned_ids = {
+            ub.idBadge
+            for ub in UserBadge.query.filter_by(idUser=user_id).all()
+        }
+
+    badges_data = [
+        {
+            "id": b.idBadges,
+            "name": b.name,
+            "description": b.description,
+            "icon": b.icon or "🏅",
+            "trigger": b.trigger,
+            "category": CATEGORY_LABELS.get(b.category, "Global") if b.category else "Global",
+            "score_range": f"{b.score_min}% – {b.score_max}%"
+                if b.score_min is not None and b.score_max is not None
+                else "—",
+            "earned": b.idBadges in earned_ids,
+        }
+        for b in all_badges
+    ]
+
+    return render_template("badges/badges.html", badges=badges_data)
 
 
 # Liste des avis pour un quiz

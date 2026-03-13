@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Badges - Cyber-hoot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='output.css') }}">
+</head>
+
+<body class="min-h-screen py-10 px-5 scanline relative">
+    <a href="{{ url_for('main.home') }}"
+        class="fixed top-5 left-5 px-6 py-3 bg-transparent border-2 border-cyber-accent text-cyber-text-lighter rounded-lg font-semibold text-sm transition-all duration-300 hover:bg-cyber-border hover:border-cyber-accent-light hover:shadow-glow-sm hover:-translate-x-1 z-50">
+        ← Retour à l'accueil
+    </a>
+
+    <div class="max-w-7xl mx-auto">
+        <!-- En-tête -->
+        <div class="text-center mb-12">
+            <h1 class="text-cyber-text-lighter text-4xl md:text-5xl font-bold mb-5 tracking-wide text-glow">
+                Hall of Badges 🏆
+            </h1>
+            <p class="text-cyber-text-muted text-base md:text-lg">
+                {{ badges|length }} badges à débloquer — saurez-vous tous les obtenir ?
+            </p>
+        </div>
+
+        {% if not badges %}
+        <div class="feature-box text-center max-w-xl mx-auto">
+            <p class="text-cyber-text-muted py-8">
+                Aucun badge disponible pour l'instant. Revenez bientôt !
+            </p>
+        </div>
+        {% else %}
+
+        <!-- Badges globaux (score) -->
+        {% set global_score_badges = badges | selectattr('trigger', 'eq', 'score') | selectattr('category', 'eq', 'Global') | list %}
+        {% if global_score_badges %}
+        <div class="max-w-6xl mx-auto mb-12">
+            <h2 class="text-cyber-text-lighter text-2xl font-bold mb-6 tracking-wide">
+                🌐 Badges Globaux — Score
+            </h2>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                {% for badge in global_score_badges %}
+                <div class="group relative flex flex-col items-center rounded-xl p-4 border transition-all duration-300
+                    {% if badge.earned %}
+                        bg-cyber-accent/10 border-cyber-accent shadow-glow-sm
+                    {% else %}
+                        bg-cyber-border/10 border-cyber-border/50 opacity-60 grayscale
+                    {% endif %}">
+                    <span class="text-4xl mb-2">{{ badge.icon }}</span>
+                    <p class="text-cyber-text-lighter text-xs font-semibold text-center leading-tight mb-1">
+                        {{ badge.name }}
+                    </p>
+                    <p class="text-cyber-text-muted text-xs text-center">{{ badge.score_range }}</p>
+                    {% if badge.earned %}
+                    <span class="mt-2 text-xs text-cyber-accent font-semibold">✓ Obtenu</span>
+                    {% endif %}
+                    <!-- Tooltip -->
+                    <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-52 bg-cyber-bg border border-cyber-accent rounded-lg p-2 text-xs text-cyber-text-muted text-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10">
+                        {{ badge.description }}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Badges par catégorie -->
+        {% set categories = ['Introduction Cyber', 'Sécurité Web', 'Malware', 'Réseaux', 'Cryptographie', 'Ingénierie sociale'] %}
+        {% for cat in categories %}
+            {% set cat_badges = badges | selectattr('trigger', 'eq', 'score') | selectattr('category', 'eq', cat) | list %}
+            {% if cat_badges %}
+            <div class="max-w-6xl mx-auto mb-10">
+                <h2 class="text-cyber-text-lighter text-xl font-bold mb-4 tracking-wide">
+                    📁 {{ cat }}
+                </h2>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    {% for badge in cat_badges %}
+                    <div class="group relative flex items-center gap-4 rounded-xl p-4 border transition-all duration-300
+                        {% if badge.earned %}
+                            bg-cyber-accent/10 border-cyber-accent
+                        {% else %}
+                            bg-cyber-border/10 border-cyber-border/50 opacity-60 grayscale
+                        {% endif %}">
+                        <span class="text-3xl shrink-0">{{ badge.icon }}</span>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-cyber-text-lighter text-sm font-semibold leading-tight">{{ badge.name }}</p>
+                            <p class="text-cyber-text-muted text-xs mt-0.5">{{ badge.score_range }}</p>
+                            {% if badge.earned %}
+                            <span class="text-xs text-cyber-accent font-semibold">✓ Obtenu</span>
+                            {% endif %}
+                        </div>
+                        <!-- Tooltip -->
+                        <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 bg-cyber-bg border border-cyber-accent rounded-lg p-2 text-xs text-cyber-text-muted text-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10">
+                            {{ badge.description }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        {% endfor %}
+
+        <!-- Badges Avis -->
+        {% set review_badges = badges | selectattr('trigger', 'ne', 'score') | list %}
+        {% if review_badges %}
+        <div class="max-w-6xl mx-auto mb-12">
+            <h2 class="text-cyber-text-lighter text-2xl font-bold mb-6 tracking-wide">
+                💬 Badges Communauté — Avis
+            </h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {% for badge in review_badges %}
+                <div class="group relative flex items-center gap-4 rounded-xl p-4 border transition-all duration-300
+                    {% if badge.earned %}
+                        bg-cyber-accent/10 border-cyber-accent
+                    {% else %}
+                        bg-cyber-border/10 border-cyber-border/50 opacity-60 grayscale
+                    {% endif %}">
+                    <span class="text-4xl shrink-0">{{ badge.icon }}</span>
+                    <div>
+                        <p class="text-cyber-text-lighter font-semibold">{{ badge.name }}</p>
+                        <p class="text-cyber-text-muted text-sm">{{ badge.description }}</p>
+                        {% if badge.earned %}
+                        <span class="text-xs text-cyber-accent font-semibold">✓ Obtenu</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% endif %}
+
+        <!-- CTA si pas connecté -->
+        {% if not session.username %}
+        <div class="text-center mt-10">
+            <p class="text-cyber-text-muted mb-4">Connectez-vous pour suivre votre progression !</p>
+            <a href="{{ url_for('auth.login_get') }}" class="btn-cyber-primary">Se connecter</a>
+        </div>
+        {% endif %}
+    </div>
+
+    <footer>
+        <p class="flex justify-center pt-7">Copyright BTS SIO</p>
+    </footer>
+</body>
+
+</html>

@@ -89,6 +89,14 @@ migrate-init:
     @echo "Alembic initialisé. La baseline est marquée comme appliquée."
 
 # ─────────────────────────────────────────────
+#  Badges
+# ─────────────────────────────────────────────
+
+# Initialise les badges prédéfinis et attribue rétroactivement aux utilisateurs existants
+seed-badges:
+    docker compose exec app flask seed-badges
+
+# ─────────────────────────────────────────────
 #  Tests unitaires
 # ─────────────────────────────────────────────
 

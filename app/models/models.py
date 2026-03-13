@@ -93,9 +93,29 @@ class Badge(db.Model):
     __tablename__ = "BADGES"
 
     idBadges = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String(45), nullable=True)
+    name = db.Column(db.String(100), nullable=True)
+    description = db.Column(db.String(255), nullable=True)
+    icon = db.Column(db.String(10), nullable=True)
+    score_min = db.Column(db.Integer, nullable=True)   # pourcentage 0-100, null = non-basé sur score
+    score_max = db.Column(db.Integer, nullable=True)   # pourcentage 0-100, null = non-basé sur score
+    category = db.Column(
+        db.Enum(
+            "SECURITE_WEB",
+            "MALWARE",
+            "RESEAUX",
+            "CRYPTOGRAPHIE",
+            "INGENIERIE_SOCIALE",
+            "INTRODUCTION_CYBER",
+        ),
+        nullable=True,  # null = badge global (toutes catégories)
+    )
+    trigger = db.Column(
+        db.Enum("score", "review", "review_comment"),
+        nullable=False,
+        server_default="score",
+    )  # ce qui déclenche le badge
     image = db.Column(db.LargeBinary, nullable=True)
-    idQuiz = db.Column(db.Integer, db.ForeignKey("QUIZ.idQUIZ"), nullable=False)
+    idQuiz = db.Column(db.Integer, db.ForeignKey("QUIZ.idQUIZ"), nullable=True)
 
     # Relations
     quiz = db.relationship("Quiz", back_populates="badges")

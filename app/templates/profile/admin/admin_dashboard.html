@@ -86,6 +86,21 @@
         </div>
 
         <!-- ============================================================ -->
+        <!-- Graphe : popularité des catégories de quiz                   -->
+        <!-- ============================================================ -->
+        <div class="max-w-6xl mx-auto mb-12">
+            <div class="feature-box" style="min-height: auto; align-items: stretch; text-align: left;">
+                <h3 class="text-cyber-text-lighter text-2xl font-bold mb-6 tracking-wide w-full">
+                    Popularité des catégories
+                    <span class="text-cyber-text-muted text-sm font-normal ml-2">— parties jouées par catégorie</span>
+                </h3>
+                <div style="position: relative; height: 300px; width: 100%;">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
         <!-- Quiz en attente de validation                                 -->
         <!-- ============================================================ -->
         <div class="max-w-6xl mx-auto mb-12">
@@ -357,55 +372,69 @@
         </div>
 
         <!-- ============================================================ -->
-        <!-- CU-02 : Configuration des Badges                            -->
-        <!-- TODO Backend : Créer les routes suivantes :                  -->
-        <!--   - GET  /profile/admin/badge/create       (formulaire)      -->
-        <!--   - POST /profile/admin/badge/create       (créer badge)     -->
-        <!--   - POST /profile/admin/badge/<id>/edit    (modifier)        -->
-        <!--   - POST /profile/admin/badge/<id>/delete  (supprimer)       -->
+        <!-- Configuration des Badges                                     -->
         <!-- ============================================================ -->
         <div class="max-w-6xl mx-auto mb-12">
             <div class="feature-box" style="min-height: auto; align-items: stretch; text-align: left;">
                 <div class="flex justify-between items-center mb-5 w-full">
                     <h3 class="text-cyber-text-lighter text-2xl font-bold tracking-wide">
                         Configuration des Badges
+                        <span class="text-cyber-accent text-xl">({{ badges_data|length }})</span>
                     </h3>
-                    <!-- TODO Backend : lier ce bouton à GET /profile/admin/badge/create -->
-                    <button class="btn-cyber-primary text-sm" style="padding: 0.5rem 1.25rem;" disabled
-                        title="Fonctionnalité à implémenter">
-                        + Ajouter un badge
-                    </button>
+                    <a href="{{ url_for('main.badges_page') }}"
+                        class="text-xs text-cyber-accent hover:text-cyber-accent-light underline">
+                        Voir la page publique →
+                    </a>
                 </div>
 
                 {% if badges_data %}
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
-                    {% for badge in badges_data %}
-                    <div
-                        class="flex items-center justify-between p-4 border border-cyber-border rounded-lg hover:border-cyber-border-light transition-colors">
-                        <div>
-                            <p class="text-cyber-text-lighter font-semibold">{{ badge.name }}</p>
-                            <p class="text-cyber-text-muted text-sm">Quiz : {{ badge.quiz_title }}</p>
-                        </div>
-                        <div class="flex gap-2">
-                            <!-- TODO Backend : lier à POST /profile/admin/badge/{{ badge.id }}/edit -->
-                            <button
-                                class="px-3 py-1 rounded text-xs font-semibold bg-blue-500/20 text-blue-400 border border-blue-500/30 hover:bg-blue-500/30 transition-colors"
-                                disabled title="Fonctionnalité à implémenter">
-                                Modifier
-                            </button>
-                            <!-- TODO Backend : lier à POST /profile/admin/badge/{{ badge.id }}/delete -->
-                            <button
-                                class="px-3 py-1 rounded text-xs font-semibold bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30 transition-colors"
-                                disabled title="Fonctionnalité à implémenter">
-                                Supprimer
-                            </button>
-                        </div>
-                    </div>
-                    {% endfor %}
+                <div class="overflow-x-auto w-full">
+                    <table class="w-full text-left text-sm">
+                        <thead>
+                            <tr class="border-b border-cyber-border">
+                                <th class="text-cyber-text-lighter font-semibold py-2 px-3">Icône</th>
+                                <th class="text-cyber-text-lighter font-semibold py-2 px-3">Nom</th>
+                                <th class="text-cyber-text-lighter font-semibold py-2 px-3">Déclencheur</th>
+                                <th class="text-cyber-text-lighter font-semibold py-2 px-3">Catégorie</th>
+                                <th class="text-cyber-text-lighter font-semibold py-2 px-3">Score</th>
+                                <th class="text-cyber-text-lighter font-semibold py-2 px-3 text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for badge in badges_data %}
+                            <tr class="border-b border-cyber-border/30 hover:bg-cyber-border/20 transition-colors">
+                                <td class="py-2 px-3 text-xl">{{ badge.icon }}</td>
+                                <td class="py-2 px-3">
+                                    <p class="text-cyber-text-lighter font-semibold">{{ badge.name }}</p>
+                                    <p class="text-cyber-text-muted text-xs">{{ badge.description }}</p>
+                                </td>
+                                <td class="py-2 px-3 text-cyber-text-muted">{{ badge.trigger }}</td>
+                                <td class="py-2 px-3 text-cyber-text-muted">{{ badge.category }}</td>
+                                <td class="py-2 px-3 text-cyber-text-muted">{{ badge.score_range }}</td>
+                                <td class="py-2 px-3 text-center">
+                                    <div class="flex gap-2 justify-center">
+                                        <a href="{{ url_for('profile.admin_badge_edit', badge_id=badge.id) }}"
+                                            class="px-3 py-1 rounded text-xs font-semibold bg-blue-500/20 text-blue-400 border border-blue-500/30 hover:bg-blue-500/30 transition-colors">
+                                            Modifier
+                                        </a>
+                                        <form method="post"
+                                            action="{{ url_for('profile.admin_badge_delete', badge_id=badge.id) }}"
+                                            onsubmit="return confirm('Supprimer ce badge et retirer les attributions liées ?')">
+                                            <button type="submit"
+                                                class="px-3 py-1 rounded text-xs font-semibold bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30 transition-colors">
+                                                Supprimer
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
                 {% else %}
                 <p class="text-cyber-text-muted text-center py-8 w-full">
-                    Aucun badge n'a encore été configuré.
+                    Aucun badge configuré — lancez <code>python seed_badges.py</code> pour les initialiser.
                 </p>
                 {% endif %}
             </div>
@@ -416,6 +445,50 @@
     <footer>
         <p class="flex justify-center pt-7">Copyright BTS SIO</p>
     </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+        const labels = {{ category_stats.keys() | list | tojson }};
+        const data   = {{ category_stats.values() | list | tojson }};
+
+        new Chart(document.getElementById('categoryChart'), {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Parties jouées',
+                    data: data,
+                    backgroundColor: 'rgba(0, 255, 200, 0.25)',
+                    borderColor:     'rgba(0, 255, 200, 0.85)',
+                    borderWidth: 2,
+                    borderRadius: 6,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => ` ${ctx.parsed.y} partie${ctx.parsed.y !== 1 ? 's' : ''}`
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: { color: '#a0aec0', font: { size: 12 } },
+                        grid:  { color: 'rgba(255,255,255,0.05)' }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ticks: { color: '#a0aec0', stepSize: 1, precision: 0 },
+                        grid:  { color: 'rgba(255,255,255,0.05)' }
+                    }
+                }
+            }
+        });
+    </script>
 </body>
 
 </html>
