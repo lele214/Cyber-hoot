@@ -100,6 +100,25 @@
                                 {{ quiz.difficulty }}
                             </span>
                         </div>
+                        {% if quiz.avg_rating %}
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="text-yellow-400 text-sm">
+                                {% for i in range(1, 6) %}{% if i <= quiz.avg_rating | round %}★{% else %}☆{% endif %}{% endfor %}
+                            </span>
+                            <span class="text-cyber-text-muted text-xs">{{ quiz.avg_rating }}/5</span>
+                            <a href="{{ url_for('main.quiz_reviews', quiz_id=quiz.id) }}"
+                                class="text-cyber-accent text-xs hover:underline ml-1">
+                                {{ quiz.review_count }} avis
+                            </a>
+                        </div>
+                        {% else %}
+                        <div class="mb-3">
+                            <a href="{{ url_for('main.quiz_reviews', quiz_id=quiz.id) }}"
+                                class="text-cyber-text-muted text-xs hover:text-cyber-accent">
+                                Aucun avis pour l'instant
+                            </a>
+                        </div>
+                        {% endif %}
                         <a href="{{ url_for('main.quiz_detail', quiz_id=quiz.id) }}"
                             class="btn-cyber-primary w-full block text-center">
                             Lancer le quiz
@@ -132,6 +151,25 @@
                                 {{ quiz.difficulty }}
                             </span>
                         </div>
+                        {% if quiz.avg_rating %}
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="text-yellow-400 text-sm">
+                                {% for i in range(1, 6) %}{% if i <= quiz.avg_rating | round %}★{% else %}☆{% endif %}{% endfor %}
+                            </span>
+                            <span class="text-cyber-text-muted text-xs">{{ quiz.avg_rating }}/5</span>
+                            <a href="{{ url_for('main.quiz_reviews', quiz_id=quiz.id) }}"
+                                class="text-cyber-accent text-xs hover:underline ml-1">
+                                {{ quiz.review_count }} avis
+                            </a>
+                        </div>
+                        {% else %}
+                        <div class="mb-3">
+                            <a href="{{ url_for('main.quiz_reviews', quiz_id=quiz.id) }}"
+                                class="text-cyber-text-muted text-xs hover:text-cyber-accent">
+                                Aucun avis pour l'instant
+                            </a>
+                        </div>
+                        {% endif %}
                         <a href="{{ url_for('main.quiz_detail', quiz_id=quiz.id) }}"
                             class="btn-cyber-primary w-full block text-center">
                             Lancer le quiz
@@ -145,7 +183,7 @@
                     {% endif %}
                 </div>
 
-                <!-- Cryptographie → catégorie MOTS_DE_PASSE -->
+                <!-- Cryptographie -->
                 <div class="container-cyber hover:shadow-glow transition-all duration-300 p-8">
                     <h3 class="text-cyber-text-lighter text-2xl font-bold mb-4 tracking-wide">
                         Cryptographie
@@ -153,7 +191,7 @@
                     <p class="text-cyber-text-muted text-base leading-relaxed mb-6">
                         Découvrez les techniques de chiffrement et les principes de la cryptographie moderne.
                     </p>
-                    {% set cat_quizzes = published_quizzes | selectattr('category', 'equalto', 'MOTS_DE_PASSE') | list
+                    {% set cat_quizzes = published_quizzes | selectattr('category', 'equalto', 'CRYPTOGRAPHIE') | list
                     %}
                     {% if cat_quizzes %}
                     {% for quiz in cat_quizzes %}
@@ -165,6 +203,25 @@
                                 {{ quiz.difficulty }}
                             </span>
                         </div>
+                        {% if quiz.avg_rating %}
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="text-yellow-400 text-sm">
+                                {% for i in range(1, 6) %}{% if i <= quiz.avg_rating | round %}★{% else %}☆{% endif %}{% endfor %}
+                            </span>
+                            <span class="text-cyber-text-muted text-xs">{{ quiz.avg_rating }}/5</span>
+                            <a href="{{ url_for('main.quiz_reviews', quiz_id=quiz.id) }}"
+                                class="text-cyber-accent text-xs hover:underline ml-1">
+                                {{ quiz.review_count }} avis
+                            </a>
+                        </div>
+                        {% else %}
+                        <div class="mb-3">
+                            <a href="{{ url_for('main.quiz_reviews', quiz_id=quiz.id) }}"
+                                class="text-cyber-text-muted text-xs hover:text-cyber-accent">
+                                Aucun avis pour l'instant
+                            </a>
+                        </div>
+                        {% endif %}
                         <a href="{{ url_for('main.quiz_detail', quiz_id=quiz.id) }}"
                             class="btn-cyber-primary w-full block text-center">
                             Lancer le quiz
@@ -178,7 +235,7 @@
                     {% endif %}
                 </div>
 
-                <!-- Sécurité Web → catégorie PHISHING -->
+                <!-- Sécurité Web -->
                 <div class="container-cyber hover:shadow-glow transition-all duration-300 p-8">
                     <h3 class="text-cyber-text-lighter text-2xl font-bold mb-4 tracking-wide">
                         Sécurité Web
@@ -186,7 +243,7 @@
                     <p class="text-cyber-text-muted text-base leading-relaxed mb-6">
                         Explorez les vulnérabilités web courantes et comment les prévenir.
                     </p>
-                    {% set cat_quizzes = published_quizzes | selectattr('category', 'equalto', 'PHISHING') | list %}
+                    {% set cat_quizzes = published_quizzes | selectattr('category', 'equalto', 'SECURITE_WEB') | list %}
                     {% if cat_quizzes %}
                     {% for quiz in cat_quizzes %}
                     <div class="{% if not loop.last %}mb-3{% endif %}">
@@ -197,6 +254,25 @@
                                 {{ quiz.difficulty }}
                             </span>
                         </div>
+                        {% if quiz.avg_rating %}
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="text-yellow-400 text-sm">
+                                {% for i in range(1, 6) %}{% if i <= quiz.avg_rating | round %}★{% else %}☆{% endif %}{% endfor %}
+                            </span>
+                            <span class="text-cyber-text-muted text-xs">{{ quiz.avg_rating }}/5</span>
+                            <a href="{{ url_for('main.quiz_reviews', quiz_id=quiz.id) }}"
+                                class="text-cyber-accent text-xs hover:underline ml-1">
+                                {{ quiz.review_count }} avis
+                            </a>
+                        </div>
+                        {% else %}
+                        <div class="mb-3">
+                            <a href="{{ url_for('main.quiz_reviews', quiz_id=quiz.id) }}"
+                                class="text-cyber-text-muted text-xs hover:text-cyber-accent">
+                                Aucun avis pour l'instant
+                            </a>
+                        </div>
+                        {% endif %}
                         <a href="{{ url_for('main.quiz_detail', quiz_id=quiz.id) }}"
                             class="btn-cyber-primary w-full block text-center">
                             Lancer le quiz
@@ -230,6 +306,25 @@
                                 {{ quiz.difficulty }}
                             </span>
                         </div>
+                        {% if quiz.avg_rating %}
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="text-yellow-400 text-sm">
+                                {% for i in range(1, 6) %}{% if i <= quiz.avg_rating | round %}★{% else %}☆{% endif %}{% endfor %}
+                            </span>
+                            <span class="text-cyber-text-muted text-xs">{{ quiz.avg_rating }}/5</span>
+                            <a href="{{ url_for('main.quiz_reviews', quiz_id=quiz.id) }}"
+                                class="text-cyber-accent text-xs hover:underline ml-1">
+                                {{ quiz.review_count }} avis
+                            </a>
+                        </div>
+                        {% else %}
+                        <div class="mb-3">
+                            <a href="{{ url_for('main.quiz_reviews', quiz_id=quiz.id) }}"
+                                class="text-cyber-text-muted text-xs hover:text-cyber-accent">
+                                Aucun avis pour l'instant
+                            </a>
+                        </div>
+                        {% endif %}
                         <a href="{{ url_for('main.quiz_detail', quiz_id=quiz.id) }}"
                             class="btn-cyber-primary w-full block text-center">
                             Lancer le quiz
@@ -262,6 +357,25 @@
                                 {{ quiz.difficulty }}
                             </span>
                         </div>
+                        {% if quiz.avg_rating %}
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="text-yellow-400 text-sm">
+                                {% for i in range(1, 6) %}{% if i <= quiz.avg_rating | round %}★{% else %}☆{% endif %}{% endfor %}
+                            </span>
+                            <span class="text-cyber-text-muted text-xs">{{ quiz.avg_rating }}/5</span>
+                            <a href="{{ url_for('main.quiz_reviews', quiz_id=quiz.id) }}"
+                                class="text-cyber-accent text-xs hover:underline ml-1">
+                                {{ quiz.review_count }} avis
+                            </a>
+                        </div>
+                        {% else %}
+                        <div class="mb-3">
+                            <a href="{{ url_for('main.quiz_reviews', quiz_id=quiz.id) }}"
+                                class="text-cyber-text-muted text-xs hover:text-cyber-accent">
+                                Aucun avis pour l'instant
+                            </a>
+                        </div>
+                        {% endif %}
                         <a href="{{ url_for('main.quiz_detail', quiz_id=quiz.id) }}"
                             class="btn-cyber-primary w-full block text-center">
                             Lancer le quiz
@@ -275,43 +389,6 @@
                     {% endif %}
                 </div>
 
-                <!-- TEST → catégorie CATEGORIE_TEST (à supprimer en production) -->
-                <div class="container-cyber hover:shadow-glow transition-all duration-300 p-8
-                    border-2 border-yellow-500/30">
-                    <div class="flex items-center gap-2 mb-4">
-                        <span
-                            class="px-2 py-0.5 rounded text-xs font-semibold bg-yellow-500/20 text-yellow-400">DEV</span>
-                        <h3 class="text-cyber-text-lighter text-2xl font-bold tracking-wide">
-                            TEST
-                        </h3>
-                    </div>
-                    <p class="text-cyber-text-muted text-base leading-relaxed mb-6">
-                        Catégorie Test pour le développement (à supprimer en production).
-                    </p>
-                    {% set cat_quizzes = published_quizzes | selectattr('category', 'equalto', 'CATEGORIE_TEST') | list
-                    %}
-                    {% if cat_quizzes %}
-                    {% for quiz in cat_quizzes %}
-                    <div class="{% if not loop.last %}mb-3{% endif %}">
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="text-cyber-text text-sm truncate">{{ quiz.title }}</span>
-                            <span
-                                class="px-3 py-1 bg-cyber-bg-lighter border border-cyber-border-light rounded text-cyber-text-light text-xs">
-                                {{ quiz.difficulty }}
-                            </span>
-                        </div>
-                        <a href="{{ url_for('main.quiz_detail', quiz_id=quiz.id) }}"
-                            class="btn-cyber-primary w-full block text-center">
-                            Lancer le quiz
-                        </a>
-                    </div>
-                    {% endfor %}
-                    {% else %}
-                    <a href="#" class="btn-cyber-primary w-full block text-center opacity-50 cursor-not-allowed">
-                        Bientôt disponible
-                    </a>
-                    {% endif %}
-                </div>
             </div>
         </div>
     </section>

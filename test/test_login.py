@@ -1,34 +1,85 @@
-from werkzeug.security import check_password_hash, generate_password_hash
+"""
+Tests unitaires pour l'authentification (connexion).
+Remplacement de l'ancien script par des tests pytest corrects.
+
+Correction : l'ancien fichier importait 'from app.database import db'
+qui n'existe pas — le bon module est 'app.extensions'.
+"""
+from werkzeug.security import check_password_hash
 from app.models.models import User
-from app.database import db
-from app import create_app
+from app.extensions import db  # noqa: F401  (import correct)
 
-# Créer l'application
-app = create_app()
 
-with app.app_context():
-    # Récupérer l'utilisateur
-    user = User.query.filter_by(username='admin_cyberhoot').first()
+def test_user_password_hash_matches(test_player):
+    """Le hash stocké doit correspondre au mot de passe du joueur de test."""
+    user = User.query.filter_by(username="testplayer").first()
+    assert user is not None
+    assert check_password_hash(user.hashpassword, "Player123!") is True
 
-    if not user:
-        print("ERREUR : Utilisateur 'admin_cyberhoot' non trouvé !")
-    else:
-        print(f"Utilisateur trouvé : {user.username}")
-        print(f"Email : {user.emailUser}")
-        print(f"Hash length : {len(user.hashpassword) if user.hashpassword else 0}")
-        print(f"Hash preview : {user.hashpassword[:50] if user.hashpassword else 'None'}")
 
-        # Tester le mot de passe
-        password = 'Admin1234!'
-        result = check_password_hash(user.hashpassword, password)
+def test_user_wrong_password_rejected(test_player):
+    """Un mauvais mot de passe ne doit pas être accepté."""
+    user = User.query.filter_by(username="testplayer").first()
+    assert user is not None
+    assert check_password_hash(user.hashpassword, "WrongPassword!") is False
 
-        print(f"\nTest du mot de passe '{password}':")
-        print(f"Résultat : {result}")
 
-        if result:
-            print("SUCCESS : Le mot de passe est correct !")
-        else:
-            print("ECHEC : Le mot de passe est incorrect !")
+def test_user_has_player_role(test_player):
+    """L'utilisateur de test doit avoir le rôle 'player'."""
+    user = User.query.filter_by(username="testplayer").first()
+    assert user is not None
+    role_names = [role.nameRoles for role in user.roles]
+    assert "player" in role_names
 
-        # Vérifier les rôles
-        print(f"\nRôles de l'utilisateur : {[role.nameRoles for role in user.roles]}")
+
+def test_login_route_success(client, test_player):
+    """La route de login doit rediriger vers l'accueil en cas de succès."""
+    response = client.post(
+        "/auth/login",
+        data={"username": "testplayer", "password": "Player123!"},
+        follow_redirects=False,
+    )
+    assert response.status_code == 302
+
+
+def test_login_route_wrong_password(client, test_player):
+    """Un mauvais mot de passe doit rester sur la page de login."""
+    response = client.post(
+        "/auth/login",
+        data={"username": "testplayer", "password": "WrongPassword!"},
+        follow_redirects=True,
+    )
+    assert response.status_code == 200
+    assert "incorrect" in response.data.decode("utf-8").lower() or \
+           "mot de passe" in response.data.decode("utf-8").lower()
+
+
+def test_login_route_unknown_user(client):
+    """Un utilisateur inexistant ne doit pas pouvoir se connecter."""
+    response = client.post(
+        "/auth/login",
+        data={"username": "utilisateur_inexistant", "password": "Password123!"},
+        follow_redirects=True,
+    )
+    assert response.status_code == 200
+
+
+def test_login_route_missing_fields(client):
+    """Des champs vides doivent afficher un message d'erreur."""
+    response = client.post(
+        "/auth/login",
+        data={"username": "", "password": ""},
+        follow_redirects=True,
+    )
+    assert response.status_code == 200
+    assert "champs" in response.data.decode("utf-8").lower()
+
+
+def test_logout_clears_session(client, test_player):
+    """La déconnexion doit vider la session."""
+    client.post(
+        "/auth/login",
+        data={"username": "testplayer", "password": "Player123!"},
+    )
+    response = client.get("/auth/logout", follow_redirects=False)
+    assert response.status_code == 302

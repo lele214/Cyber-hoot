@@ -45,6 +45,7 @@ class User(db.Model):
     user_badges = db.relationship("UserBadge", back_populates="user")
     results = db.relationship("Result", back_populates="user")
     connection_logs = db.relationship("ConnectionLog", back_populates="user")
+    reviews = db.relationship("Review", back_populates="user")
 
     def __repr__(self):
         return f"<User {self.username}>"
@@ -64,13 +65,12 @@ class Quiz(db.Model):
     )
     category = db.Column(
         db.Enum(
-            "PHISHING",
+            "SECURITE_WEB",
             "MALWARE",
             "RESEAUX",
-            "MOTS_DE_PASSE",
+            "CRYPTOGRAPHIE",
             "INGENIERIE_SOCIALE",
             "INTRODUCTION_CYBER",
-            "CATEGORIE_TEST",
         ),
         nullable=True,
     )
@@ -83,6 +83,7 @@ class Quiz(db.Model):
     badges = db.relationship("Badge", back_populates="quiz")
     questions = db.relationship("Question", back_populates="quiz")
     results = db.relationship("Result", back_populates="quiz")
+    reviews = db.relationship("Review", back_populates="quiz")
 
     def __repr__(self):
         return f"<Quiz {self.title}>"
@@ -92,9 +93,29 @@ class Badge(db.Model):
     __tablename__ = "BADGES"
 
     idBadges = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String(45), nullable=True)
+    name = db.Column(db.String(100), nullable=True)
+    description = db.Column(db.String(255), nullable=True)
+    icon = db.Column(db.String(10), nullable=True)
+    score_min = db.Column(db.Integer, nullable=True)   # pourcentage 0-100, null = non-basé sur score
+    score_max = db.Column(db.Integer, nullable=True)   # pourcentage 0-100, null = non-basé sur score
+    category = db.Column(
+        db.Enum(
+            "SECURITE_WEB",
+            "MALWARE",
+            "RESEAUX",
+            "CRYPTOGRAPHIE",
+            "INGENIERIE_SOCIALE",
+            "INTRODUCTION_CYBER",
+        ),
+        nullable=True,  # null = badge global (toutes catégories)
+    )
+    trigger = db.Column(
+        db.Enum("score", "review", "review_comment"),
+        nullable=False,
+        server_default="score",
+    )  # ce qui déclenche le badge
     image = db.Column(db.LargeBinary, nullable=True)
-    idQuiz = db.Column(db.Integer, db.ForeignKey("QUIZ.idQUIZ"), nullable=False)
+    idQuiz = db.Column(db.Integer, db.ForeignKey("QUIZ.idQUIZ"), nullable=True)
 
     # Relations
     quiz = db.relationship("Quiz", back_populates="badges")
@@ -221,6 +242,28 @@ class Result(db.Model):
 
     def __repr__(self):
         return f"<Result {self.idRESULT}>"
+
+
+class Review(db.Model):
+    __tablename__ = "REVIEW"
+
+    idREVIEW = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    idUSERinReview = db.Column(db.Integer, db.ForeignKey("USER.idUSER"), nullable=False)
+    idQUIZinReview = db.Column(db.Integer, db.ForeignKey("QUIZ.idQUIZ"), nullable=False)
+    rating = db.Column(db.Integer, nullable=False)  # 1 à 5
+    comment = db.Column(db.Text, nullable=True)
+    date = db.Column(db.Date, nullable=True)
+
+    __table_args__ = (
+        db.UniqueConstraint("idUSERinReview", "idQUIZinReview", name="unique_user_quiz_review"),
+    )
+
+    # Relations
+    user = db.relationship("User", back_populates="reviews")
+    quiz = db.relationship("Quiz", back_populates="reviews")
+
+    def __repr__(self):
+        return f"<Review user={self.idUSERinReview} quiz={self.idQUIZinReview} rating={self.rating}>"
 
 
 class ConnectionLog(db.Model):

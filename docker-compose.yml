@@ -33,6 +33,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    restart: unless-stopped
     ports:
       - "5000:5000"
     volumes:
@@ -61,7 +62,7 @@ services:
     image: adminer:latest
     restart: always
     ports:
-      - "8181:8080"
+      - "8383:8080"
     depends_on:
       - db
     networks:
@@ -71,14 +72,15 @@ services:
 # Volume créé avec les paramètres par défaut
 # Persistance des données de la DB ici
 volumes:
-  db_data: # driver: local
+  db_data:
+    # driver: local
 
-# Réseaux isolés : frontend (accès externe) / backend (communication interne)
+    # Réseaux isolés : frontend (accès externe) / backend (communication interne)
 networks:
   frontend:
   backend:
 
-# Secrets Docker : montés en fichiers dans /run/secrets/ (lecture seule)
+    # Secrets Docker : montés en fichiers dans /run/secrets/ (lecture seule)
 secrets:
   db_password:
     file: ./secrets/db_password.txt

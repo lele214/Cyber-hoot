@@ -1,7 +1,9 @@
 from flask_sqlalchemy import SQLAlchemy
+from flask_mail import Mail
 from contextlib import contextmanager
 
 db = SQLAlchemy()
+mail = Mail()
 
 
 @contextmanager

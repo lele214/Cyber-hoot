@@ -89,6 +89,40 @@ migrate-init:
     @echo "Alembic initialisé. La baseline est marquée comme appliquée."
 
 # ─────────────────────────────────────────────
+#  Badges
+# ─────────────────────────────────────────────
+
+# Initialise les badges prédéfinis et attribue rétroactivement aux utilisateurs existants
+seed-badges:
+    docker compose exec app flask seed-badges
+
+# ─────────────────────────────────────────────
+#  Tests unitaires
+# ─────────────────────────────────────────────
+
+# Lance tous les tests
+test:
+    python -m pytest -v
+
+# Lance les tests en mode silencieux (résumé uniquement)
+test-short:
+    python -m pytest -q
+
+# Lance un fichier ou un test spécifique
+# Usage : just test-run test/test_quiz.py
+#         just test-run test/test_quiz.py::test_quiz_creation_model
+test-run target:
+    python -m pytest -v {{target}}
+
+# Lance les tests avec affichage des print()
+test-debug:
+    python -m pytest -v -s
+
+# Lance les tests et s'arrête au premier échec
+test-fail-fast:
+    python -m pytest -v -x
+
+# ─────────────────────────────────────────────
 #  Docker utilitaires
 # ─────────────────────────────────────────────
 
