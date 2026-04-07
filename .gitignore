@@ -75,6 +75,9 @@ temp/
 # Documentation générée
 docs/_build/
 site/
+docs/oral_bts_sio_slam.md
+docs/alembic.md
+docs/justfile.md
 
 # Secrets et clés
 *.key

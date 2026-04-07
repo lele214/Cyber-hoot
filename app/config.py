@@ -28,6 +28,15 @@ class Config:
     # --- VirusTotal API ---
     VIRUSTOTAL_API_KEY = get_secret("VIRUSTOTAL_API_KEY", "api_key")
 
+    # --- Flask-Mail (SMTP) ---
+    MAIL_SERVER = os.getenv("MAIL_SERVER", "smtp.gmail.com")
+    MAIL_PORT = int(os.getenv("MAIL_PORT", 587))
+    MAIL_USE_TLS = os.getenv("MAIL_USE_TLS", "true").lower() == "true"
+    MAIL_USE_SSL = os.getenv("MAIL_USE_SSL", "false").lower() == "true"
+    MAIL_USERNAME = os.getenv("MAIL_USERNAME", "")
+    MAIL_PASSWORD = get_secret("MAIL_PASSWORD", "mail_password")
+    MAIL_DEFAULT_SENDER = os.getenv("MAIL_DEFAULT_SENDER", MAIL_USERNAME)
+
     MYSQL_USER = os.getenv("MYSQL_USER", "")
     MYSQL_PASSWORD = get_secret("MYSQL_PASSWORD", "db_password")
     MYSQL_HOST = os.getenv("MYSQL_HOST", "")
