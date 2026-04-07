@@ -20,9 +20,10 @@ from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 
 # import de l'application (base de donnée, les models de page, la config de l'appli flask)
 # fonction try/except dans extensions.py
-from app.extensions import db_transaction
+from app.extensions import db_transaction, mail
 from app.models.models import User, ConnectionLog, Role
 from flask import current_app
+from flask_mail import Message
 
 
 # Création de la route lié à l'authentification
@@ -196,20 +197,41 @@ def forgot_password_post():
         token = generate_reset_token(email)
         reset_url = url_for("auth.reset_password_get", token=token, _external=True)
 
-        # TODO: Envoyer l'email avec le lien de réinitialisation
-        # Pour l'instant, afficher le lien dans la console (développement uniquement)
-        print(f"Lien de réinitialisation pour {email}: {reset_url}")
+        # Envoyer l'email avec le lien de réinitialisation
+        try:
+            msg = Message(
+                subject="Réinitialisation de votre mot de passe - Cyber-hoot",
+                recipients=[email],
+                html=f"""
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #0d1117; color: #c9d1d9; padding: 40px; border-radius: 8px; border: 1px solid #30363d;">
+                    <h1 style="color: #58a6ff; margin-bottom: 8px;">Cyber-hoot</h1>
+                    <h2 style="color: #f0f6fc; margin-bottom: 24px;">Réinitialisation de mot de passe</h2>
+                    <p style="margin-bottom: 16px;">Bonjour <strong>{user.username}</strong>,</p>
+                    <p style="margin-bottom: 24px;">Vous avez demandé à réinitialiser votre mot de passe. Cliquez sur le bouton ci-dessous pour choisir un nouveau mot de passe :</p>
+                    <div style="text-align: center; margin: 32px 0;">
+                        <a href="{reset_url}"
+                           style="background-color: #58a6ff; color: #0d1117; padding: 14px 28px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 16px; display: inline-block;">
+                            Réinitialiser mon mot de passe
+                        </a>
+                    </div>
+                    <p style="margin-bottom: 8px; color: #8b949e; font-size: 14px;">Ce lien est valable pendant <strong style="color: #c9d1d9;">1 heure</strong>.</p>
+                    <p style="color: #8b949e; font-size: 14px;">Si vous n'avez pas fait cette demande, ignorez simplement cet email — votre mot de passe restera inchangé.</p>
+                    <hr style="border: none; border-top: 1px solid #30363d; margin: 32px 0;">
+                    <p style="color: #6e7681; font-size: 12px; text-align: center;">Cyber-hoot — Plateforme de sensibilisation à la cybersécurité</p>
+                </div>
+                """,
+            )
+            mail.send(msg)
+        except Exception as e:
+            current_app.logger.error(f"Erreur envoi email réinitialisation à {email}: {e}")
+            flash("Une erreur est survenue lors de l'envoi de l'email. Veuillez réessayer.", "error")
+            return render_template("auth/forgot_password.html")
 
-        flash(
-            "Si cette adresse email existe, un lien de réinitialisation a été envoyé.",
-            "success",
-        )
-    else:
-        # Ne pas révéler si l'email existe ou non (sécurité)
-        flash(
-            "Si cette adresse email existe, un lien de réinitialisation a été envoyé.",
-            "success",
-        )
+    # Ne pas révéler si l'email existe ou non (sécurité anti-énumération)
+    flash(
+        "Si cette adresse email est associée à un compte, un lien de réinitialisation vient d'être envoyé.",
+        "success",
+    )
 
     return redirect(url_for("auth.login_get"))
 

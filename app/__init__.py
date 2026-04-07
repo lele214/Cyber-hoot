@@ -17,8 +17,9 @@ def create_app(config_name=None):
     app.config.from_object(config[config_name])
 
     # Initialiser les extensions
-    from app.extensions import db
+    from app.extensions import db, mail
     db.init_app(app)
+    mail.init_app(app)
 
     # Enregistrer les blueprints
     from app.routes.main_routes import main_bp
