@@ -102,7 +102,7 @@
         <p class="text-cyber-text-muted">Copyright BTS SIO</p>
     </footer>
 
-    <script>
+    <script nonce="{{ csp_nonce }}">
         const stars = document.querySelectorAll('.star-icon');
         const radios = document.querySelectorAll('input[name="rating"]');
         const ratingLabel = document.getElementById('rating-label');

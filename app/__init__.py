@@ -1,5 +1,6 @@
 import os
-from flask import Flask
+import secrets
+from flask import Flask, g
 from dotenv import load_dotenv
 
 
@@ -32,6 +33,43 @@ def create_app(config_name=None):
 
     # Créer le dossier d'uploads s'il n'existe pas
     os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
+
+    # --- Sécurité : nonce CSP par requête ---
+    @app.before_request
+    def set_csp_nonce():
+        g.csp_nonce = secrets.token_urlsafe(16)
+
+    @app.context_processor
+    def inject_csp_nonce():
+        return {"csp_nonce": getattr(g, "csp_nonce", "")}
+
+    @app.after_request
+    def set_security_headers(response):
+        nonce = getattr(g, "csp_nonce", "")
+        csp = (
+            f"default-src 'self'; "
+            f"script-src 'self' 'nonce-{nonce}' https://cdn.jsdelivr.net; "
+            # 'unsafe-inline' requis pour les styles Tailwind dynamiques et inline style= attr
+            f"style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+            f"font-src 'self' https://fonts.gstatic.com; "
+            f"img-src 'self' data: blob:; "
+            f"connect-src 'self'; "
+            f"frame-src 'none'; "
+            f"object-src 'none'; "
+            f"base-uri 'self'; "
+            f"form-action 'self';"
+        )
+        response.headers["Content-Security-Policy"] = csp
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "SAMEORIGIN"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["Permissions-Policy"] = (
+            "camera=(), microphone=(), geolocation=(), payment=()"
+        )
+        # À activer après passage en HTTPS :
+        # response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains; preload"
+        response.headers.pop("X-Xss-Protection", None)
+        return response
 
     # Commandes CLI Flask
     _register_cli(app)

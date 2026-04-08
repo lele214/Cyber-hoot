@@ -105,7 +105,7 @@
 
     <!-- Alert pour la déconnexion -->
     {% if request.args.get('logout') == 'success' %}
-    <script>
+    <script nonce="{{ csp_nonce }}">
         alert("Vous avez été déconnecté avec succès");
     </script>
     {% endif %}

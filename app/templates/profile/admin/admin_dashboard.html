@@ -27,7 +27,7 @@
         </div>
         {% endfor %}
     </div>
-    <script>
+    <script nonce="{{ csp_nonce }}">
         setTimeout(() => {
             const c = document.getElementById('flash-container');
             if (c) c.remove();
@@ -447,7 +447,7 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <script>
+    <script nonce="{{ csp_nonce }}">
         const labels = {{ category_stats.keys() | list | tojson }};
         const data   = {{ category_stats.values() | list | tojson }};
 
