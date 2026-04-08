@@ -53,7 +53,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    command: sh -c "npm run build:css && python3 run.py"
+    command: sh -c "npm run build:css && gunicorn -w 2 -b 0.0.0.0:5000 run:app"
     networks:
       - frontend
       - backend

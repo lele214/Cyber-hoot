@@ -8,3 +8,4 @@ itsdangerous
 alembic
 requests
 pytest
+gunicorn
