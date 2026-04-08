@@ -159,6 +159,12 @@
                                         </button>
                                         {% endif %}
 
+                                        <!-- Bouton Statistiques détaillées -->
+                                        <a href="{{ url_for('profile.creator_quiz_stats', quiz_id=quiz.id) }}"
+                                            class="px-3 py-1 rounded text-xs font-semibold bg-purple-500/20 text-purple-400 border border-purple-500/30 hover:bg-purple-500/30 transition-colors">
+                                            Stats
+                                        </a>
+
                                         <!-- Bouton Supprimer → formulaire POST avec confirmation -->
                                         <form method="POST"
                                             action="{{ url_for('profile.creator_quiz_delete', quiz_id=quiz.id) }}"
@@ -184,31 +190,27 @@
             </div>
         </div>
 
-        <!-- ============================================================ -->
-        <!-- CU-07 : Statistiques détaillées des quiz                     -->
-        <!-- TODO Backend : Créer la route suivante :                     -->
-        <!--   - GET /profile/creator/quiz/<id>/stats  (stats détaillées) -->
-        <!-- Données à afficher :                                         -->
-        <!--   - Nombre de tentatives par quiz                            -->
-        <!--   - Score moyen, min, max par quiz                           -->
-        <!--   - Taux de réussite par question                            -->
-        <!--   - Évolution dans le temps                                  -->
-        <!-- ============================================================ -->
+        <!-- CU-07 : Statistiques détaillées des quiz -->
+        {% if quizzes_data %}
         <div class="max-w-6xl mx-auto mb-12">
             <div class="feature-box" style="min-height: auto; align-items: stretch; text-align: left;">
                 <h3 class="text-cyber-text-lighter text-2xl font-bold mb-5 tracking-wide w-full">
                     Statistiques détaillées
                 </h3>
-                <p class="text-cyber-text-muted text-base leading-relaxed w-full mb-4">
-                    Consultez les performances des joueurs sur vos quiz : scores moyens, taux de réussite par question,
-                    et évolution dans le temps.
+                <p class="text-cyber-text-muted text-sm leading-relaxed w-full mb-4">
+                    Cliquez sur le bouton <span class="text-purple-400 font-semibold">Stats</span> dans la colonne Actions de chaque quiz pour consulter les performances détaillées.
                 </p>
-                <!-- TODO Backend : lier à GET /profile/creator/quiz/<id>/stats -->
-                <button class="btn-cyber text-sm" disabled title="Fonctionnalité à implémenter">
-                    Voir les statistiques détaillées
-                </button>
+                <div class="flex flex-wrap gap-3">
+                    {% for quiz in quizzes_data %}
+                    <a href="{{ url_for('profile.creator_quiz_stats', quiz_id=quiz.id) }}"
+                        class="px-4 py-2 rounded text-sm font-semibold bg-purple-500/20 text-purple-400 border border-purple-500/30 hover:bg-purple-500/30 transition-colors">
+                        {{ quiz.title }}
+                    </a>
+                    {% endfor %}
+                </div>
             </div>
         </div>
+        {% endif %}
 
     </div>
 

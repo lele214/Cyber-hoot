@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statistiques – {{ quiz.title }} - Cyber-hoot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='output.css') }}">
+</head>
+
+<body class="min-h-screen py-10 px-5 scanline relative">
+    <a href="{{ url_for('profile.creator_dashboard') }}"
+        class="fixed top-5 left-5 px-6 py-3 bg-transparent border-2 border-cyber-accent text-cyber-text-lighter rounded-lg font-semibold text-sm transition-all duration-300 hover:bg-cyber-border hover:border-cyber-accent-light hover:shadow-glow-sm hover:-translate-x-1 z-50">
+        ← Retour au dashboard
+    </a>
+
+    <div class="max-w-5xl mx-auto">
+
+        <!-- En-tête -->
+        <div class="text-center mb-10">
+            <h1 class="text-cyber-text-lighter text-4xl font-bold mb-3 tracking-wide text-glow">
+                Statistiques détaillées
+            </h1>
+            <p class="text-cyber-text-muted text-base">
+                {{ quiz.title }}
+                <span class="mx-2 text-cyber-border">|</span>
+                <span class="px-2 py-0.5 rounded-full text-xs font-semibold
+                    {% if quiz.difficulty == 'EASY' %}bg-green-500/20 text-green-400
+                    {% elif quiz.difficulty == 'MEDIUM' %}bg-yellow-500/20 text-yellow-400
+                    {% else %}bg-red-500/20 text-red-400{% endif %}">
+                    {{ quiz.difficulty }}
+                </span>
+            </p>
+        </div>
+
+        <!-- Résumé global -->
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-10">
+            <div class="feature-box text-center col-span-1">
+                <h3 class="text-cyber-accent text-4xl font-bold mb-2">{{ total_attempts }}</h3>
+                <p class="text-cyber-text-lighter text-sm font-semibold">Tentatives</p>
+            </div>
+            <div class="feature-box text-center col-span-1">
+                <h3 class="text-cyber-accent text-4xl font-bold mb-2">{{ unique_players }}</h3>
+                <p class="text-cyber-text-lighter text-sm font-semibold">Joueurs uniques</p>
+            </div>
+            <div class="feature-box text-center col-span-1">
+                <h3 class="font-bold text-4xl mb-2
+                    {% if avg_score >= 80 %}text-green-400
+                    {% elif avg_score >= 60 %}text-yellow-400
+                    {% else %}text-red-400{% endif %}">
+                    {{ avg_score }}%
+                </h3>
+                <p class="text-cyber-text-lighter text-sm font-semibold">Score moyen</p>
+            </div>
+            <div class="feature-box text-center col-span-1">
+                <h3 class="text-green-400 text-4xl font-bold mb-2">{{ max_score }}%</h3>
+                <p class="text-cyber-text-lighter text-sm font-semibold">Score max</p>
+            </div>
+            <div class="feature-box text-center col-span-1">
+                <h3 class="text-red-400 text-4xl font-bold mb-2">{{ min_score }}%</h3>
+                <p class="text-cyber-text-lighter text-sm font-semibold">Score min</p>
+            </div>
+        </div>
+
+        {% if total_attempts == 0 %}
+        <div class="feature-box text-center mb-10" style="min-height: auto;">
+            <p class="text-cyber-text-muted py-6">Aucune tentative enregistrée pour ce quiz.</p>
+        </div>
+        {% else %}
+
+        <!-- Statistiques par question -->
+        <div class="feature-box mb-10" style="min-height: auto; align-items: stretch; text-align: left;">
+            <h3 class="text-cyber-text-lighter text-xl font-bold mb-5 tracking-wide w-full">
+                Taux de réussite par question
+            </h3>
+            {% if question_stats %}
+            <div class="space-y-5 w-full">
+                {% for q in question_stats %}
+                <div>
+                    <div class="flex justify-between items-start mb-1 gap-3">
+                        <p class="text-cyber-text text-sm flex-1">
+                            <span class="text-cyber-text-muted font-semibold">Q{{ q.index }}.</span>
+                            {{ q.text }}
+                        </p>
+                        <span class="text-sm font-bold shrink-0
+                            {% if q.success_rate >= 80 %}text-green-400
+                            {% elif q.success_rate >= 50 %}text-yellow-400
+                            {% else %}text-red-400{% endif %}">
+                            {{ q.success_rate }}%
+                        </span>
+                    </div>
+                    <!-- Barre de progression -->
+                    <div class="w-full bg-cyber-border rounded-full h-2 mb-1">
+                        <div class="h-2 rounded-full transition-all
+                            {% if q.success_rate >= 80 %}bg-green-500
+                            {% elif q.success_rate >= 50 %}bg-yellow-500
+                            {% else %}bg-red-500{% endif %}"
+                            style="width: {{ q.success_rate }}%"></div>
+                    </div>
+                    <div class="flex gap-4 text-xs text-cyber-text-muted">
+                        <span class="text-green-400">✓ {{ q.correct_count }} correct{{ 's' if q.correct_count > 1 else '' }}</span>
+                        <span class="text-red-400">✗ {{ q.wrong_count }} incorrect{{ 's' if q.wrong_count > 1 else '' }}</span>
+                        {% if q.unanswered_count > 0 %}
+                        <span class="text-yellow-400">— {{ q.unanswered_count }} sans réponse</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-cyber-text-muted text-sm">Aucune question trouvée pour ce quiz.</p>
+            {% endif %}
+        </div>
+
+        <!-- Timeline des tentatives -->
+        {% if timeline %}
+        <div class="feature-box mb-10" style="min-height: auto; align-items: stretch; text-align: left;">
+            <h3 class="text-cyber-text-lighter text-xl font-bold mb-5 tracking-wide w-full">
+                Historique des tentatives
+            </h3>
+            <div class="overflow-x-auto w-full">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="border-b border-cyber-border">
+                            <th class="text-cyber-text-lighter font-semibold py-2 px-4">Date</th>
+                            <th class="text-cyber-text-lighter font-semibold py-2 px-4 text-center">Tentatives</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for entry in timeline %}
+                        <tr class="border-b border-cyber-border/30 hover:bg-cyber-border/20 transition-colors">
+                            <td class="text-cyber-text-muted py-2 px-4">{{ entry.date }}</td>
+                            <td class="py-2 px-4 text-center">
+                                <div class="flex items-center justify-center gap-2">
+                                    <div class="h-2 bg-cyber-accent rounded-full" style="width: {{ [entry.count * 20, 160] | min }}px"></div>
+                                    <span class="text-cyber-text font-semibold">{{ entry.count }}</span>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        {% endif %}
+
+    </div>
+
+    <footer>
+        <p class="flex justify-center pt-7">Copyright BTS SIO</p>
+    </footer>
+</body>
+
+</html>

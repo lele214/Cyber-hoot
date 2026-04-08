@@ -28,6 +28,8 @@ from app.extensions import db, db_transaction
 from app.decorators import login_required, role_required
 from app.routes.auth import generate_reset_token
 from werkzeug.utils import secure_filename
+import ast
+from collections import defaultdict
 from datetime import date
 from app.services.virustotal import scan_file, VirusTotalError
 import uuid
@@ -304,6 +306,101 @@ def creator_dashboard():
         published_count=published_count,
         draft_count=draft_count,
         quizzes_data=quizzes_data,
+    )
+
+
+# Statistiques détaillées d'un quiz pour le créateur
+@profile_bp.get("/creator/quiz/<int:quiz_id>/stats")
+@login_required
+@role_required("creator")
+def creator_quiz_stats(quiz_id):
+    user_id = session.get("user_id")
+    username = session.get("username")
+    user_roles = session.get("user_roles", [])
+
+    # Vérifie que le quiz appartient bien à ce créateur
+    quiz = Quiz.query.filter_by(idQUIZ=quiz_id, idCreatedByUser=user_id).first_or_404()
+
+    results = Result.query.filter_by(idQUIZinResult=quiz_id).order_by(Result.date).all()
+
+    total_attempts = len(results)
+    unique_players = len(set(r.idUSERinResult for r in results if r.idUSERinResult))
+
+    if results:
+        scores_pct = [
+            r.score / r.totalQuestions * 100
+            for r in results
+            if r.totalQuestions and r.totalQuestions > 0
+        ]
+        avg_score = round(sum(scores_pct) / len(scores_pct), 1) if scores_pct else 0
+        min_score = round(min(scores_pct), 1) if scores_pct else 0
+        max_score = round(max(scores_pct), 1) if scores_pct else 0
+    else:
+        avg_score = min_score = max_score = 0
+
+    # Statistiques par question
+    question_stats = []
+    for i, question in enumerate(quiz.questions):
+        # Trouve l'index de la bonne réponse (0-based)
+        correct_idx = None
+        for j, resp in enumerate(question.responses):
+            if resp.isCorrect:
+                correct_idx = str(j)
+                break
+
+        correct_count = 0
+        wrong_count = 0
+        unanswered_count = 0
+
+        for result in results:
+            try:
+                answers = ast.literal_eval(result.answer) if result.answer else {}
+            except Exception:
+                answers = {}
+            user_ans = answers.get(f"q{i}")
+            if user_ans is None:
+                unanswered_count += 1
+            elif user_ans == correct_idx:
+                correct_count += 1
+            else:
+                wrong_count += 1
+
+        success_rate = (
+            round(correct_count / total_attempts * 100, 1) if total_attempts > 0 else 0
+        )
+
+        question_stats.append(
+            {
+                "index": i + 1,
+                "text": question.QuestionText,
+                "correct_count": correct_count,
+                "wrong_count": wrong_count,
+                "unanswered_count": unanswered_count,
+                "success_rate": success_rate,
+            }
+        )
+
+    # Tentatives par date (timeline)
+    attempts_by_date = defaultdict(int)
+    for result in results:
+        date_str = result.date.strftime("%d/%m/%Y") if result.date else "N/A"
+        attempts_by_date[date_str] += 1
+    timeline = [
+        {"date": d, "count": c} for d, c in sorted(attempts_by_date.items())
+    ]
+
+    return render_template(
+        "profile/creator/creator_quiz_stats.html",
+        username=username,
+        user_roles=user_roles,
+        quiz=quiz,
+        total_attempts=total_attempts,
+        unique_players=unique_players,
+        avg_score=avg_score,
+        min_score=min_score,
+        max_score=max_score,
+        question_stats=question_stats,
+        timeline=timeline,
     )
 
 
