@@ -158,21 +158,26 @@ def logout():
 
 
 # Génère un token lié à l'email pour réinitialiser son compte
-def generate_reset_token(email):
-    """Génère un token de réinitialisation sécurisé"""
+def generate_reset_token(email, password_hash):
+    """Génère un token de réinitialisation sécurisé.
+    Inclut un fingerprint du hash actuel pour invalider le token après utilisation.
+    """
     serializer = URLSafeTimedSerializer(current_app.config["SECRET_KEY"])
-    return serializer.dumps(email, salt="password-reset-salt")
+    fingerprint = (password_hash or "")[:16]
+    return serializer.dumps({"email": email, "fp": fingerprint}, salt="password-reset-salt")
 
 
 # Et ici vérifie que le token ne soit pas expiré
 def verify_reset_token(token, expiration=3600):
-    """Vérifie un token de réinitialisation (expire après 1 heure par défaut)"""
+    """Vérifie un token de réinitialisation (expire après 1 heure par défaut).
+    Retourne (email, fingerprint) ou (None, None) si invalide/expiré.
+    """
     serializer = URLSafeTimedSerializer(current_app.config["SECRET_KEY"])
     try:
-        email = serializer.loads(token, salt="password-reset-salt", max_age=expiration)
-        return email
+        data = serializer.loads(token, salt="password-reset-salt", max_age=expiration)
+        return data.get("email"), data.get("fp", "")
     except (SignatureExpired, BadSignature):
-        return None
+        return None, None
 
 
 # Envoie vers la page pour réinitialiser son compte
@@ -193,8 +198,8 @@ def forgot_password_post():
     user = User.query.filter_by(emailUser=email).first()
 
     if user:
-        # Générer le token de réinitialisation
-        token = generate_reset_token(email)
+        # Générer le token de réinitialisation (fingerprint du hash pour invalidation après usage)
+        token = generate_reset_token(email, user.hashpassword)
         reset_url = url_for("auth.reset_password_get", token=token, _external=True)
 
         # Envoyer l'email avec le lien de réinitialisation
@@ -240,9 +245,15 @@ def forgot_password_post():
 @auth_bp.get("/reset-password/<token>")
 def reset_password_get(token):
     # Vérifier que le token est valide
-    email = verify_reset_token(token)
+    email, fingerprint = verify_reset_token(token)
     if not email:
         flash("Le lien de réinitialisation est invalide ou a expiré", "error")
+        return redirect(url_for("auth.forgot_password_get"))
+
+    # Vérifier que le token n'a pas déjà été utilisé (fingerprint du hash actuel)
+    user = User.query.filter_by(emailUser=email).first()
+    if not user or (user.hashpassword or "")[:16] != fingerprint:
+        flash("Ce lien de réinitialisation a déjà été utilisé ou est invalide", "error")
         return redirect(url_for("auth.forgot_password_get"))
 
     return render_template("auth/reset_password.html", token=token)
@@ -253,7 +264,7 @@ def reset_password_get(token):
 @auth_bp.post("/reset-password/<token>")
 def reset_password_post(token):
     # Vérifier que le token est valide
-    email = verify_reset_token(token)
+    email, fingerprint = verify_reset_token(token)
     if not email:
         flash("Le lien de réinitialisation est invalide ou a expiré", "error")
         return redirect(url_for("auth.forgot_password_get"))
@@ -290,16 +301,21 @@ def reset_password_post(token):
         flash("Le mot de passe doit contenir au moins un caractère spécial", "error")
         return render_template("auth/reset_password.html", token=token)
 
-    # Trouver l'utilisateur et mettre à jour son mot de passe
+    # Trouver l'utilisateur et vérifier que le token n'a pas déjà été utilisé
     user = User.query.filter_by(emailUser=email).first()
     if not user:
         flash("Utilisateur introuvable", "error")
         return redirect(url_for("auth.forgot_password_get"))
 
-    # Mettre à jour le mot de passe
-    with db_transaction():
-        user.hashpassword = generate_password_hash(password)
-    # db.session.commit()
+    if (user.hashpassword or "")[:16] != fingerprint:
+        flash("Ce lien de réinitialisation a déjà été utilisé", "error")
+        return redirect(url_for("auth.forgot_password_get"))
+
+    # Mettre à jour le mot de passe — add(user) explicite pour garantir le tracking ORM
+    hashed_password = generate_password_hash(password)
+    with db_transaction() as db_session:
+        user.hashpassword = hashed_password
+        db_session.add(user)
 
     flash(
         "Votre mot de passe a été réinitialisé avec succès. Vous pouvez maintenant vous connecter.",

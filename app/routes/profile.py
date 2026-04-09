@@ -431,17 +431,22 @@ def player_dashboard():
     )
 
     # 3. Calculer les statistiques
-    completed_quizzes = len(user_results)
-    remaining_quizzes = total_quizzes - completed_quizzes
+    # Nombre de quiz distincts joués ET encore publiés (un quiz refait plusieurs fois ne compte qu'une fois)
+    unique_completed_ids = {
+        quiz.idQUIZ
+        for result, quiz in user_results
+        if quiz.statut == "PUBLISHED"
+    }
+    completed_quizzes = len(unique_completed_ids)
+    remaining_quizzes = total_quizzes - completed_quizzes  # toujours >= 0
 
-    # 4. Calculer le score moyen
-    if completed_quizzes > 0:
-        total_score = sum(
-            (result.score / result.totalQuestions * 100)
-            for result, quiz in user_results
-            if result.totalQuestions > 0
-        )
-        average_score = round(total_score / completed_quizzes, 1)
+    # 4. Calculer le score moyen (sur toutes les tentatives, pas seulement les quiz uniques)
+    valid_results = [
+        result for result, quiz in user_results if result.totalQuestions > 0
+    ]
+    if valid_results:
+        total_score = sum(r.score / r.totalQuestions * 100 for r in valid_results)
+        average_score = round(total_score / len(valid_results), 1)
     else:
         average_score = 0
 
@@ -1382,7 +1387,7 @@ def admin_user_reset_password(user_id):
     user = User.query.get_or_404(user_id)
 
     # Génère le token et le lien de réinitialisation
-    token = generate_reset_token(user.emailUser)
+    token = generate_reset_token(user.emailUser, user.hashpassword)
     reset_url = url_for("auth.reset_password_get", token=token, _external=True)
 
     # Affiche le lien dans la console (mode dev)

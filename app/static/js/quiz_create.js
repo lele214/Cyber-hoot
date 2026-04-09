@@ -1,4 +1,5 @@
-/* JS POUR LA CRÉATION DE QUIZ */
+/* JS POUR LA CRÉATION ET MODIFICATION DE QUIZ */
+/* Aucun handler inline (onclick/oninput/onchange) — conformité CSP nonce */
 
 let questionCount = 0;
 
@@ -13,7 +14,7 @@ function addQuestion() {
     questionBlock.innerHTML = `
         <div class="flex justify-between items-center mb-3">
             <h3 class="text-cyber-text-lighter font-semibold">Question ${qIndex + 1}</h3>
-            <button type="button" onclick="removeQuestion(${qIndex})"
+            <button type="button" data-action="remove-question"
                     class="px-3 py-1 text-red-400 border border-red-400 rounded text-sm hover:bg-red-400 hover:text-white transition-all duration-200">
                 Supprimer
             </button>
@@ -33,20 +34,19 @@ function addQuestion() {
                 <input type="url"
                        name="question_link_url_${qIndex}"
                        class="input-cyber flex-1"
-                       placeholder="https://..."
-                       oninput="updateLinkPreview(${qIndex})">
+                       placeholder="https://...">
                 <input type="text"
                        name="question_link_label_${qIndex}"
                        class="input-cyber w-48"
                        placeholder="Texte du lien">
-                <button type="button" onclick="clearLink(${qIndex})"
+                <button type="button" data-action="clear-link"
                         title="Supprimer le lien"
                         class="flex-shrink-0 px-2 py-1 text-red-400 hover:text-red-300 text-sm transition-colors">
                     ✕
                 </button>
             </div>
             <span id="link_preview_${qIndex}"
-                  class="hidden mt-1 block text-xs text-cyber-text-lighter break-all"></span>
+                  class="hidden mt-1 text-xs text-cyber-text-lighter break-all"></span>
         </div>
         <div class="mb-2">
             <label class="block mb-2 text-cyber-text text-sm">
@@ -54,7 +54,7 @@ function addQuestion() {
             </label>
             <div id="responses_${qIndex}">
             </div>
-            <button type="button" onclick="addResponse(${qIndex})"
+            <button type="button" data-action="add-response"
                     class="mt-2 px-3 py-1 bg-transparent border border-cyber-border text-cyber-text rounded text-sm hover:border-cyber-accent hover:text-cyber-text-lighter transition-all duration-200">
                 + Ajouter une réponse
             </button>
@@ -64,6 +64,23 @@ function addQuestion() {
     container.appendChild(questionBlock);
     questionCount++;
 
+    // Attacher les listeners — aucun onclick inline (conformité CSP)
+    questionBlock.querySelector('[data-action="remove-question"]').addEventListener('click', function () {
+        removeQuestion(qIndex);
+    });
+
+    questionBlock.querySelector(`input[name="question_link_url_${qIndex}"]`).addEventListener('input', function () {
+        updateLinkPreview(qIndex);
+    });
+
+    questionBlock.querySelector('[data-action="clear-link"]').addEventListener('click', function () {
+        clearLink(qIndex);
+    });
+
+    questionBlock.querySelector('[data-action="add-response"]').addEventListener('click', function () {
+        addResponse(qIndex);
+    });
+
     // Ajouter 2 réponses par défaut
     addResponse(qIndex);
     addResponse(qIndex);
@@ -71,9 +88,7 @@ function addQuestion() {
 
 function removeQuestion(qIndex) {
     const block = document.getElementById('question_block_' + qIndex);
-    if (block) {
-        block.remove();
-    }
+    if (block) block.remove();
 }
 
 function updateLinkPreview(qIndex) {
@@ -118,7 +133,7 @@ function addResponse(qIndex) {
                    name="response_text_${qIndex}_${rIndex}"
                    class="input-cyber flex-1"
                    placeholder="Texte (optionnel si image)">
-            <button type="button" onclick="this.closest('.mb-3').remove()"
+            <button type="button" data-action="remove-response"
                     class="px-2 py-1 text-red-400 hover:text-red-300 text-sm transition-colors flex-shrink-0">
                 ✕
             </button>
@@ -127,11 +142,9 @@ function addResponse(qIndex) {
             <input type="file"
                    name="response_image_${qIndex}_${rIndex}"
                    accept="image/png,image/jpeg,image/gif,image/webp"
-                   class="block w-full text-cyber-text text-sm file:mr-4 file:py-1 file:px-3 file:rounded file:border file:border-cyber-border file:bg-transparent file:text-cyber-text-lighter file:cursor-pointer hover:file:border-cyber-accent"
-                   onchange="previewImage(this, 'resp_preview_${qIndex}_${rIndex}', 'resp_clear_${qIndex}_${rIndex}')">
+                   class="block w-full text-cyber-text text-sm file:mr-4 file:py-1 file:px-3 file:rounded file:border file:border-cyber-border file:bg-transparent file:text-cyber-text-lighter file:cursor-pointer hover:file:border-cyber-accent">
             <button type="button"
                     id="resp_clear_${qIndex}_${rIndex}"
-                    onclick="clearResponseImage(${qIndex}, ${rIndex})"
                     class="hidden mt-1 text-xs text-red-400 hover:text-red-300 transition-colors">
                 ✕ Supprimer l'image
             </button>
@@ -140,15 +153,31 @@ function addResponse(qIndex) {
     `;
 
     responsesDiv.appendChild(responseRow);
+
+    // Attacher les listeners — aucun onclick inline (conformité CSP)
+    responseRow.querySelector('[data-action="remove-response"]').addEventListener('click', function () {
+        responseRow.remove();
+    });
+
+    responseRow.querySelector(`input[name="response_image_${qIndex}_${rIndex}"]`).addEventListener('change', function () {
+        previewImage(this, `resp_preview_${qIndex}_${rIndex}`, `resp_clear_${qIndex}_${rIndex}`);
+    });
+
+    document.getElementById(`resp_clear_${qIndex}_${rIndex}`).addEventListener('click', function () {
+        clearResponseImage(qIndex, rIndex);
+    });
 }
 
 function clearResponseImage(qIndex, rIndex) {
     const fileInput = document.querySelector(`input[name="response_image_${qIndex}_${rIndex}"]`);
     if (fileInput) {
         fileInput.value = '';
-        // Certains navigateurs ne permettent pas de vider un input file directement
         if (fileInput.value) {
             const clone = fileInput.cloneNode(true);
+            // Ré-attacher le listener sur le clone car cloneNode ne copie pas les listeners
+            clone.addEventListener('change', function () {
+                previewImage(this, `resp_preview_${qIndex}_${rIndex}`, `resp_clear_${qIndex}_${rIndex}`);
+            });
             fileInput.parentNode.replaceChild(clone, fileInput);
         }
     }
@@ -161,7 +190,6 @@ function clearResponseImage(qIndex, rIndex) {
     if (clearBtn) clearBtn.classList.add('hidden');
 }
 
-// Affiche un aperçu de l'image sélectionnée avant upload
 function previewImage(input, previewId, clearBtnId) {
     const preview = document.getElementById(previewId);
     const clearBtn = clearBtnId ? document.getElementById(clearBtnId) : null;
@@ -180,8 +208,14 @@ function previewImage(input, previewId, clearBtnId) {
     }
 }
 
-// Ajouter une première question au chargement (sauf si le template d'édition gère le chargement)
+// Attacher le bouton "+ Ajouter une question" via addEventListener (pas d'onclick inline)
 document.addEventListener('DOMContentLoaded', function () {
+    const addQuestionBtn = document.getElementById('add-question-btn');
+    if (addQuestionBtn) {
+        addQuestionBtn.addEventListener('click', addQuestion);
+    }
+
+    // Initialisation : ajouter une question vide si pas de données existantes (page création)
     if (typeof existingQuestions === 'undefined') {
         addQuestion();
     }

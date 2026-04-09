@@ -46,18 +46,21 @@
                     {% if badge.earned %}
                         bg-cyber-accent/10 border-cyber-accent shadow-glow-sm
                     {% else %}
-                        bg-cyber-border/10 border-cyber-border/50 opacity-60 grayscale
+                        bg-cyber-border/10 border-cyber-border/50
                     {% endif %}">
-                    <span class="text-4xl mb-2">{{ badge.icon }}</span>
-                    <p class="text-cyber-text-lighter text-xs font-semibold text-center leading-tight mb-1">
-                        {{ badge.name }}
-                    </p>
-                    <p class="text-cyber-text-muted text-xs text-center">{{ badge.score_range }}</p>
-                    {% if badge.earned %}
-                    <span class="mt-2 text-xs text-cyber-accent font-semibold">✓ Obtenu</span>
-                    {% endif %}
-                    <!-- Tooltip -->
-                    <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-52 bg-cyber-bg border border-cyber-accent rounded-lg p-2 text-xs text-cyber-text-muted text-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10">
+                    <!-- Contenu du badge (fondu + grayscale pour les non obtenus) -->
+                    <div class="flex flex-col items-center w-full {% if not badge.earned %}opacity-60 grayscale{% endif %}">
+                        <span class="text-4xl mb-2">{{ badge.icon }}</span>
+                        <p class="text-cyber-text-lighter text-xs font-semibold text-center leading-tight mb-1">
+                            {{ badge.name }}
+                        </p>
+                        <p class="text-cyber-text-muted text-xs text-center">{{ badge.score_range }}</p>
+                        {% if badge.earned %}
+                        <span class="mt-2 text-xs text-cyber-accent font-semibold">✓ Obtenu</span>
+                        {% endif %}
+                    </div>
+                    <!-- Tooltip (hors du div fané — opacité non héritée) -->
+                    <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-52 bg-cyber-bg/95 border border-cyber-accent rounded-lg p-3 text-xs text-cyber-text-lighter text-center shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10">
                         {{ badge.description }}
                     </div>
                 </div>
@@ -81,18 +84,21 @@
                         {% if badge.earned %}
                             bg-cyber-accent/10 border-cyber-accent
                         {% else %}
-                            bg-cyber-border/10 border-cyber-border/50 opacity-60 grayscale
+                            bg-cyber-border/10 border-cyber-border/50
                         {% endif %}">
-                        <span class="text-3xl shrink-0">{{ badge.icon }}</span>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-cyber-text-lighter text-sm font-semibold leading-tight">{{ badge.name }}</p>
-                            <p class="text-cyber-text-muted text-xs mt-0.5">{{ badge.score_range }}</p>
-                            {% if badge.earned %}
-                            <span class="text-xs text-cyber-accent font-semibold">✓ Obtenu</span>
-                            {% endif %}
+                        <!-- Contenu du badge (fondu + grayscale pour les non obtenus) -->
+                        <div class="flex items-center gap-4 flex-1 min-w-0 {% if not badge.earned %}opacity-60 grayscale{% endif %}">
+                            <span class="text-3xl shrink-0">{{ badge.icon }}</span>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-cyber-text-lighter text-sm font-semibold leading-tight">{{ badge.name }}</p>
+                                <p class="text-cyber-text-muted text-xs mt-0.5">{{ badge.score_range }}</p>
+                                {% if badge.earned %}
+                                <span class="text-xs text-cyber-accent font-semibold">✓ Obtenu</span>
+                                {% endif %}
+                            </div>
                         </div>
-                        <!-- Tooltip -->
-                        <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 bg-cyber-bg border border-cyber-accent rounded-lg p-2 text-xs text-cyber-text-muted text-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10">
+                        <!-- Tooltip (hors du div fané — opacité non héritée) -->
+                        <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 bg-cyber-bg/95 border border-cyber-accent rounded-lg p-3 text-xs text-cyber-text-lighter text-center shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10">
                             {{ badge.description }}
                         </div>
                     </div>

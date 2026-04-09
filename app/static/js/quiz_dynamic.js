@@ -125,3 +125,9 @@ function toggleAllSolutions() {
     boxes.forEach(b => b.classList.toggle('hidden', !allHidden));
     btn.textContent = allHidden ? 'Masquer ▲' : 'Voir toutes les solutions ▼';
 }
+
+// Attacher les listeners des boutons résultats — aucun onclick inline (conformité CSP)
+document.getElementById('btn-all-solutions').addEventListener('click', toggleAllSolutions);
+document.getElementById('btn-restart').addEventListener('click', function () {
+    window.location.reload();
+});

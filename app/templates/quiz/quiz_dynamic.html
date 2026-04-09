@@ -112,7 +112,7 @@
 
                 <!-- Bouton global solutions -->
                 <div class="flex justify-center mb-6">
-                    <button id="btn-all-solutions" onclick="toggleAllSolutions()"
+                    <button id="btn-all-solutions"
                         class="px-5 py-2 border border-cyber-accent text-cyber-accent text-sm rounded hover:bg-cyber-border transition-all">
                         Voir toutes les solutions ▼
                     </button>
@@ -122,7 +122,7 @@
                 <div id="results-detail" class="space-y-4 mb-8"></div>
 
                 <div class="flex justify-center gap-4 flex-wrap">
-                    <button onclick="window.location.reload()" class="btn-cyber">
+                    <button id="btn-restart" class="btn-cyber">
                         Recommencer
                     </button>
                     <a href="{{ url_for('main.quiz') }}" class="btn-cyber-primary">
