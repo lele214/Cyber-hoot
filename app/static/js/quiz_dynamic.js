@@ -127,7 +127,17 @@ function toggleAllSolutions() {
 }
 
 // Attacher les listeners des boutons résultats — aucun onclick inline (conformité CSP)
-document.getElementById('btn-all-solutions').addEventListener('click', toggleAllSolutions);
-document.getElementById('btn-restart').addEventListener('click', function () {
-    window.location.reload();
-});
+const btnAllSolutions = document.getElementById('btn-all-solutions');
+if (btnAllSolutions) btnAllSolutions.addEventListener('click', toggleAllSolutions);
+
+const btnRestart = document.getElementById('btn-restart');
+if (btnRestart) {
+    btnRestart.addEventListener('click', function () { window.location.reload(); });
+} else {
+    // Fallback : le template n'a pas encore l'id — on cherche le bouton par son texte
+    document.querySelectorAll('button').forEach(function (btn) {
+        if (btn.textContent.trim() === 'Recommencer') {
+            btn.addEventListener('click', function () { window.location.reload(); });
+        }
+    });
+}
