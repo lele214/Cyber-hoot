@@ -1,3 +1,4 @@
+{% from 'partials/_back_button.html' import back_button %}
 <!DOCTYPE html>
 <html lang="fr">
 
@@ -9,10 +10,7 @@
 </head>
 
 <body class="min-h-screen py-10 px-5 scanline relative">
-    <a href="{{ url_for('main.quiz') }}"
-        class="fixed top-5 left-5 px-6 py-3 bg-transparent border-2 border-cyber-accent text-cyber-text-lighter rounded-lg font-semibold text-sm transition-all duration-300 hover:bg-cyber-border hover:border-cyber-accent-light hover:shadow-glow-sm hover:-translate-x-1 z-50">
-        ← Retour aux quiz
-    </a>
+    {{ back_button(url_for('main.quiz'), "Retour aux quiz") }}
 
     <div class="max-w-3xl mx-auto mt-16">
         <!-- En-tête -->
