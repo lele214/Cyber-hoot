@@ -83,4 +83,4 @@ docs/justfile.md
 *.key
 *.cert
 secrets/
-2026-*-exercice-*.md
+exercices/*
